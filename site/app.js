@@ -89,7 +89,7 @@ const SAMPLE_FACTORS = [
 
 const CFG = {
   github: "https://github.com/nemo02070118/boatfx-repro",
-  video: "#",
+  video: "https://youtu.be/tVHLUQy93rg",
   email: "mailto:15761209998@163.com",
   showcase: "https://github.com/nemo02070118/boatfx-repro/tree/main/system_showcase",
   live: "https://nemo02070118.github.io/boatfx-repro/",
