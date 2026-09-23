@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Huannian Jin — Global Weakness, Local Strength</title>
+  <meta name="description" content="Global Weakness, Local Strength — submitted to Journal of Finance; submitted to Eastern Finance Association (EFA). AI factor factory · Zheshang systems · public repro pack." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="progress" id="progress" aria-hidden="true"></div>
+  <div class="cursor" id="cursor" aria-hidden="true"></div>
+  <div class="cursor-dot" id="cursor-dot" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="top">
+    <a class="mark" href="#top" data-magnetic>HJ</a>
+    <nav id="spy-nav">
+      <a href="#idea" data-spy="idea">Idea</a>
+      <a href="#venues" data-spy="venues">Venues</a>
+      <a href="#math" data-spy="math">Math</a>
+      <a href="#results" data-spy="results">Results</a>
+      <a href="#machine" data-spy="machine">Machine</a>
+      <a href="#factory" data-spy="factory">Factory</a>
+      <a href="#letter" data-spy="letter">Letter</a>
+      <a href="#edge" data-spy="edge">Edge</a>
+      <a href="#craft" data-spy="craft">Craft</a>
+      <a href="#proof" data-spy="proof">Proof</a>
+    </nav>
+    <button class="cmd-hint" type="button" id="cmd-hint" title="Press /">/</button>
+  </header>
+
+  <main id="top">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-meta">
+        <span class="pulse"></span>
+        <span class="chip">JF under review</span>
+        <span class="chip chip-alt">EFA submitted</span>
+        <span class="sep">·</span>
+        <span>Independent researcher · builder</span>
+      </div>
+      <h1 class="brand">Huannian Jin</h1>
+      <p class="lede">
+        I build an <em>AI agent factory</em> that proposes return factors by the thousand—
+        then prove that <strong>unconditional screens have a structural blind spot</strong>
+        for factors that only pay inside a market state.
+      </p>
+      <p class="lede-sub">
+        Flagship paper: <em>Global Weakness, Local Strength</em> —
+        under review at the <strong>Journal of Finance</strong>,
+        also submitted to the <strong>Eastern Finance Association (EFA)</strong> annual meeting.
+      </p>
+      <div class="cta-row">
+        <a class="btn primary" data-magnetic href="#idea">Enter the argument</a>
+        <a class="btn ghost" data-magnetic id="github-link" href="https://github.com/" target="_blank" rel="noopener">Repro pack</a>
+        <a class="btn ghost" data-magnetic href="#venues">JF · EFA</a>
+        <a class="btn ghost" data-magnetic href="#letter">Zheshang letter</a>
+      </div>
+
+      <div class="hero-stats" id="hero-stats">
+        <div><b data-count="172" data-suffix="">0</b><span>bps/yr VW active</span></div>
+        <div><b data-count="1.99" data-decimals="2">0</b><span>information ratio</span></div>
+        <div><b data-count="6881">0</b><span>machine factors</span></div>
+        <div><b data-count="6.4" data-decimals="1" data-suffix="×">0</b><span>falsification excess</span></div>
+        <div><b data-count="56">0</b><span>modules @ Zheshang</span></div>
+        <div><b data-count="64" data-suffix="k">0</b><span>LoC shipped</span></div>
+      </div>
+
+      <div class="hero-stage">
+        <canvas id="regime-canvas" width="1400" height="480"></canvas>
+        <div class="stage-ui">
+          <span>UNCONDITIONAL SCREEN</span>
+          <span>OWN-REGIME TILT</span>
+        </div>
+        <p class="stage-caption">Interactive sketch — hard gates discard legs; continuous tilt keeps breadth. Move mouse to perturb states.</p>
+      </div>
+    </section>
+
+    <div class="marquee" aria-hidden="true">
+      <div class="marquee-track">
+        <span>Proposition 2 · Blind spot</span>
+        <span>t<sub>g</sub> ≈ t<sub>state</sub>√π</span>
+        <span>6881 machine factors</span>
+        <span>10.0% → 3.15% → 1.08%</span>
+        <span>24/24 same-base increments</span>
+        <span>172 bps · IR ≈ 2</span>
+        <span>Alpha191 · Alpha101</span>
+        <span>Romano–Wolf · e-BH · Lo (2002)</span>
+        <span>JF under review</span>
+        <span>EFA submitted</span>
+        <span>Zheshang Securities</span>
+        <span>56 modules · 95%+ coverage</span>
+        <span>Proposition 2 · Blind spot</span>
+        <span>t<sub>g</sub> ≈ t<sub>state</sub>√π</span>
+        <span>6881 machine factors</span>
+        <span>10.0% → 3.15% → 1.08%</span>
+        <span>24/24 same-base increments</span>
+        <span>172 bps · IR ≈ 2</span>
+        <span>Alpha191 · Alpha101</span>
+        <span>Romano–Wolf · e-BH · Lo (2002)</span>
+        <span>JF under review</span>
+        <span>EFA submitted</span>
+        <span>Zheshang Securities</span>
+        <span>56 modules · 95%+ coverage</span>
+      </div>
+    </div>
+
+    <!-- IDEA -->
+    <section id="idea" class="section reveal">
+      <p class="section-kicker">01 · The idea</p>
+      <h2>Global Weakness, Local Strength</h2>
+      <p class="section-lede">
+        The blind spot of unconditional factor screening.
+        Every numeral in the manuscript is machine-bound to result JSONs—not hand-typed.
+      </p>
+
+      <div class="beats">
+        <article><span>01</span><h3>Machines flood the zoo</h3><p>LLMs + search propose predictors faster than humans can vet. Screens become the bottleneck.</p></article>
+        <article><span>02</span><h3>Unconditional filter</h3><p>Keep if average premium clears multiple-testing. State-confined premia look like zeros.</p></article>
+        <article><span>03</span><h3>Structural blind spot</h3><p>Global t dilutes with √π. Locally strong factors are discarded as globally weak.</p></article>
+        <article><span>04</span><h3>Own-regime tilt</h3><p>Per-factor states + hierarchical pooling. Continuous tilt—no hard gate that kills breadth.</p></article>
+        <article><span>05</span><h3>Falsify, then trade</h3><p>Block-shuffle nulls, placebos, cross-fit. Then show deployable bps on public panels.</p></article>
+        <article><span>06</span><h3>Honest tiers</h3><p>Load-bearing vs identification vs suggestive—said upfront. Science over storytelling.</p></article>
+      </div>
+
+      <div class="claim-tiers">
+        <article class="tier load">
+          <header><span>Tier I</span><strong>Load-bearing</strong></header>
+          <p>Regime overlay adds deployable, net-of-cost alpha to every implementable baseline.</p>
+          <ul>
+            <li>24/24 same-base active increments positive (RW + e-BH)</li>
+            <li>VW: <b>172 bps/yr</b> active · IR <b>1.99</b> · deployable t = 6.81</li>
+            <li>OOS VW: <b>134 bps</b> · IR <b>2.05</b></li>
+          </ul>
+        </article>
+        <article class="tier id">
+          <header><span>Tier II</span><strong>Identification</strong></header>
+          <p>Discarded &amp; machine factors carry genuine state-dependent structure.</p>
+          <ul>
+            <li>Falsification excess <b>6.4×</b> (219 vs 34 under global null)</li>
+            <li>Funding-scarcity interaction t = 3.62 / 2.81</li>
+            <li>Vol / broad-stress placebos: <b>no</b> such gradient</li>
+          </ul>
+        </article>
+        <article class="tier sug">
+          <header><span>Tier III</span><strong>Suggestive</strong></header>
+          <p>Reported, not leaned on—honest science.</p>
+          <ul>
+            <li>Cross-asset travel is incomplete</li>
+            <li>Reg SHO natural experiment is a null</li>
+            <li>Shown for completeness only</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <!-- VENUES -->
+    <section id="venues" class="section reveal">
+      <p class="section-kicker">01b · Submission track</p>
+      <h2>Where the paper is in flight</h2>
+      <p class="section-lede">
+        Not “published.” Not vapor. A dual academic track with honest status labels—
+        the Academy cares about motion; journals care about priority and process.
+      </p>
+      <div class="venue-grid">
+        <article class="venue jf">
+          <header>
+            <span class="badge live">Under review</span>
+            <h3>Journal of Finance</h3>
+          </header>
+          <p class="venue-meta">Submitted · September 2026 · single-blind refereeing</p>
+          <ul>
+            <li>Top finance journal · AFA</li>
+            <li>Manuscript: <em>Global Weakness, Local Strength</em></li>
+            <li>Disclosure + machine-bound numerals · no funding / no COI</li>
+            <li>Full PDF password-gated during review (not a public “publication”)</li>
+          </ul>
+        </article>
+        <article class="venue efa">
+          <header>
+            <span class="badge pending">Submitted</span>
+            <h3>Eastern Finance Association</h3>
+          </header>
+          <p class="venue-meta">U.S. academic conference · EFA annual meeting track</p>
+          <ul>
+            <li>Conference submission of the same research program</li>
+            <li>Signals: peer academic pipeline, not only a private notebook</li>
+            <li>Status updates as decisions arrive — no overclaiming acceptance</li>
+          </ul>
+        </article>
+      </div>
+      <p class="venue-note">
+        Both tracks are <strong>submissions</strong>. Acceptance is not claimed.
+        The proof of work is the paper + repro pack + systems letter—not the journal logo.
+      </p>
+    </section>
+
+    <!-- MATH -->
+    <section id="math" class="section reveal">
+      <p class="section-kicker">02 · Mechanism</p>
+      <h2>Why the global <span class="mono">t</span> goes blind</h2>
+      <p class="section-lede">
+        A premium confined to a paying state of frequency <span class="mono">π</span>
+        is diluted in the unconditional mean. The screen sees weakness; the state sees strength.
+      </p>
+
+      <div class="math-grid">
+        <div class="math-card">
+          <h3>Unconditional mean</h3>
+          <div class="tex" data-tex="\bar r_i = \sum_r \pi_r \mu_{ir}"></div>
+          <p>State-frequency-weighted average. Local strength is averaged away by construction.</p>
+        </div>
+        <div class="math-card">
+          <h3>Blind-spot identity</h3>
+          <div class="tex" data-tex="t_g \;\approx\; t_{\mathrm{state}}\sqrt{\pi}"></div>
+          <p>Proposition (blind spot): global <span class="mono">t</span> vanishes as the paying state grows rare—even when conditional <span class="mono">t</span> stays large.</p>
+        </div>
+        <div class="math-card">
+          <h3>Breadth, not leverage</h3>
+          <div class="tex" data-tex="\mathrm{SR}\;\approx\;\overline{\mathrm{SR}}_{\mathrm{bet}}\times\sqrt{\mathrm{BR}}"></div>
+          <p>Hard gates raise per-bet skill but destroy effective breadth. Continuous tilt keeps legs and scales weights.</p>
+        </div>
+      </div>
+
+      <div class="pi-lab">
+        <div class="pi-lab-head">
+          <h3>Live lab · drag π</h3>
+          <p>Fix <span class="mono">t<sub>state</sub> = 3</span>. Watch the unconditional screen lose the factor as the paying state becomes rare.</p>
+        </div>
+        <div class="pi-controls">
+          <label>
+            Paying-state frequency π
+            <input type="range" id="pi-range" min="0.05" max="0.9" step="0.01" value="0.25" />
+          </label>
+          <div class="pi-readout">
+            <div><span>π</span><b id="pi-val">0.25</b></div>
+            <div><span>t<sub>state</sub></span><b>3.00</b></div>
+            <div><span>t<sub>g</sub></span><b id="tg-val">1.50</b></div>
+            <div><span>verdict</span><b id="verdict">discarded</b></div>
+          </div>
+        </div>
+        <canvas id="pi-canvas" width="1100" height="220"></canvas>
+        <p class="stage-caption">Threshold line at |t|=2.0 (illustrative). Same factor, same conditional edge—only π changes.</p>
+      </div>
+    </section>
+
+    <!-- RESULTS -->
+    <section id="results" class="section reveal">
+      <p class="section-kicker">03 · Deployable economics</p>
+      <h2>Numbers that survive baselines</h2>
+      <p class="section-lede">
+        Overlay on Chen–Zimmermann OSAP panels. Against seven allocators × four panels,
+        <strong>24/24</strong> same-base active increments stay positive.
+      </p>
+
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Panel</th>
+              <th>MinVar SR</th>
+              <th>Overlay SR</th>
+              <th>Active bps/yr</th>
+              <th>IR</th>
+              <th>Deployable t</th>
+              <th>OOS bps</th>
+              <th>OOS IR</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Equal-weight</td>
+              <td>2.79</td>
+              <td>3.01</td>
+              <td>128</td>
+              <td>1.73</td>
+              <td>1.49</td>
+              <td>101</td>
+              <td>1.72</td>
+            </tr>
+            <tr class="hl">
+              <td>Value-weight ★</td>
+              <td>1.37</td>
+              <td>1.91</td>
+              <td><b>172</b></td>
+              <td><b>1.99</b></td>
+              <td><b>6.81</b></td>
+              <td>134</td>
+              <td>2.05</td>
+            </tr>
+            <tr>
+              <td>NYSE breakpoint</td>
+              <td>1.73</td>
+              <td>2.15</td>
+              <td>134</td>
+              <td>1.68</td>
+              <td>4.11</td>
+              <td>116</td>
+              <td>1.52</td>
+            </tr>
+            <tr>
+              <td>Large-cap (ME20)</td>
+              <td>1.77</td>
+              <td>2.05</td>
+              <td>109</td>
+              <td>1.66</td>
+              <td>2.79</td>
+              <td>75</td>
+              <td>1.60</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="result-notes">
+        <div>
+          <h4>Breadth content</h4>
+          <p>EW: ~115 factors significant unconditionally → ~268 factor–state cells (~2× independent bets from the same raw material).</p>
+        </div>
+        <div>
+          <h4>Credibility stack</h4>
+          <p>Cross-fit (labels ⊥ alpha), own-regime beats placebo 3–5×, states persist ~8.6 months, Romano–Wolf / e-BH / Lo (2002), deflated Sharpe ≈ 1.</p>
+        </div>
+        <div>
+          <h4>Economics</h4>
+          <p>Local strength steepens when funding capital is scarce (HKM &amp; Baa–Aaa). Volatility placebos fail—limits to arbitrage, not vol timing.</p>
+        </div>
+      </div>
+
+      <div class="cred-bars" aria-label="Key credibility checks">
+        <div class="cred-row"><span>24/24 same-base increments positive</span><div class="bar"><i style="--p:100%"></i></div><b>100%</b></div>
+        <div class="cred-row"><span>Lo (2002) Sharpe-diff survival (tradeable panels)</span><div class="bar"><i style="--p:83%"></i></div><b>20/24</b></div>
+        <div class="cred-row"><span>Cross-fit splits with positive increment</span><div class="bar"><i style="--p:100%"></i></div><b>100%</b></div>
+        <div class="cred-row"><span>MinVar SR → Overlay SR (VW)</span><div class="bar"><i style="--p:72%"></i></div><b>1.37 → 1.91</b></div>
+      </div>
+    </section>
+
+    <!-- MACHINE -->
+    <section id="machine" class="section reveal">
+      <p class="section-kicker">04 · Machine population</p>
+      <h2>What screens throw away when agents propose</h2>
+      <p class="section-lede">
+        6,881 genuinely machine-generated factors. <strong>None</strong> clears the global screen.
+        The question is whether the discards hide recoverable structure.
+      </p>
+
+      <div class="funnel" id="funnel">
+        <div class="funnel-step" style="--w:100%">
+          <b>6,881</b>
+          <span>Machine factors in analysis pool</span>
+          <i>0 clear global screen</i>
+        </div>
+        <div class="funnel-step" style="--w:72%">
+          <b>10.0%</b>
+          <span>Flagged regime-local</span>
+          <i>bootstrap 95% · 9.3–10.7%</i>
+        </div>
+        <div class="funnel-step" style="--w:48%">
+          <b>3.15%</b>
+          <span>Survive block-shuffle falsification</span>
+          <i>induced-null pipeline re-run</i>
+        </div>
+        <div class="funnel-step" style="--w:28%">
+          <b>1.08%</b>
+          <span>Clear BH one-factor-at-a-time</span>
+          <i>correction cost made visible</i>
+        </div>
+        <div class="funnel-anchor">
+          <b>6.4×</b>
+          <span>Flagged set’s falsification passes vs global-null allowance (219 vs 34)</span>
+        </div>
+      </div>
+
+      <div class="expert-row">
+        <div class="expert">
+          <h4>Alpha191</h4>
+          <p class="big">13.8%</p>
+          <span>regime-local rate · human expert library</span>
+        </div>
+        <div class="expert">
+          <h4>Alpha101</h4>
+          <p class="big">11.6%</p>
+          <span>regime-local rate · human expert library</span>
+        </div>
+        <div class="expert">
+          <h4>Reading</h4>
+          <p>Same order of magnitude as the machine pool → structural property of <em>unconditional screening</em>, not one generator’s artifact.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FACTORY -->
+    <section id="factory" class="section reveal factory">
+      <p class="section-kicker">05 · AI agent factory</p>
+      <h2>Visible traces — not chatbot cosplay</h2>
+      <p class="section-lede">
+        Agents emit typed ASTs over nine microstructure signals. Admission requires
+        executability, non-constancy, dispersion, and an economic rationale.
+        The paper evaluates the population <em>without</em> performance pre-screening.
+      </p>
+
+      <div class="pipeline" aria-label="Agent pipeline">
+        <div class="pipe-step"><span>01</span>LLM propose</div>
+        <div class="pipe-step"><span>02</span>Type-check</div>
+        <div class="pipe-step"><span>03</span>Sandbox</div>
+        <div class="pipe-step"><span>04</span>Rationale</div>
+        <div class="pipe-step"><span>05</span>Admit</div>
+        <div class="pipe-step accent"><span>06</span>Study discards</div>
+      </div>
+
+      <div class="factor-panel">
+        <div class="factor-list" id="factor-list"></div>
+        <div class="factor-detail" id="factor-detail"><p class="hint">Select a machine-emitted factor →</p></div>
+      </div>
+    </section>
+
+    <!-- LETTER -->
+    <section id="letter" class="section reveal">
+      <p class="section-kicker">06 · Industry proof</p>
+      <h2>Zheshang Securities · recommendation</h2>
+      <p class="section-lede">
+        Quantitative System Development Intern (from Aug 2025).
+        Sole developer on a task subsystem inside an enterprise quant platform.
+        Letter by <strong>Liao Jingchi</strong>, Managing Director, Zheshang Securities.
+      </p>
+
+      <div class="letter-layout">
+        <div class="letter-metrics">
+          <div><b>56</b><span>modules from ground up</span></div>
+          <div><b>~64k</b><span>lines of code</span></div>
+          <div><b>&gt;95%</b><span>test coverage</span></div>
+          <div><b>1</b><span>sole developer · task system</span></div>
+        </div>
+        <blockquote class="letter-quote">
+          “He independently completed the decomposition of complex modules, built the system’s
+          mathematical foundation layer and data processing layer… demonstrating excellent
+          systems thinking and architectural design ability.”
+          <footer>— Liao Jingchi, Managing Director, Zheshang Securities</footer>
+        </blockquote>
+        <figure class="letter-fig">
+          <img src="assets/recommendation-letter.jpg" alt="Recommendation letter from Liao Jingchi, Managing Director, Zheshang Securities" />
+          <figcaption>Full letter on file · available to Academy admissions (password-gated with JF manuscript)</figcaption>
+        </figure>
+      </div>
+
+      <div class="letter-tags">
+        <span>High-precision computation</span>
+        <span>Distributed storage</span>
+        <span>Realtime sync</span>
+        <span>Math → production systems</span>
+        <span>Root-cause debugging</span>
+      </div>
+    </section>
+
+    <!-- EDGE vs peers -->
+    <section id="edge" class="section reveal">
+      <p class="section-kicker">06b · Why this clears the peer bar</p>
+      <h2>Same age cohort · different altitude</h2>
+      <p class="section-lede">
+        Academy early applicants often show apps, robots, audiences.
+        Research builders win by making judgment <em>inspectable</em>—not by stacking logos.
+      </p>
+      <div class="edge-grid">
+        <article>
+          <h3>Most peers</h3>
+          <ul>
+            <li>Demo video + stack list</li>
+            <li>“I used AI to code”</li>
+            <li>One metric, no falsification</li>
+            <li>Private notebook science</li>
+          </ul>
+        </article>
+        <article class="edge-you">
+          <h3>This packet</h3>
+          <ul>
+            <li><b>JF + EFA</b> dual academic flight path</li>
+            <li>AI as a <b>factory with gates</b>, not a chat log</li>
+            <li>Falsification excess <b>6.4×</b> + claim tiers</li>
+            <li>Public repro anyone can run in minutes</li>
+            <li>Enterprise letter: 56 modules · 64k LoC · &gt;95% coverage</li>
+            <li>Killed own wrong regime layer (dispersion → vol timing)</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <!-- BUILD CRAFT -->
+    <section id="craft" class="section reveal">
+      <p class="section-kicker">06c · Web coding craft</p>
+      <h2>How this site was engineered</h2>
+      <p class="section-lede">
+        Modern builders don’t pretend they never use agents.
+        They show <strong>agentic loops with gates</strong> — the same discipline as the factor factory.
+      </p>
+      <div class="craft-grid">
+        <article>
+          <h3>Agent loop</h3>
+          <p>Cursor / Claude Code / Codex / OpenAI / cloud coding agents implement. I own taste, narrative, email replies, and every number.</p>
+        </article>
+        <article>
+          <h3>Why static</h3>
+          <p>No React tax on a one-page evidence site. Semantic HTML + CSS system + vanilla JS loads fast for reviewers on phones.</p>
+        </article>
+        <article>
+          <h3>Repo partition</h3>
+          <p><span class="mono">boatfx-repro</span> = research + <span class="mono">site/</span> + <span class="mono">system_showcase/</span>. Full monorepo stays private.</p>
+        </article>
+        <article>
+          <h3>Gates</h3>
+          <p>No invented metrics. No JF PDF in public git. Essay/video human-written. See <span class="mono">VIBE_CODING.md</span> + Rust gate excerpts.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- PROOF -->
+    <section id="proof" class="section reveal">
+      <p class="section-kicker">07 · Proof of work</p>
+      <h2>Verify in one command</h2>
+      <p class="section-lede">Headline arithmetic regenerates from shipped tilt output—no router source required.</p>
+
+      <div class="terminal-block">
+        <div class="terminal-bar"><span></span><span></span><span></span><i>boatfx-repro</i></div>
+        <pre id="terminal-body" class="terminal"><code></code></pre>
+      </div>
+
+      <ul class="proof-list">
+        <li>Public grammar + 60 sample factors with rationales · <span class="mono">python repro.py</span> → 60/60</li>
+        <li>Tilt <em>output</em> shipped · <span class="mono">python reproduce_headline.py</span> → ~172 bps · IR ≈ 2</li>
+        <li>Full pool &amp; ranking policy withheld on purpose — documented boundary, not omission</li>
+        <li>JF manuscript under review · EFA conference submitted · PDF password-gated</li>
+      </ul>
+    </section>
+
+    <!-- ACADEMY -->
+    <section class="section about reveal">
+      <p class="section-kicker">08 · Why The Academy</p>
+      <h2>Already in motion</h2>
+      <p>
+        I want a year in San Francisco among builders who ship—compute, mentors, and peers—
+        to push this research-system into a sharper product surface and harder external tests.
+        The work is already real: <strong>JF under review</strong>, <strong>EFA submitted</strong>,
+        a public repro pack, an AI factor factory, and production systems experience at Zheshang Securities.
+      </p>
+      <p class="note">Essay and video are mine. AI helps me code and edit—not invent the story.</p>
+    </section>
+
+    <!-- LINKS -->
+    <section id="links" class="section links reveal">
+      <p class="section-kicker">Artifacts</p>
+      <h2>For reviewers</h2>
+      <ul class="link-rows">
+        <li><span>Live site (public)</span><a id="live-link" href="https://nemo02070118.github.io/boatfx-repro/">nemo02070118.github.io/boatfx-repro →</a></li>
+        <li><span>Reproducibility pack</span><a id="github-link-2" href="https://github.com/nemo02070118/boatfx-repro" target="_blank" rel="noopener">GitHub boatfx-repro →</a></li>
+        <li><span>AI factory source excerpts</span><a id="showcase-link" href="https://github.com/nemo02070118/boatfx-repro/tree/main/system_showcase" target="_blank" rel="noopener">system_showcase →</a></li>
+        <li><span>JF manuscript + Zheshang letter</span><span class="muted">Password-gated for admissions</span></li>
+        <li><span>1-minute video</span><a id="video-link" href="#">Add YouTube in app.js →</a></li>
+        <li><span>Email</span><a id="email-link" href="mailto:15761209998@163.com">15761209998@163.com</a></li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <p>© <span id="year"></span> Huannian Jin · Proof over polish · Press <kbd>/</kbd> for jump menu</p>
+  </footer>
+
+  <!-- Command palette -->
+  <div class="palette" id="palette" hidden>
+    <input type="text" id="palette-input" placeholder="Jump to… idea / math / results / machine / factory / letter / proof" autocomplete="off" />
+    <ul id="palette-list"></ul>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

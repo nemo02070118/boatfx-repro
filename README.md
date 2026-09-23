@@ -17,6 +17,18 @@ search policy or the full factor pool.
 
 ---
 
+## Live portfolio (public web)
+
+After GitHub Pages is enabled on this repo:
+
+**https://nemo02070118.github.io/boatfx-repro/**
+
+Source: [`site/`](site/) · AI factory excerpts: [`system_showcase/`](system_showcase/) · Vibe coding: [`VIBE_CODING.md`](VIBE_CODING.md)
+
+**Contact:** [15761209998@163.com](mailto:15761209998@163.com)
+
+---
+
 ## Venue status
 
 | Venue | Status | Note |
