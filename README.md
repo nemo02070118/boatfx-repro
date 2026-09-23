@@ -7,7 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-2c5f7c?style=for-the-badge)](LICENSE)
 
 **Author:** Huannian Jin · **Email:** [15761209998@163.com](mailto:15761209998@163.com)  
-**Paper:** *Global Weakness, Local Strength* — **Journal of Finance under review (MS 2026-0738)** · handling editor **Antoinette Schoar** · **Eastern Finance Association (submitted)**
+**Paper:** *Global Weakness, Local Strength* — **Journal of Finance (under review)** · **Eastern Finance Association (submitted)**
 
 > Machines propose factors faster than humans can vet them.  
 > Unconditional screens have a **structural blind spot** for state-dependent premia.  
@@ -133,7 +133,7 @@ Details: [`system_showcase/README.md`](system_showcase/README.md)
 
 | Venue | Status |
 |---|---|
-| Journal of Finance | Under review · received 21 Sep 2026 · **MS 2026-0738** · handling editor Antoinette Schoar (Executive Editor) |
+| Journal of Finance | **Under review** · MS **2026-0738** · received **Sep 21, 2026** · editor in charge: **Antoinette Schoar** |
 | Eastern Finance Association | Submitted |
 | This GitHub surface | Public · MIT for code |
 
@@ -147,7 +147,7 @@ Acceptance is **not** claimed.
 @unpublished{jin2026global,
   title  = {Global Weakness, Local Strength: The Blind Spot of Unconditional Factor Screening},
   author = {Jin, Huannian},
-  note   = {Under review at the Journal of Finance (MS 2026-0738); submitted to Eastern Finance Association},
+  note   = {Under review at the Journal of Finance (MS 2026-0738; editor in charge: Antoinette Schoar); submitted to Eastern Finance Association},
   year   = {2026}
 }
 ```
