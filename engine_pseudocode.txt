@@ -1,0 +1,53 @@
+ENGINE PSEUDOCODE (generation of candidate factors)
+====================================================
+The generator emits typed expression trees over the microstructure signal set. Only the
+grammar and the admission gate are documented here; the search/ranking policy that
+orders proposals is not part of the reproducibility surface and is not needed to
+reproduce the paper, which takes the emitted factors as GIVEN and evaluates every one.
+
+INPUTS
+  SIGNALS   = {BestBid, BestAsk, BidSize, AskSize, MidPrice,
+               TradePrice, TradeSize, TradeSide, Volume}
+  # Node kinds: input, const, unary, binary, rolling, if_then_else.
+  # This grammar is canonical and matches operator_inventory.json and
+  # evaluate_factors.py exactly (7 unary, 9 binary, 12 rolling operators).
+  UNARY     = {Abs, Neg, Sign, Sqrt, Log, Diff, Rank}                       # 7
+  BINARY    = {Add, Sub, Mul, Div, Max, Min, Pow, Gt, Lt}                   # 9
+  ROLLING   = {Mean, Std, Sum, Max, Min, Skew, Kurt, Zscore, Rank,
+               Quantile, Slope, Corr}                                       # 12
+  WINDOWS   = {5, 10, 20, 50, 100, 200}          # look-back lengths in bars
+  MAX_DEPTH = 6
+
+GENERATE(depth):
+  # returns a random well-typed subtree; leaves are raw signals or constants
+  if depth == 0 or coin(p_leaf):
+      return choice([Node(kind="input", signal=choice(SIGNALS)),
+                     Node(kind="const", value=random_scalar())])
+  kind = choice({unary, binary, rolling, if_then_else})
+  if kind == unary:
+      return Node(unary, op=choice(UNARY), inner=GENERATE(depth-1))
+  if kind == binary:
+      return Node(binary, op=choice(BINARY),
+                  left=GENERATE(depth-1), right=GENERATE(depth-1))
+  if kind == rolling:
+      return Node(rolling, op=choice(ROLLING),
+                  inner=GENERATE(depth-1), window=choice(WINDOWS))
+  if kind == if_then_else:
+      return Node(if_then_else, cond=GENERATE(depth-1),
+                  then_=GENERATE(depth-1), else_=GENERATE(depth-1))
+
+ADMISSION GATE (applied to each emitted candidate):
+  1. type-checks and evaluates without error on the reference sample
+  2. is not a constant and not a trivial duplicate of an admitted factor
+  3. has finite cross-sectional dispersion (it varies across names)
+  4. carries an economic rationale tag referencing a microstructure mechanism
+  Admitted factors are stored as {name, rationale, theme, expr}.
+
+EVALUATION (in the paper, identical for every factor):
+  - map each SIGNAL to its daily-OHLCV proxy (documented in the paper appendix)
+  - evaluate the AST causally to a per-name daily series
+  - cross-sectionally rank into a long-short leg, resample to the target cycle
+  - pass the leg through the same regime router as every other factor
+The paper applies NO pre-screening on expected performance: all admitted factors are
+evaluated, which is what makes the rescue rate a population statistic rather than a
+selected one.

@@ -1,0 +1,2350 @@
+[
+  {
+    "name": "net_quote_demand_rank",
+    "rationale": "Biais et al. (1995) show order book imbalance predicts price changes.",
+    "expr": {
+      "kind": "unary",
+      "op": "Rank",
+      "inner": {
+        "kind": "binary",
+        "op": "Div",
+        "left": {
+          "kind": "input",
+          "signal": "BidSize"
+        },
+        "right": {
+          "kind": "input",
+          "signal": "AskSize"
+        }
+      }
+    }
+  },
+  {
+    "name": "volume_price_correlation_proxy",
+    "rationale": "Karpoff (1987) finds positive volume-price change correlation; we approximate with product.",
+    "expr": {
+      "kind": "binary",
+      "op": "Mul",
+      "left": {
+        "kind": "input",
+        "signal": "Volume"
+      },
+      "right": {
+        "kind": "unary",
+        "op": "Abs",
+        "inner": {
+          "kind": "unary",
+          "op": "Diff",
+          "inner": {
+            "kind": "input",
+            "signal": "MidPrice"
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "volatility_breakout_strength",
+    "rationale": "Timmermann (2009) volatility breakout: deviation of current volatility from historical range.",
+    "expr": {
+      "kind": "binary",
+      "op": "Div",
+      "left": {
+        "kind": "binary",
+        "op": "Sub",
+        "left": {
+          "kind": "rolling",
+          "op": "Std",
+          "inner": {
+            "kind": "unary",
+            "op": "Abs",
+            "inner": {
+              "kind": "unary",
+              "op": "Diff",
+              "inner": {
+                "kind": "unary",
+                "op": "Log",
+                "inner": {
+                  "kind": "input",
+                  "signal": "MidPrice"
+                }
+              }
+            }
+          },
+          "window": 20
+        },
+        "right": {
+          "kind": "rolling",
+          "op": "Mean",
+          "inner": {
+            "kind": "rolling",
+            "op": "Std",
+            "inner": {
+              "kind": "unary",
+              "op": "Abs",
+              "inner": {
+                "kind": "unary",
+                "op": "Diff",
+                "inner": {
+                  "kind": "unary",
+                  "op": "Log",
+                  "inner": {
+                    "kind": "input",
+                    "signal": "MidPrice"
+                  }
+                }
+              }
+            },
+            "window": 20
+          },
+          "window": 100
+        }
+      },
+      "right": {
+        "kind": "rolling",
+        "op": "Std",
+        "inner": {
+          "kind": "rolling",
+          "op": "Std",
+          "inner": {
+            "kind": "unary",
+            "op": "Abs",
+            "inner": {
+              "kind": "unary",
+              "op": "Diff",
+              "inner": {
+                "kind": "unary",
+                "op": "Log",
+                "inner": {
+                  "kind": "input",
+                  "signal": "MidPrice"
+                }
+              }
+            }
+          },
+          "window": 20
+        },
+        "window": 100
+      }
+    }
+  },
+  {
+    "name": "volume_weighted_reversal",
+    "rationale": "Reversal strength weighted by volume (Lehmann 1990).",
+    "expr": {
+      "kind": "rolling",
+      "op": "Mean",
+      "inner": {
+        "kind": "binary",
+        "op": "Mul",
+        "left": {
+          "kind": "unary",
+          "op": "Neg",
+          "inner": {
+            "kind": "unary",
+            "op": "Sign",
+            "inner": {
+              "kind": "unary",
+              "op": "Diff",
+              "inner": {
+                "kind": "input",
+                "signal": "MidPrice"
+              }
+            }
+          }
+        },
+        "right": {
+          "kind": "input",
+          "signal": "Volume"
+        }
+      },
+      "window": 50
+    }
+  },
+  {
+    "name": "price_trend_slope_vol_adjusted",
+    "rationale": "Trend following with volatility adjustment (Szakmary, Shen & Sharma 2010). This factor computes the slope of mid-price divided by volatility.",
+    "expr": {
+      "kind": "binary",
+      "op": "Div",
+      "left": {
+        "kind": "rolling",
+        "op": "Slope",
+        "inner": {
+          "kind": "input",
+          "signal": "MidPrice"
+        },
+        "window": 30
+      },
+      "right": {
+        "kind": "rolling",
+        "op": "Std",
+        "inner": {
+          "kind": "input",
+          "signal": "MidPrice"
+        },
+        "window": 30
+      }
+    }
+  },
+  {
+    "name": "tr_dprice_skew_cond_up_down_w20",
+    "rationale": "",
+    "expr": {
+      "kind": "binary",
+      "op": "Sub",
+      "left": {
+        "kind": "rolling",
+        "op": "Skew",
+        "inner": {
+          "kind": "if_then_else",
+          "cond": {
+            "kind": "binary",
+            "op": "Gt",
+            "left": {
+              "kind": "unary",
+              "op": "Diff",
+              "inner": {
+                "kind": "input",
+                "signal": "MidPrice"
+              }
+            },
+            "right": {
+              "kind": "const",
+              "value": 0.0
+            }
+          },
+          "then_": {
+            "kind": "unary",
+            "op": "Diff",
+            "inner": {
+              "kind": "input",
+              "signal": "MidPrice"
+            }
+          },
+          "else_": {
+            "kind": "const",
+            "value": 0.0
+          }
+        },
+        "window": 20
+      },
+      "right": {
+        "kind": "rolling",
+        "op": "Skew",
+        "inner": {
+          "kind": "if_then_else",
+          "cond": {
+            "kind": "binary",
+            "op": "Lt",
+            "left": {
+              "kind": "unary",
+              "op": "Diff",
+              "inner": {
+                "kind": "input",
+                "signal": "MidPrice"
+              }
+            },
+            "right": {
+              "kind": "const",
+              "value": 0.0
+            }
+          },
+          "then_": {
+            "kind": "unary",
+            "op": "Diff",
+            "inner": {
+              "kind": "input",
+              "signal": "MidPrice"
+            }
+          },
+          "else_": {
+            "kind": "const",
+            "value": 0.0
+          }
+        },
+        "window": 20
+      }
+    }
+  },
+  {
+    "name": "volume_conditional_spread",
+    "rationale": "Huang Stoll (1997) volume conditional spread: spread normalized by volume.",
+    "expr": {
+      "kind": "binary",
+      "op": "Div",
+      "left": {
+        "kind": "binary",
+        "op": "Sub",
+        "left": {
+          "kind": "input",
+          "signal": "BestAsk"
+        },
+        "right": {
+          "kind": "input",
+          "signal": "BestBid"
+        }
+      },
+      "right": {
+        "kind": "binary",
+        "op": "Add",
+        "left": {
+          "kind": "input",
+          "signal": "Volume"
+        },
+        "right": {
+          "kind": "const",
+          "value": 0.01
+        }
+      }
+    }
+  },
+  {
+    "name": "energy_weighted_spread",
+    "rationale": "Corwin-Schultz (2012) spread proxy: spread variability weighted by bid-ask energy captures hidden illiquidity.",
+    "expr": {
+      "kind": "binary",
+      "op": "Mul",
+      "left": {
+        "kind": "binary",
+        "op": "Sub",
+        "left": {
+          "kind": "input",
+          "signal": "BestAsk"
+        },
+        "right": {
+          "kind": "input",
+          "signal": "BestBid"
+        }
+      },
+      "right": {
+        "kind": "rolling",
+        "op": "Std",
+        "inner": {
+          "kind": "binary",
+          "op": "Sub",
+          "left": {
+            "kind": "input",
+            "signal": "BestAsk"
+          },
+          "right": {
+            "kind": "input",
+            "signal": "BestBid"
+          }
+        },
+        "window": 20
+      }
+    }
+  },
+  {
+    "name": "spread_momentum",
+    "rationale": "Trend in quoted spread signals building transaction cost pressure, similar to Hasbrouck (1991) information flow.",
+    "expr": {
+      "kind": "rolling",
+      "op": "Slope",
+      "inner": {
+        "kind": "binary",
+        "op": "Sub",
+        "left": {
+          "kind": "input",
+          "signal": "BestAsk"
+        },
+        "right": {
+          "kind": "input",
+          "signal": "BestBid"
+        }
+      },
+      "window": 20
+    }
+  },
+  {
+    "name": "midprice_hurst_exponent_proxy",
+    "rationale": "Proxy for Hurst via ratio of overlapping return std devs (Di Matteo et al. 2005).",
+    "expr": {
+      "kind": "binary",
+      "op": "Div",
+      "left": {
+        "kind": "rolling",
+        "op": "Std",
+        "inner": {
+          "kind": "unary",
+          "op": "Diff",
+          "inner": {
+            "kind": "input",
+            "signal": "MidPrice"
+          }
+        },
+        "window": 10
+      },
+      "right": {
+        "kind": "rolling",
+        "op": "Std",
+        "inner": {
+          "kind": "unary",
+          "op": "Diff",
+          "inner": {
+            "kind": "input",
+            "signal": "MidPrice"
+          }
+        },
+        "window": 5
+      }
+    }
+  },
+  {
+    "name": "ask_bid_price_ratio_log_diff",
+    "rationale": "Log return of BestAsk/BestBid ratio measures relative spread change, signals tightening (Fleming 2001).",
+    "expr": {
+      "kind": "unary",
+      "op": "Diff",
+      "inner": {
+        "kind": "unary",
+        "op": "Log",
+        "inner": {
+          "kind": "binary",
+          "op": "Div",
+          "left": {
+            "kind": "input",
+            "signal": "BestAsk"
+          },
+          "right": {
+            "kind": "input",
+            "signal": "BestBid"
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "extreme_return_sum",
+    "rationale": "Cumulative return during extreme events; directional extreme exposure.",
+    "expr": {
+      "kind": "rolling",
+      "op": "Sum",
+      "inner": {
+        "kind": "if_then_else",
+        "cond": {
+          "kind": "binary",
+          "op": "Gt",
+          "left": {
+            "kind": "unary",
+            "op": "Abs",
+            "inner": {
+              "kind": "unary",
+              "op": "Diff",
+              "inner": {
+                "kind": "unary",
+                "op": "Log",
+                "inner": {
+                  "kind": "input",
+                  "signal": "MidPrice"
+                }
+              }
+            }
+          },
+          "right": {
+            "kind": "const",
+            "value": 0.0005
+          }
+        },
+        "then_": {
+          "kind": "unary",
+          "op": "Diff",
+          "inner": {
+            "kind": "unary",
+            "op": "Log",
+            "inner": {
+              "kind": "input",
+              "signal": "MidPrice"
+            }
+          }
+        },
+        "else_": {
+          "kind": "const",
+          "value": 0.0
+        }
+      },
+      "window": 100
+    }
+  },
+  {
+    "name": "volume_kurtosis_trade_size",
+    "rationale": "Trade size kurtosis (Farmer et al. 2004).",
+    "expr": {
+      "kind": "rolling",
+      "op": "Kurt",
+      "inner": {
+        "kind": "input",
+        "signal": "TradeSize"
+      },
+      "window": 200
+    }
+  },
+  {
+    "name": "depth_risk_adjusted_return",
+    "rationale": "Sharpe 1966: risk-adjusted depth return",
+    "expr": {
+      "kind": "binary",
+      "op": "Div",
+      "left": {
+        "kind": "rolling",
+        "op": "Mean",
+        "inner": {
+          "kind": "unary",
+          "op": "Diff",
+          "inner": {
+            "kind": "input",
+            "signal": "BidSize"
+          }
+        },
+        "window": 50
+      },
+      "right": {
+        "kind": "rolling",
+        "op": "Std",
+        "inner": {
+          "kind": "unary",
+          "op": "Diff",
+          "inner": {
+            "kind": "input",
+            "signal": "BidSize"
+          }
+        },
+        "window": 50
+      }
+    }
+  },
+  {
+    "name": "adverse_selection_impact_ratio",
+    "rationale": "Average permanent price impact per trade relative to quoted spread, capturing adverse selection cost (Glosten and Milgrom 1985).",
+    "expr": {
+      "kind": "binary",
+      "op": "Div",
+      "left": {
+        "kind": "rolling",
+        "op": "Mean",
+        "inner": {
+          "kind": "binary",
+          "op": "Mul",
+          "left": {
+            "kind": "input",
+            "signal": "TradeSide"
+          },
+          "right": {
+            "kind": "unary",
+            "op": "Diff",
+            "inner": {
+              "kind": "input",
+              "signal": "MidPrice"
+            }
+          }
+        },
+        "window": 50
+      },
+      "right": {
+        "kind": "rolling",
+        "op": "Mean",
+        "inner": {
+          "kind": "binary",
+          "op": "Sub",
+          "left": {
+            "kind": "input",
+            "signal": "BestAsk"
+          },
+          "right": {
+            "kind": "input",
+            "signal": "BestBid"
+          }
+        },
+        "window": 50
+      }
+    }
+  },
+  {
+    "name": "attn_market_impact_curve_proxy",
+    "rationale": "Square root of volume times return sign approximates impact (Almgren et al. 2005)",
+    "expr": {
+      "kind": "binary",
+      "op": "Mul",
+      "left": {
+        "kind": "unary",
+        "op": "Sqrt",
+        "inner": {
+          "kind": "input",
+          "signal": "Volume"
+        }
+      },
+      "right": {
+        "kind": "unary",
+        "op": "Sign",
+        "inner": {
+          "kind": "unary",
+          "op": "Diff",
+          "inner": {
+            "kind": "unary",
+            "op": "Log",
+            "inner": {
+              "kind": "input",
+              "signal": "MidPrice"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "volume_log_vol",
+    "rationale": "Volatility of log volume: proportional changes smooth extreme values (Lobato & Velasco 2000).",
+    "expr": {
+      "kind": "rolling",
+      "op": "Std",
+      "inner": {
+        "kind": "unary",
+        "op": "Diff",
+        "inner": {
+          "kind": "unary",
+          "op": "Log",
+          "inner": {
+            "kind": "input",
+            "signal": "Volume"
+          }
+        }
+      },
+      "window": 50
+    }
+  },
+  {
+    "name": "depth_persistence_ratio",
+    "rationale": "Mandelbrot fractal markets: ratio of depth volatility at long to short window indicates persistence.",
+    "expr": {
+      "kind": "binary",
+      "op": "Div",
+      "left": {
+        "kind": "rolling",
+        "op": "Std",
+        "inner": {
+          "kind": "binary",
+          "op": "Add",
+          "left": {
+            "kind": "input",
+            "signal": "BidSize"
+          },
+          "right": {
+            "kind": "input",
+            "signal": "AskSize"
+          }
+        },
+        "window": 50
+      },
+      "right": {
+        "kind": "rolling",
+        "op": "Std",
+        "inner": {
+          "kind": "binary",
+          "op": "Add",
+          "left": {
+            "kind": "input",
+            "signal": "BidSize"
+          },
+          "right": {
+            "kind": "input",
+            "signal": "AskSize"
+          }
+        },
+        "window": 10
+      }
+    }
+  },
+  {
+    "name": "flash_heating_proxy",
+    "rationale": "Flash heating reduces friction (Rice 2006); here sudden spike in trade intensity (volume over very short window) compared to recent average, indicating potential large move (Easley et al. 2012).",
+    "expr": {
+      "kind": "binary",
+      "op": "Div",
+      "left": {
+        "kind": "rolling",
+        "op": "Sum",
+        "inner": {
+          "kind": "input",
+          "signal": "Volume"
+        },
+        "window": 3
+      },
+      "right": {
+        "kind": "rolling",
+        "op": "Mean",
+        "inner": {
+          "kind": "input",
+          "signal": "Volume"
+        },
+        "window": 20
+      }
+    }
+  },
+  {
+    "name": "hawk_dove_intensity_ratio",
+    "rationale": "Hawk-Dove game (Maynard Smith & Price 1973): high aggressiveness (large trades) vs passivity; the ratio of 90th percentile to median trade size separates hawks from doves.",
+    "expr": {
+      "kind": "binary",
+      "op": "Div",
+      "left": {
+        "kind": "rolling",
+        "op": "Quantile",
+        "inner": {
+          "kind": "input",
+          "signal": "TradeSize"
+        },
+        "window": 50
+      },
+      "right": {
+        "kind": "rolling",
+        "op": "Quantile",
+        "inner": {
+          "kind": "input",
+          "signal": "TradeSize"
+        },
+        "window": 50
+      }
+    }
+  },
+  {
+    "name": "t_statistic_momentum",
+    "rationale": "Lo & MacKinlay 1988: t-statistic of linear trend more robust than raw slope",
+    "expr": {
+      "kind": "binary",
+      "op": "Div",
+      "left": {
+        "kind": "rolling",
+        "op": "Slope",
+        "inner": {
+          "kind": "input",
+          "signal": "MidPrice"
+        },
+        "window": 50
+      },
+      "right": {
+        "kind": "rolling",
+        "op": "Std",
+        "inner": {
+          "kind": "unary",
+          "op": "Diff",
+          "inner": {
+            "kind": "input",
+            "signal": "MidPrice"
+          }
+        },
+        "window": 50
+      }
+    }
+  },
+  {
+    "name": "depth_price_trend_interaction",
+    "rationale": "Interaction of price trend and depth (Lo & MacKinlay 1988): depth changes during trends.",
+    "expr": {
+      "kind": "binary",
+      "op": "Mul",
+      "left": {
+        "kind": "rolling",
+        "op": "Slope",
+        "inner": {
+          "kind": "input",
+          "signal": "MidPrice"
+        },
+        "window": 20
+      },
+      "right": {
+        "kind": "unary",
+        "op": "Diff",
+        "inner": {
+          "kind": "input",
+          "signal": "BidSize"
+        }
+      }
+    }
+  },
+  {
+    "name": "return_magnitude_dispersion",
+    "rationale": "Cont (2001) volatility clustering implies magnitude dispersion varies. Coefficient of variation of |r| over 100 ticks.",
+    "expr": {
+      "kind": "binary",
+      "op": "Div",
+      "left": {
+        "kind": "rolling",
+        "op": "Std",
+        "inner": {
+          "kind": "unary",
+          "op": "Abs",
+          "inner": {
+            "kind": "unary",
+            "op": "Diff",
+            "inner": {
+              "kind": "unary",
+              "op": "Log",
+              "inner": {
+                "kind": "input",
+                "signal": "MidPrice"
+              }
+            }
+          }
+        },
+        "window": 100
+      },
+      "right": {
+        "kind": "rolling",
+        "op": "Mean",
+        "inner": {
+          "kind": "unary",
+          "op": "Abs",
+          "inner": {
+            "kind": "unary",
+            "op": "Diff",
+            "inner": {
+              "kind": "unary",
+              "op": "Log",
+              "inner": {
+                "kind": "input",
+                "signal": "MidPrice"
+              }
+            }
+          }
+        },
+        "window": 100
+      }
+    }
+  },
+  {
+    "name": "spread_depth_momentum",
+    "rationale": "Momentum in the spread-depth ratio (Chordia et al. 2000).",
+    "expr": {
+      "kind": "rolling",
+      "op": "Mean",
+      "inner": {
+        "kind": "unary",
+        "op": "Diff",
+        "inner": {
+          "kind": "binary",
+          "op": "Div",
+          "left": {
+            "kind": "binary",
+            "op": "Sub",
+            "left": {
+              "kind": "input",
+              "signal": "BestAsk"
+            },
+            "right": {
+              "kind": "input",
+              "signal": "BestBid"
+            }
+          },
+          "right": {
+            "kind": "binary",
+            "op": "Add",
+            "left": {
+              "kind": "input",
+              "signal": "BidSize"
+            },
+            "right": {
+              "kind": "input",
+              "signal": "AskSize"
+            }
+          }
+        }
+      },
+      "window": 10
+    }
+  },
+  {
+    "name": "zero_crossing_spread",
+    "rationale": "",
+    "expr": {
+      "kind": "rolling",
+      "op": "Mean",
+      "inner": {
+        "kind": "binary",
+        "op": "Mul",
+        "left": {
+          "kind": "binary",
+          "op": "Lt",
+          "left": {
+            "kind": "unary",
+            "op": "Diff",
+            "inner": {
+              "kind": "binary",
+              "op": "Sub",
+              "left": {
+                "kind": "input",
+                "signal": "BestAsk"
+              },
+              "right": {
+                "kind": "input",
+                "signal": "BestBid"
+              }
+            }
+          },
+          "right": {
+            "kind": "const",
+            "value": 0.0
+          }
+        },
+        "right": {
+          "kind": "const",
+          "value": 1.0
+        }
+      },
+      "window": 50
+    }
+  },
+  {
+    "name": "informed_flow_reversal",
+    "rationale": "Price reversal after toxic trades indicates temporary impact (Hendershott et al. 2011).",
+    "expr": {
+      "kind": "rolling",
+      "op": "Mean",
+      "inner": {
+        "kind": "binary",
+        "op": "Mul",
+        "left": {
+          "kind": "unary",
+          "op": "Neg",
+          "inner": {
+            "kind": "binary",
+            "op": "Mul",
+            "left": {
+              "kind": "unary",
+              "op": "Diff",
+              "inner": {
+                "kind": "input",
+                "signal": "MidPrice"
+              }
+            },
+            "right": {
+              "kind": "input",
+              "signal": "TradeSide"
+            }
+          }
+        },
+        "right": {
+          "kind": "input",
+          "signal": "TradeSize"
+        }
+      },
+      "window": 50
+    }
+  },
+  {
+    "name": "noise_sweep_detection",
+    "rationale": "Sweep detection noise: volume burst relative to depth as noise intensity (HFT sweeps).",
+    "expr": {
+      "kind": "binary",
+      "op": "Div",
+      "left": {
+        "kind": "rolling",
+        "op": "Max",
+        "inner": {
+          "kind": "input",
+          "signal": "Volume"
+        },
+        "window": 10
+      },
+      "right": {
+        "kind": "binary",
+        "op": "Add",
+        "left": {
+          "kind": "input",
+          "signal": "BidSize"
+        },
+        "right": {
+          "kind": "input",
+          "signal": "AskSize"
+        }
+      }
+    }
+  },
+  {
+    "name": "mp_spread_dev_interaction",
+    "rationale": "Product of spread and deviation (Kyle 1985).",
+    "expr": {
+      "kind": "binary",
+      "op": "Mul",
+      "left": {
+        "kind": "binary",
+        "op": "Sub",
+        "left": {
+          "kind": "binary",
+          "op": "Div",
+          "left": {
+            "kind": "binary",
+            "op": "Add",
+            "left": {
+              "kind": "binary",
+              "op": "Mul",
+              "left": {
+                "kind": "input",
+                "signal": "BestBid"
+              },
+              "right": {
+                "kind": "input",
+                "signal": "AskSize"
+              }
+            },
+            "right": {
+              "kind": "binary",
+              "op": "Mul",
+              "left": {
+                "kind": "input",
+                "signal": "BestAsk"
+              },
+              "right": {
+                "kind": "input",
+                "signal": "BidSize"
+              }
+            }
+          },
+          "right": {
+            "kind": "binary",
+            "op": "Add",
+            "left": {
+              "kind": "input",
+              "signal": "BidSize"
+            },
+            "right": {
+              "kind": "input",
+              "signal": "AskSize"
+            }
+          }
+        },
+        "right": {
+          "kind": "input",
+          "signal": "MidPrice"
+        }
+      },
+      "right": {
+        "kind": "binary",
+        "op": "Sub",
+        "left": {
+          "kind": "input",
+          "signal": "BestAsk"
+        },
+        "right": {
+          "kind": "input",
+          "signal": "BestBid"
+        }
+      }
+    }
+  },
+  {
+    "name": "midprice_reversal_after_large_trade",
+    "rationale": "Madhavan-Smidt 1991: large trades cause temporary price pressure that reverts.",
+    "expr": {
+      "kind": "binary",
+      "op": "Mul",
+      "left": {
+        "kind": "input",
+        "signal": "TradeSide"
+      },
+      "right": {
+        "kind": "unary",
+        "op": "Diff",
+        "inner": {
+          "kind": "unary",
+          "op": "Diff",
+          "inner": {
+            "kind": "input",
+            "signal": "MidPrice"
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "ask_side_pressure",
+    "rationale": "Asymmetric focus on ask side: when ask size is large relative to bid, selling pressure dominates (Bollerslev and Melvin 1994).",
+    "expr": {
+      "kind": "binary",
+      "op": "Sub",
+      "left": {
+        "kind": "binary",
+        "op": "Div",
+        "left": {
+          "kind": "input",
+          "signal": "AskSize"
+        },
+        "right": {
+          "kind": "binary",
+          "op": "Add",
+          "left": {
+            "kind": "binary",
+            "op": "Add",
+            "left": {
+              "kind": "input",
+              "signal": "BidSize"
+            },
+            "right": {
+              "kind": "input",
+              "signal": "AskSize"
+            }
+          },
+          "right": {
+            "kind": "const",
+            "value": 1e-08
+          }
+        }
+      },
+      "right": {
+        "kind": "const",
+        "value": 0.5
+      }
+    }
+  },
+  {
+    "name": "relative_spread_depth",
+    "rationale": "Spread relative to depth (liquidity premium) as adverse selection measure (Foucault 1999).",
+    "expr": {
+      "kind": "binary",
+      "op": "Div",
+      "left": {
+        "kind": "binary",
+        "op": "Sub",
+        "left": {
+          "kind": "input",
+          "signal": "BestAsk"
+        },
+        "right": {
+          "kind": "input",
+          "signal": "BestBid"
+        }
+      },
+      "right": {
+        "kind": "unary",
+        "op": "Sqrt",
+        "inner": {
+          "kind": "binary",
+          "op": "Mul",
+          "left": {
+            "kind": "input",
+            "signal": "BidSize"
+          },
+          "right": {
+            "kind": "input",
+            "signal": "AskSize"
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "trade_impact_concavity",
+    "rationale": "Lillo, Farmer, Mantegna (2003) concave impact: |return| / log(trade size).",
+    "expr": {
+      "kind": "binary",
+      "op": "Div",
+      "left": {
+        "kind": "unary",
+        "op": "Abs",
+        "inner": {
+          "kind": "unary",
+          "op": "Diff",
+          "inner": {
+            "kind": "input",
+            "signal": "MidPrice"
+          }
+        }
+      },
+      "right": {
+        "kind": "unary",
+        "op": "Log",
+        "inner": {
+          "kind": "input",
+          "signal": "TradeSize"
+        }
+      }
+    }
+  },
+  {
+    "name": "volatility_memory_parkinson_to_close_ratio",
+    "rationale": "Parkinson (1980) vs close vol; when ratio of range vol to close vol persists, trend emerges.",
+    "expr": {
+      "kind": "binary",
+      "op": "Div",
+      "left": {
+        "kind": "unary",
+        "op": "Log",
+        "inner": {
+          "kind": "binary",
+          "op": "Max",
+          "left": {
+            "kind": "unary",
+            "op": "Abs",
+            "inner": {
+              "kind": "binary",
+              "op": "Sub",
+              "left": {
+                "kind": "rolling",
+                "op": "Max",
+                "inner": {
+                  "kind": "input",
+                  "signal": "MidPrice"
+                },
+                "window": 20
+              },
+              "right": {
+                "kind": "rolling",
+                "op": "Min",
+                "inner": {
+                  "kind": "input",
+                  "signal": "MidPrice"
+                },
+                "window": 20
+              }
+            }
+          },
+          "right": {
+            "kind": "const",
+            "value": 1e-06
+          }
+        }
+      },
+      "right": {
+        "kind": "unary",
+        "op": "Log",
+        "inner": {
+          "kind": "binary",
+          "op": "Max",
+          "left": {
+            "kind": "rolling",
+            "op": "Std",
+            "inner": {
+              "kind": "unary",
+              "op": "Diff",
+              "inner": {
+                "kind": "input",
+                "signal": "MidPrice"
+              }
+            },
+            "window": 20
+          },
+          "right": {
+            "kind": "const",
+            "value": 1e-06
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "residual_inventory_effect",
+    "rationale": "Lyons 1995: residual inventory effect: (imbalance - long-term mean) * return.",
+    "expr": {
+      "kind": "binary",
+      "op": "Mul",
+      "left": {
+        "kind": "binary",
+        "op": "Sub",
+        "left": {
+          "kind": "binary",
+          "op": "Sub",
+          "left": {
+            "kind": "input",
+            "signal": "BidSize"
+          },
+          "right": {
+            "kind": "input",
+            "signal": "AskSize"
+          }
+        },
+        "right": {
+          "kind": "rolling",
+          "op": "Mean",
+          "inner": {
+            "kind": "binary",
+            "op": "Sub",
+            "left": {
+              "kind": "input",
+              "signal": "BidSize"
+            },
+            "right": {
+              "kind": "input",
+              "signal": "AskSize"
+            }
+          },
+          "window": 100
+        }
+      },
+      "right": {
+        "kind": "unary",
+        "op": "Diff",
+        "inner": {
+          "kind": "input",
+          "signal": "MidPrice"
+        }
+      }
+    }
+  },
+  {
+    "name": "ask_bid_ratio_change",
+    "rationale": "Cartea-Jaimungal-Penalva 2015: change in ratio of ask to bid size predicts order flow direction.",
+    "expr": {
+      "kind": "unary",
+      "op": "Diff",
+      "inner": {
+        "kind": "binary",
+        "op": "Div",
+        "left": {
+          "kind": "input",
+          "signal": "AskSize"
+        },
+        "right": {
+          "kind": "input",
+          "signal": "BidSize"
+        }
+      }
+    }
+  },
+  {
+    "name": "anchor_pain_ratio",
+    "rationale": "Pain ratio (Zakamouline 2011) concept: sum of drawdowns divided by number of observations near the anchor; higher pain suggests higher likelihood of bounce.",
+    "expr": {
+      "kind": "binary",
+      "op": "Div",
+      "left": {
+        "kind": "rolling",
+        "op": "Sum",
+        "inner": {
+          "kind": "binary",
+          "op": "Max",
+          "left": {
+            "kind": "const",
+            "value": 0.0
+          },
+          "right": {
+            "kind": "binary",
+            "op": "Sub",
+            "left": {
+              "kind": "rolling",
+              "op": "Mean",
+              "inner": {
+                "kind": "input",
+                "signal": "MidPrice"
+              },
+              "window": 20
+            },
+            "right": {
+              "kind": "input",
+              "signal": "MidPrice"
+            }
+          }
+        },
+        "window": 50
+      },
+      "right": {
+        "kind": "const",
+        "value": 50.0
+      }
+    }
+  },
+  {
+    "name": "trade_price_range_reversal",
+    "rationale": "When trade prices trade in a narrow range, a breakout is false and reverses (Duclos 1985).",
+    "expr": {
+      "kind": "binary",
+      "op": "Sub",
+      "left": {
+        "kind": "rolling",
+        "op": "Max",
+        "inner": {
+          "kind": "input",
+          "signal": "TradePrice"
+        },
+        "window": 20
+      },
+      "right": {
+        "kind": "rolling",
+        "op": "Min",
+        "inner": {
+          "kind": "input",
+          "signal": "TradePrice"
+        },
+        "window": 20
+      }
+    }
+  },
+  {
+    "name": "dd_zero_tick",
+    "rationale": "Frequency of zero price changes increases during drawdowns signaling frozen markets (Madhavan-Richardson-Roomans 1997).",
+    "expr": {
+      "kind": "binary",
+      "op": "Mul",
+      "left": {
+        "kind": "binary",
+        "op": "Gt",
+        "left": {
+          "kind": "rolling",
+          "op": "Max",
+          "inner": {
+            "kind": "input",
+            "signal": "MidPrice"
+          },
+          "window": 100
+        },
+        "right": {
+          "kind": "input",
+          "signal": "MidPrice"
+        }
+      },
+      "right": {
+        "kind": "binary",
+        "op": "Sub",
+        "left": {
+          "kind": "const",
+          "value": 1.0
+        },
+        "right": {
+          "kind": "binary",
+          "op": "Gt",
+          "left": {
+            "kind": "unary",
+            "op": "Abs",
+            "inner": {
+              "kind": "unary",
+              "op": "Diff",
+              "inner": {
+                "kind": "input",
+                "signal": "MidPrice"
+              }
+            }
+          },
+          "right": {
+            "kind": "const",
+            "value": 0.0
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "zcr_trade_price_30",
+    "rationale": "ZCR of trade price returns captures transaction-level oscillation, reflecting speculative intensity (Mantegna and Stanley 1996).",
+    "expr": {
+      "kind": "rolling",
+      "op": "Mean",
+      "inner": {
+        "kind": "if_then_else",
+        "cond": {
+          "kind": "binary",
+          "op": "Gt",
+          "left": {
+            "kind": "rolling",
+            "op": "Std",
+            "inner": {
+              "kind": "unary",
+              "op": "Sign",
+              "inner": {
+                "kind": "unary",
+                "op": "Diff",
+                "inner": {
+                  "kind": "input",
+                  "signal": "TradePrice"
+                }
+              }
+            },
+            "window": 2
+          },
+          "right": {
+            "kind": "const",
+            "value": 0.0
+          }
+        },
+        "then_": {
+          "kind": "const",
+          "value": 1.0
+        },
+        "else_": {
+          "kind": "const",
+          "value": 0.0
+        }
+      },
+      "window": 30
+    }
+  },
+  {
+    "name": "rqa_determinism_mid_rolling_corr",
+    "rationale": "Zbilut & Webber 1992 determinism on correlation; if correlation of mid with bid trends upward, bullish; trending down, bearish divergence.",
+    "expr": {
+      "kind": "rolling",
+      "op": "Mean",
+      "inner": {
+        "kind": "binary",
+        "op": "Gt",
+        "left": {
+          "kind": "binary",
+          "op": "Mul",
+          "left": {
+            "kind": "unary",
+            "op": "Diff",
+            "inner": {
+              "kind": "rolling",
+              "op": "Corr",
+              "inner": {
+                "kind": "input",
+                "signal": "MidPrice"
+              },
+              "window": 50
+            }
+          },
+          "right": {
+            "kind": "binary",
+            "op": "Sub",
+            "left": {
+              "kind": "unary",
+              "op": "Diff",
+              "inner": {
+                "kind": "rolling",
+                "op": "Corr",
+                "inner": {
+                  "kind": "input",
+                  "signal": "MidPrice"
+                },
+                "window": 50
+              }
+            },
+            "right": {
+              "kind": "unary",
+              "op": "Diff",
+              "inner": {
+                "kind": "unary",
+                "op": "Diff",
+                "inner": {
+                  "kind": "rolling",
+                  "op": "Corr",
+                  "inner": {
+                    "kind": "input",
+                    "signal": "MidPrice"
+                  },
+                  "window": 50
+                }
+              }
+            }
+          }
+        },
+        "right": {
+          "kind": "const",
+          "value": 0.0
+        }
+      },
+      "window": 50
+    }
+  },
+  {
+    "name": "cs_trade_arrival_clustering",
+    "rationale": "Clustering of trades (variance of inter-trade intervals proxied by volume volatility) increases before crash (Engle 2000).",
+    "expr": {
+      "kind": "rolling",
+      "op": "Std",
+      "inner": {
+        "kind": "unary",
+        "op": "Diff",
+        "inner": {
+          "kind": "unary",
+          "op": "Diff",
+          "inner": {
+            "kind": "input",
+            "signal": "Volume"
+          }
+        }
+      },
+      "window": 30
+    }
+  },
+  {
+    "name": "hwk_log_intensity_bid_30",
+    "rationale": "",
+    "expr": {
+      "kind": "unary",
+      "op": "Log",
+      "inner": {
+        "kind": "rolling",
+        "op": "Sum",
+        "inner": {
+          "kind": "binary",
+          "op": "Gt",
+          "left": {
+            "kind": "unary",
+            "op": "Abs",
+            "inner": {
+              "kind": "unary",
+              "op": "Diff",
+              "inner": {
+                "kind": "input",
+                "signal": "BestBid"
+              }
+            }
+          },
+          "right": {
+            "kind": "const",
+            "value": 0.0
+          }
+        },
+        "window": 30
+      }
+    }
+  },
+  {
+    "name": "iceberg_ask_short_long_vol",
+    "rationale": "Ask depth short-term vs long-term volatility; decreasing ratio implies growing hidden sell orders.",
+    "expr": {
+      "kind": "binary",
+      "op": "Div",
+      "left": {
+        "kind": "rolling",
+        "op": "Std",
+        "inner": {
+          "kind": "input",
+          "signal": "AskSize"
+        },
+        "window": 20
+      },
+      "right": {
+        "kind": "rolling",
+        "op": "Std",
+        "inner": {
+          "kind": "input",
+          "signal": "AskSize"
+        },
+        "window": 100
+      }
+    }
+  },
+  {
+    "name": "bid_ask_bounce_spillover",
+    "rationale": "Roll 1984 bid-ask bounce transmits to short-term momentum",
+    "expr": {
+      "kind": "binary",
+      "op": "Mul",
+      "left": {
+        "kind": "unary",
+        "op": "Abs",
+        "inner": {
+          "kind": "unary",
+          "op": "Diff",
+          "inner": {
+            "kind": "input",
+            "signal": "MidPrice"
+          }
+        }
+      },
+      "right": {
+        "kind": "unary",
+        "op": "Sign",
+        "inner": {
+          "kind": "binary",
+          "op": "Sub",
+          "left": {
+            "kind": "input",
+            "signal": "BestAsk"
+          },
+          "right": {
+            "kind": "input",
+            "signal": "BestBid"
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "zscore_ljung_box_autocorr",
+    "rationale": "Ljung-Box style test statistic: sum of squared autocorrelations of returns normalized, then z-score; detects predictability; Lo-MacKinlay (1988).",
+    "expr": {
+      "kind": "rolling",
+      "op": "Zscore",
+      "inner": {
+        "kind": "rolling",
+        "op": "Sum",
+        "inner": {
+          "kind": "binary",
+          "op": "Pow",
+          "left": {
+            "kind": "rolling",
+            "op": "Corr",
+            "inner": {
+              "kind": "unary",
+              "op": "Diff",
+              "inner": {
+                "kind": "unary",
+                "op": "Log",
+                "inner": {
+                  "kind": "input",
+                  "signal": "MidPrice"
+                }
+              }
+            },
+            "window": 10
+          },
+          "right": {
+            "kind": "const",
+            "value": 2.0
+          }
+        },
+        "window": 50
+      },
+      "window": 100
+    }
+  },
+  {
+    "name": "lv_spread_depth_ratio20",
+    "rationale": "",
+    "expr": {
+      "kind": "rolling",
+      "op": "Mean",
+      "inner": {
+        "kind": "binary",
+        "op": "Div",
+        "left": {
+          "kind": "binary",
+          "op": "Sub",
+          "left": {
+            "kind": "input",
+            "signal": "BestAsk"
+          },
+          "right": {
+            "kind": "input",
+            "signal": "BestBid"
+          }
+        },
+        "right": {
+          "kind": "binary",
+          "op": "Add",
+          "left": {
+            "kind": "binary",
+            "op": "Add",
+            "left": {
+              "kind": "input",
+              "signal": "BidSize"
+            },
+            "right": {
+              "kind": "input",
+              "signal": "AskSize"
+            }
+          },
+          "right": {
+            "kind": "const",
+            "value": 0.01
+          }
+        }
+      },
+      "window": 20
+    }
+  },
+  {
+    "name": "quantile_range_slope",
+    "rationale": "Slope of the inter-quantile range (Max-Min) as a volatility-of-volatility measure (Christoffersen 2012).",
+    "expr": {
+      "kind": "rolling",
+      "op": "Slope",
+      "inner": {
+        "kind": "binary",
+        "op": "Sub",
+        "left": {
+          "kind": "rolling",
+          "op": "Max",
+          "inner": {
+            "kind": "binary",
+            "op": "Sub",
+            "left": {
+              "kind": "input",
+              "signal": "BestAsk"
+            },
+            "right": {
+              "kind": "input",
+              "signal": "BestBid"
+            }
+          },
+          "window": 40
+        },
+        "right": {
+          "kind": "rolling",
+          "op": "Min",
+          "inner": {
+            "kind": "binary",
+            "op": "Sub",
+            "left": {
+              "kind": "input",
+              "signal": "BestAsk"
+            },
+            "right": {
+              "kind": "input",
+              "signal": "BestBid"
+            }
+          },
+          "window": 40
+        }
+      },
+      "window": 20
+    }
+  },
+  {
+    "name": "volume_power_law_exponent",
+    "rationale": "Gabaix-Gopikrishnan-Plerou-Stanley 2006: power-law exponent of volume via log-difference of max and sum",
+    "expr": {
+      "kind": "binary",
+      "op": "Div",
+      "left": {
+        "kind": "unary",
+        "op": "Log",
+        "inner": {
+          "kind": "rolling",
+          "op": "Max",
+          "inner": {
+            "kind": "input",
+            "signal": "Volume"
+          },
+          "window": 50
+        }
+      },
+      "right": {
+        "kind": "unary",
+        "op": "Log",
+        "inner": {
+          "kind": "rolling",
+          "op": "Sum",
+          "inner": {
+            "kind": "input",
+            "signal": "Volume"
+          },
+          "window": 50
+        }
+      }
+    }
+  },
+  {
+    "name": "spread_sq_over_depth_volatility",
+    "rationale": "A nonlinear adverse selection measure: spread squared times volatility divided by depth, amplifying regimes where all three spike.",
+    "expr": {
+      "kind": "binary",
+      "op": "Div",
+      "left": {
+        "kind": "binary",
+        "op": "Mul",
+        "left": {
+          "kind": "binary",
+          "op": "Pow",
+          "left": {
+            "kind": "binary",
+            "op": "Sub",
+            "left": {
+              "kind": "input",
+              "signal": "BestAsk"
+            },
+            "right": {
+              "kind": "input",
+              "signal": "BestBid"
+            }
+          },
+          "right": {
+            "kind": "const",
+            "value": 2.0
+          }
+        },
+        "right": {
+          "kind": "rolling",
+          "op": "Std",
+          "inner": {
+            "kind": "unary",
+            "op": "Diff",
+            "inner": {
+              "kind": "input",
+              "signal": "MidPrice"
+            }
+          },
+          "window": 50
+        }
+      },
+      "right": {
+        "kind": "binary",
+        "op": "Add",
+        "left": {
+          "kind": "input",
+          "signal": "BidSize"
+        },
+        "right": {
+          "kind": "input",
+          "signal": "AskSize"
+        }
+      }
+    }
+  },
+  {
+    "name": "vol_vol_volume_shock_10_50",
+    "rationale": "Product of changes in vol-of-vol and volume; synchronized positive spikes indicate news-driven volatility.",
+    "expr": {
+      "kind": "binary",
+      "op": "Mul",
+      "left": {
+        "kind": "unary",
+        "op": "Diff",
+        "inner": {
+          "kind": "rolling",
+          "op": "Std",
+          "inner": {
+            "kind": "rolling",
+            "op": "Std",
+            "inner": {
+              "kind": "unary",
+              "op": "Diff",
+              "inner": {
+                "kind": "unary",
+                "op": "Log",
+                "inner": {
+                  "kind": "input",
+                  "signal": "MidPrice"
+                }
+              }
+            },
+            "window": 10
+          },
+          "window": 50
+        }
+      },
+      "right": {
+        "kind": "unary",
+        "op": "Diff",
+        "inner": {
+          "kind": "input",
+          "signal": "Volume"
+        }
+      }
+    }
+  },
+  {
+    "name": "bid_ask_spread_ratio_en",
+    "rationale": "Hendershott & Menkveld (2014) intermediary constraints; entropy of the ratio of bid to ask depth provides inventory pressure signal.",
+    "expr": {
+      "kind": "rolling",
+      "op": "Std",
+      "inner": {
+        "kind": "binary",
+        "op": "Div",
+        "left": {
+          "kind": "input",
+          "signal": "BidSize"
+        },
+        "right": {
+          "kind": "input",
+          "signal": "AskSize"
+        }
+      },
+      "window": 70
+    }
+  },
+  {
+    "name": "asym_bidsize_slope_50",
+    "rationale": "Slope asymmetry of bid depth conditional on price direction (Zumbach 2009)",
+    "expr": {
+      "kind": "binary",
+      "op": "Sub",
+      "left": {
+        "kind": "rolling",
+        "op": "Slope",
+        "inner": {
+          "kind": "if_then_else",
+          "cond": {
+            "kind": "binary",
+            "op": "Gt",
+            "left": {
+              "kind": "unary",
+              "op": "Diff",
+              "inner": {
+                "kind": "input",
+                "signal": "MidPrice"
+              }
+            },
+            "right": {
+              "kind": "const",
+              "value": 0.0
+            }
+          },
+          "then_": {
+            "kind": "input",
+            "signal": "BidSize"
+          },
+          "else_": {
+            "kind": "const",
+            "value": 0.0
+          }
+        },
+        "window": 50
+      },
+      "right": {
+        "kind": "rolling",
+        "op": "Slope",
+        "inner": {
+          "kind": "if_then_else",
+          "cond": {
+            "kind": "binary",
+            "op": "Lt",
+            "left": {
+              "kind": "unary",
+              "op": "Diff",
+              "inner": {
+                "kind": "input",
+                "signal": "MidPrice"
+              }
+            },
+            "right": {
+              "kind": "const",
+              "value": 0.0
+            }
+          },
+          "then_": {
+            "kind": "input",
+            "signal": "BidSize"
+          },
+          "else_": {
+            "kind": "const",
+            "value": 0.0
+          }
+        },
+        "window": 50
+      }
+    }
+  },
+  {
+    "name": "omori_decay_2std",
+    "rationale": "Omori 1894 aftershock decay: after a return >2 std, ratio of short to long volatility measures decay rate.",
+    "expr": {
+      "kind": "if_then_else",
+      "cond": {
+        "kind": "binary",
+        "op": "Gt",
+        "left": {
+          "kind": "unary",
+          "op": "Abs",
+          "inner": {
+            "kind": "unary",
+            "op": "Diff",
+            "inner": {
+              "kind": "unary",
+              "op": "Log",
+              "inner": {
+                "kind": "input",
+                "signal": "MidPrice"
+              }
+            }
+          }
+        },
+        "right": {
+          "kind": "binary",
+          "op": "Mul",
+          "left": {
+            "kind": "const",
+            "value": 2.0
+          },
+          "right": {
+            "kind": "rolling",
+            "op": "Std",
+            "inner": {
+              "kind": "unary",
+              "op": "Diff",
+              "inner": {
+                "kind": "unary",
+                "op": "Log",
+                "inner": {
+                  "kind": "input",
+                  "signal": "MidPrice"
+                }
+              }
+            },
+            "window": 100
+          }
+        }
+      },
+      "then_": {
+        "kind": "binary",
+        "op": "Div",
+        "left": {
+          "kind": "rolling",
+          "op": "Std",
+          "inner": {
+            "kind": "unary",
+            "op": "Diff",
+            "inner": {
+              "kind": "unary",
+              "op": "Log",
+              "inner": {
+                "kind": "input",
+                "signal": "MidPrice"
+              }
+            }
+          },
+          "window": 10
+        },
+        "right": {
+          "kind": "rolling",
+          "op": "Std",
+          "inner": {
+            "kind": "unary",
+            "op": "Diff",
+            "inner": {
+              "kind": "unary",
+              "op": "Log",
+              "inner": {
+                "kind": "input",
+                "signal": "MidPrice"
+              }
+            }
+          },
+          "window": 100
+        }
+      },
+      "else_": {
+        "kind": "const",
+        "value": 0.0
+      }
+    }
+  },
+  {
+    "name": "norm_dist_to_round",
+    "rationale": "Osler (2003) distance normalized by spread reflects how close price is in tick units, amplifying signal near the round level.",
+    "expr": {
+      "kind": "binary",
+      "op": "Div",
+      "left": {
+        "kind": "unary",
+        "op": "Abs",
+        "inner": {
+          "kind": "binary",
+          "op": "Sub",
+          "left": {
+            "kind": "input",
+            "signal": "MidPrice"
+          },
+          "right": {
+            "kind": "const",
+            "value": 1.2
+          }
+        }
+      },
+      "right": {
+        "kind": "binary",
+        "op": "Sub",
+        "left": {
+          "kind": "input",
+          "signal": "BestAsk"
+        },
+        "right": {
+          "kind": "input",
+          "signal": "BestBid"
+        }
+      }
+    }
+  },
+  {
+    "name": "depth_ratio_momentum_reversal",
+    "rationale": "Chordia and Subrahmanyam (2004): depth ratio momentum exhausts and reverses.",
+    "expr": {
+      "kind": "unary",
+      "op": "Neg",
+      "inner": {
+        "kind": "unary",
+        "op": "Diff",
+        "inner": {
+          "kind": "binary",
+          "op": "Div",
+          "left": {
+            "kind": "input",
+            "signal": "BidSize"
+          },
+          "right": {
+            "kind": "input",
+            "signal": "AskSize"
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "seasonal_price_divergence",
+    "rationale": "VWAP deviation; prices tend to revert to VWAP after intraday extremes caused by open/close flows.",
+    "expr": {
+      "kind": "binary",
+      "op": "Sub",
+      "left": {
+        "kind": "input",
+        "signal": "MidPrice"
+      },
+      "right": {
+        "kind": "binary",
+        "op": "Div",
+        "left": {
+          "kind": "rolling",
+          "op": "Sum",
+          "inner": {
+            "kind": "binary",
+            "op": "Mul",
+            "left": {
+              "kind": "input",
+              "signal": "MidPrice"
+            },
+            "right": {
+              "kind": "input",
+              "signal": "Volume"
+            }
+          },
+          "window": 200
+        },
+        "right": {
+          "kind": "rolling",
+          "op": "Sum",
+          "inner": {
+            "kind": "input",
+            "signal": "Volume"
+          },
+          "window": 200
+        }
+      }
+    }
+  },
+  {
+    "name": "kf_innovation_vol_bid_ask_asymmetry",
+    "rationale": "Asymmetry in bid-ask innovation volatility signals market stress (Bollerslev and Todorov 2011).",
+    "expr": {
+      "kind": "binary",
+      "op": "Sub",
+      "left": {
+        "kind": "rolling",
+        "op": "Std",
+        "inner": {
+          "kind": "binary",
+          "op": "Sub",
+          "left": {
+            "kind": "input",
+            "signal": "BestAsk"
+          },
+          "right": {
+            "kind": "rolling",
+            "op": "Mean",
+            "inner": {
+              "kind": "input",
+              "signal": "BestAsk"
+            },
+            "window": 20
+          }
+        },
+        "window": 30
+      },
+      "right": {
+        "kind": "rolling",
+        "op": "Std",
+        "inner": {
+          "kind": "binary",
+          "op": "Sub",
+          "left": {
+            "kind": "input",
+            "signal": "BestBid"
+          },
+          "right": {
+            "kind": "rolling",
+            "op": "Mean",
+            "inner": {
+              "kind": "input",
+              "signal": "BestBid"
+            },
+            "window": 20
+          }
+        },
+        "window": 30
+      }
+    }
+  },
+  {
+    "name": "csd_ret_var",
+    "rationale": "Rising return variance is a classic early warning signal of critical transitions (Scheffer et al. 2009).",
+    "expr": {
+      "kind": "binary",
+      "op": "Pow",
+      "left": {
+        "kind": "rolling",
+        "op": "Std",
+        "inner": {
+          "kind": "unary",
+          "op": "Diff",
+          "inner": {
+            "kind": "unary",
+            "op": "Log",
+            "inner": {
+              "kind": "input",
+              "signal": "MidPrice"
+            }
+          }
+        },
+        "window": 50
+      },
+      "right": {
+        "kind": "const",
+        "value": 2.0
+      }
+    }
+  },
+  {
+    "name": "gjr_garch_leverage",
+    "rationale": "Indicator of negative returns interacting with volatility (Glosten-Jagannathan-Runkle 1993 GJR-GARCH)",
+    "expr": {
+      "kind": "binary",
+      "op": "Mul",
+      "left": {
+        "kind": "binary",
+        "op": "Min",
+        "left": {
+          "kind": "unary",
+          "op": "Diff",
+          "inner": {
+            "kind": "input",
+            "signal": "MidPrice"
+          }
+        },
+        "right": {
+          "kind": "const",
+          "value": 0.0
+        }
+      },
+      "right": {
+        "kind": "rolling",
+        "op": "Std",
+        "inner": {
+          "kind": "unary",
+          "op": "Diff",
+          "inner": {
+            "kind": "input",
+            "signal": "MidPrice"
+          }
+        },
+        "window": 20
+      }
+    }
+  },
+  {
+    "name": "depth_stability_zscore",
+    "rationale": "",
+    "expr": {
+      "kind": "rolling",
+      "op": "Zscore",
+      "inner": {
+        "kind": "binary",
+        "op": "Div",
+        "left": {
+          "kind": "const",
+          "value": 1.0
+        },
+        "right": {
+          "kind": "rolling",
+          "op": "Std",
+          "inner": {
+            "kind": "input",
+            "signal": "BidSize"
+          },
+          "window": 20
+        }
+      },
+      "window": 50
+    }
+  }
+]

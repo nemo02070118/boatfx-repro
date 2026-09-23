@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+message: "If you use this reproducibility pack, please cite the working paper."
+title: "Global Weakness, Local Strength — Reproducibility Pack"
+authors:
+  - family-names: Jin
+    given-names: Huannian
+version: "0.1.0"
+date-released: "2026-09-20"
+license: MIT
+repository-code: "https://github.com/nemo02070118/boatfx-repro"
+abstract: >-
+  Public reproducibility surface for Global Weakness, Local Strength:
+  the blind spot of unconditional factor screening. Ships factor language,
+  a 60-factor sample, and headline tilt outputs so deployable economics
+  can be regenerated without proprietary router source.
+keywords:
+  - factor investing
+  - regime
+  - reproducibility
+  - unconditional screening
+  - machine-generated factors
+preferred-citation:
+  type: unpublished
+  title: "Global Weakness, Local Strength: The Blind Spot of Unconditional Factor Screening"
+  authors:
+    - family-names: Jin
+      given-names: Huannian
+  year: 2026
+  notes: "Submitted to the Journal of Finance; submitted to Eastern Finance Association (EFA)"

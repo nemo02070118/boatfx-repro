@@ -1,0 +1,11 @@
+{
+  "node_kinds": ["input", "const", "unary", "binary", "rolling", "if_then_else"],
+  "unary_operators": ["Abs", "Neg", "Sign", "Sqrt", "Log", "Diff", "Rank"],
+  "binary_operators": ["Add", "Sub", "Mul", "Div", "Max", "Min", "Pow", "Gt", "Lt"],
+  "rolling_operators": ["Mean", "Std", "Sum", "Max", "Min", "Skew", "Kurt", "Zscore", "Rank", "Quantile", "Slope", "Corr"],
+  "input_signals": ["BestBid", "BestAsk", "BidSize", "AskSize", "MidPrice", "TradePrice", "TradeSize", "TradeSide", "Volume"],
+  "rolling_windows": [5, 10, 20, 50, 100, 200],
+  "n_total_admitted_factors": 7384,
+  "operator_counts_by_kind": {"unary": 7, "binary": 9, "rolling": 12, "input_signals": 9},
+  "note": "COUNTING CONVENTION: the paper's '7 unary, 9 binary, 12 rolling operators over 9 signals' counts DISTINCT operator NAMES PER KIND, matching operator_counts_by_kind above; do NOT sum across kinds (7+9+12=28 is not a meaningful figure). Some operator names (Max, Min, Rank) intentionally appear under more than one kind because they denote different operations there (e.g. binary Max(a,b) vs rolling Max over a window); the node's kind field selects the handler in evaluate_factors.py. The unary/binary/rolling lists reflect that evaluator's per-kind dispatch exactly."
+}

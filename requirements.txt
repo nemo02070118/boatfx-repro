@@ -1,0 +1,5 @@
+# Pinned to the versions used to produce the results in the paper.
+# Python 3.12.8. Install with:  pip install -r requirements.txt
+numpy==2.4.2
+pandas==2.2.3
+scipy==1.17.1
