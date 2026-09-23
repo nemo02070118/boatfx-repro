@@ -1,121 +1,123 @@
-# Global Weakness, Local Strength — Reproducibility Pack
+# Global Weakness, Local Strength — public surface
 
-[![Python 3.12](https://img.shields.io/badge/python-3.12-0d5c4b?style=flat-square)](requirements.txt)
-[![License: MIT](https://img.shields.io/badge/license-MIT-2c5f7c?style=flat-square)](LICENSE)
-[![JF](https://img.shields.io/badge/Journal%20of%20Finance-under%20review-0d5c4b?style=flat-square)](#venue-status)
-[![EFA](https://img.shields.io/badge/Eastern%20Finance%20Association-submitted-2c5f7c?style=flat-square)](#venue-status)
-[![Repro](https://img.shields.io/badge/repro-60%2F60%20%2B%20headline-c45c26?style=flat-square)](#quick-start)
+[![Live site](https://img.shields.io/badge/live-portfolio-0d5c4b?style=for-the-badge&logo=githubpages)](https://nemo02070118.github.io/boatfx-repro/)
+[![CI repro](https://img.shields.io/github/actions/workflow/status/nemo02070118/boatfx-repro/ci.yml?branch=main&label=repro-smoke&style=for-the-badge)](https://github.com/nemo02070118/boatfx-repro/actions/workflows/ci.yml)
+[![CI pages](https://img.shields.io/github/actions/workflow/status/nemo02070118/boatfx-repro/pages.yml?branch=main&label=pages&style=for-the-badge)](https://github.com/nemo02070118/boatfx-repro/actions/workflows/pages.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-2c5f7c?style=for-the-badge)](LICENSE)
 
-> **Paper:** *Global Weakness, Local Strength: The Blind Spot of Unconditional Factor Screening*  
-> **Author:** Huannian Jin (independent researcher)  
-> **License:** MIT  
-> **GitHub:** [nemo02070118/boatfx-repro](https://github.com/nemo02070118/boatfx-repro)
+**Author:** Huannian Jin · **Email:** [15761209998@163.com](mailto:15761209998@163.com)  
+**Paper:** *Global Weakness, Local Strength* — **Journal of Finance (under review)** · **Eastern Finance Association (submitted)**
 
-Public reproducibility surface for the paper — and the cleanest way to inspect the
-**machine-factor language** an LLM/agent factory emits — without shipping proprietary
-search policy or the full factor pool.
+> Machines propose factors faster than humans can vet them.  
+> Unconditional screens have a **structural blind spot** for state-dependent premia.  
+> This repo is the **public receipt**: live web craft + one-command repro + AI-factory excerpts.
 
 ---
 
-## Live portfolio (public web)
+## Start here (30 seconds)
 
-After GitHub Pages is enabled on this repo:
-
-**https://nemo02070118.github.io/boatfx-repro/**
-
-Source: [`site/`](site/) · AI factory excerpts: [`system_showcase/`](system_showcase/) · Vibe coding: [`VIBE_CODING.md`](VIBE_CODING.md)
-
-**Contact:** [15761209998@163.com](mailto:15761209998@163.com)
-
----
-
-## Venue status
-
-| Venue | Status | Note |
-|---|---|---|
-| **Journal of Finance** | Under review (submitted Sep 2026) | Do not treat as published |
-| **Eastern Finance Association (EFA)** | Submitted | U.S. academic conference track |
-| This GitHub pack | Public | Code + tilt *outputs*; not the manuscript PDF |
+| Want | Go |
+|---|---|
+| **Open the portfolio** | https://nemo02070118.github.io/boatfx-repro/ |
+| **Run research smoke** | `pip install -r requirements.txt && python repro.py && python reproduce_headline.py` |
+| **See AI factory code** | [`system_showcase/`](system_showcase/) |
+| **See vibe-coding discipline** | [`VIBE_CODING.md`](VIBE_CODING.md) |
+| **See agent instructions** | [`AGENTS.md`](AGENTS.md) · [`CONTRIBUTING.md`](CONTRIBUTING.md) |
 
 ---
 
-## Why this exists (30 seconds)
+## Repo map (partition on purpose)
 
-Machines propose return predictors faster than researchers can vet them.
-The standard **unconditional** screen looks weak-on-average and throws many away.
+```
+boatfx-repro/                 ← YOU ARE HERE (public)
+├── site/                     ← Web portfolio (GitHub Pages)
+├── system_showcase/          ← Real Rust excerpts from boat_factor::llm_agent
+├── headline_tilt/            ← Shipped tilt outputs for headline economics
+├── repro.py / reproduce_*.py ← One-command verification
+├── VIBE_CODING.md            ← Cursor / Claude Code / Codex / OpenAI / cloud agents
+├── AGENTS.md                 ← How coding agents must behave in this repo
+├── CONTRIBUTING.md           ← Human + agent contribution gates
+└── .github/workflows/        ← CI: repro-smoke + pages deploy
 
-When a premium lives in a **market state**, the unconditional *t* shrinks with that
-state’s rarity (\(t_g \approx t_{\mathrm{state}}\sqrt{\pi}\)). Genuine **regime-local**
-predictors are structurally discarded. The claim is established by **falsification**,
-not a single backtest curve. A continuous regime **tilt** (not a hard gate) shows the
-recovered structure is economically deployable.
+boat-fx/                      ← PRIVATE monorepo (not dumped)
+```
+
+Why not one giant public dump? Reviewers drown.  
+Public surfaces are **role-separated**: web face · research lung · private body.
 
 ---
 
-## Results at a glance (regenerate locally)
+## Results you can regenerate
 
 | Panel | Active bps/yr | IR | Command |
 |---|---:|---:|---|
 | **Value-weight ★** | **172** | **≈2.01** | `python reproduce_headline.py` |
-| NYSE breakpoint | 134 | ≈1.73 | same |
+| NYSE | 134 | ≈1.73 | same |
 | Equal-weight | 128 | ≈1.77 | same |
-| Large-cap (ME20) | 111 | ≈1.69 | same |
-| VW out-of-sample | 134 | ≈2.05 | `python reproduce_headline.py --oos` |
-| Language self-test | 60/60 | — | `python repro.py` |
+| Large-cap | 111 | ≈1.69 | same |
+| VW OOS | 134 | ≈2.05 | `python reproduce_headline.py --oos` |
+| Language | 60/60 | — | `python repro.py` |
 
-Paper body reports VW IR **1.99** / deployable *t* **6.81**; the script prints same-base
-active *t* and IR within a documented alignment-window gap (see `REPRODUCIBILITY.md`).
+Exact yes/no matrix: [`REPRODUCIBILITY.md`](REPRODUCIBILITY.md)
 
 ---
 
-## Quick start
+## Vibe coding (what “using AI” means here)
 
-```bash
-python -m venv .venv
-# Windows: .venv\Scripts\activate
-# macOS/Linux: source .venv/bin/activate
-pip install -r requirements.txt
-python repro.py
-python reproduce_headline.py
-python reproduce_headline.py --oos
+I use **Cursor · Claude Code · Codex · OpenAI · cloud coding agents** the way a modern shop does:
+
+```
+intent → agent draft → human gate → CI → ship public surface
 ```
 
-**Runtime:** typically &lt; 30s on a laptop after deps install.  
-**Seed:** `repro.py` fixes seed `0` (deterministic).
+- Agents implement and refactor.  
+- Humans own numbers, narrative, and boundaries.  
+- CI is the receipt (`repro-smoke` + `pages`).  
+- Factor factory uses the **same philosophy**: LLM proposes → constitution/gates → admit.
+
+Full write-up: [`VIBE_CODING.md`](VIBE_CODING.md)
 
 ---
 
-## What you can / cannot verify
+## System showcase (from production boatfx)
 
-| Claim | Here? |
+Public Rust excerpts (reference, not a standalone crate):
+
+| File | Signal |
 |---|---|
-| Factor language typed & executable | **Yes** — `repro.py` |
-| Agents emit rationales + ASTs | **Yes** — `sample_factors.json` |
-| Generation grammar / admission gate | **Yes** — `engine_pseudocode.txt` |
-| Headline bps / IR from tilt **output** | **Yes** — `reproduce_headline.py` |
-| Full ~7k factor pool | **No** (deliberate) |
-| Regime router **estimation** source | **No** (tilt *output* shipped) |
+| `llm_provider.rs` | DeepSeek breadth + Claude/GPT depth · keys **only from env** |
+| `dsl.rs` | Typed AST — no arbitrary code from the model |
+| `gates.rs` | G1–G4 front gates before expensive eval |
+| `constitution.rs` | Machine-checkable factor constitution |
+| `wasm_sandbox.rs` | Fuel / wall-clock / memory hard limits |
 
-Full matrix: [`REPRODUCIBILITY.md`](REPRODUCIBILITY.md) · AI framing: [`AI_FACTORY.md`](AI_FACTORY.md)
+Details: [`system_showcase/README.md`](system_showcase/README.md)
 
 ---
 
-## Layout
+## Professional workflow (small craft that compounds)
 
-```
-repro.py                 language self-test (60/60)
-evaluate_factors.py      reference AST evaluator
-reproduce_headline.py    headline economics from shipped tilt output
-sample_factors.json      60 machine factors + rationales
-operator_inventory.json  canonical operators / signals
-engine_pseudocode.txt    generation + admission gate
-AI_FACTORY.md            how the factory is framed publicly
-CITATION.cff             machine-readable citation
-headline_tilt/           tilt / min-var / returns (+ oos/)
-REPRODUCIBILITY.md       exact yes/no matrix
-DATA_SOURCES.md          external data provenance
-.github/workflows/ci.yml smoke test on push
-```
+| Practice | Where |
+|---|---|
+| CI on every push | `.github/workflows/ci.yml` |
+| Pages deploy from `site/` | `.github/workflows/pages.yml` |
+| Agent policy file | `AGENTS.md` |
+| Human contribution gates | `CONTRIBUTING.md` |
+| Citation metadata | `CITATION.cff` |
+| Security / secrets policy | `SECURITY.md` |
+| Verify script | `scripts/verify.ps1` / `scripts/verify.sh` |
+
+---
+
+## Venue status (honest)
+
+| Venue | Status |
+|---|---|
+| Journal of Finance | Under review (submitted Sep 2026) |
+| Eastern Finance Association | Submitted |
+| This GitHub surface | Public · MIT for code |
+
+Acceptance is **not** claimed.
 
 ---
 
@@ -130,20 +132,10 @@ DATA_SOURCES.md          external data provenance
 }
 ```
 
-Also see [`CITATION.cff`](CITATION.cff).
-
----
-
-## Sister repos
-
-| Repo | Role |
-|---|---|
-| [`boatfx-repro`](https://github.com/nemo02070118/boatfx-repro) (this) | Research smoke tests |
-| [`huannian-jin`](https://github.com/nemo02070118/huannian-jin) | Portfolio / web craft · [live](https://nemo02070118.github.io/huannian-jin/) |
-| `boat-fx` | Full production system · **keep private** |
-
 ---
 
 ## Contact
 
-Portfolio: [nemo02070118.github.io/huannian-jin](https://nemo02070118.github.io/huannian-jin/)
+- **Email:** [15761209998@163.com](mailto:15761209998@163.com)  
+- **Live:** https://nemo02070118.github.io/boatfx-repro/  
+- **GitHub:** [@nemo02070118](https://github.com/nemo02070118)
