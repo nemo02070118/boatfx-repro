@@ -47,6 +47,23 @@ Public surfaces are **role-separated**: web face · research lung · private bod
 
 ---
 
+## Engineering mass (honest scale)
+
+The private **boatfx** monorepo is large on purpose. This public repo is the **thin receipt**, not the body.
+
+| Surface | Scale (measured locally, build artifacts excluded) |
+|---|---|
+| **Private `boatfx/`** | **12 crates** · **~2,300 Rust source files** · **~670k LoC Rust** · `llm_agent` alone **77** `.rs` modules |
+| **Public `boatfx-repro`** | Curated: live `site/` · one-command repro · CI · `system_showcase/` excerpts |
+| **Zheshang internship** | **56 modules · ~64k LoC · >95% coverage** (enterprise letter on file) |
+
+How to read this: dumping 10k+ files on GitHub is noise.  
+Shipping a **partitioned surface** with CI greens is discipline.
+
+Measurement notes: [`SCALE.md`](SCALE.md)
+
+---
+
 ## Results you can regenerate
 
 | Panel | Active bps/yr | IR | Command |

@@ -30,6 +30,7 @@
       <a href="#letter" data-spy="letter">Letter</a>
       <a href="#edge" data-spy="edge">Edge</a>
       <a href="#craft" data-spy="craft">Craft</a>
+      <a href="#scale" data-spy="scale">Scale</a>
       <a href="#proof" data-spy="proof">Proof</a>
     </nav>
     <button class="cmd-hint" type="button" id="cmd-hint" title="Press /">/</button>
@@ -484,6 +485,7 @@
             <li>Falsification excess <b>6.4×</b> + claim tiers</li>
             <li>Public repro anyone can run in minutes</li>
             <li>Enterprise letter: 56 modules · 64k LoC · &gt;95% coverage</li>
+            <li>Private monorepo mass: <b>12 crates · ~670k Rust LoC</b> — public surface stays thin</li>
             <li>Killed own wrong regime layer (dispersion → vol timing)</li>
           </ul>
         </article>
@@ -516,6 +518,29 @@
           <p>No invented metrics. No JF PDF in public git. Essay/video human-written. See <span class="mono">VIBE_CODING.md</span> + Rust gate excerpts.</p>
         </article>
       </div>
+    </section>
+
+    <!-- SCALE -->
+    <section id="scale" class="section reveal">
+      <p class="section-kicker">06d · Engineering mass</p>
+      <h2>Large private body · thin public receipt</h2>
+      <p class="section-lede">
+        Competitors dump folders. I show <em>partition</em>:
+        a serious monorepo behind the curtain, and a public surface you can verify in minutes.
+      </p>
+      <div class="letter-metrics scale-metrics">
+        <div><b>12</b><span>crates in private boatfx</span></div>
+        <div><b>~2.3k</b><span>Rust source files</span></div>
+        <div><b>~670k</b><span>Rust LoC (ex-build)</span></div>
+        <div><b>77</b><span>llm_agent modules</span></div>
+        <div><b>56</b><span>Zheshang modules shipped</span></div>
+        <div><b>&gt;95%</b><span>enterprise coverage</span></div>
+      </div>
+      <p class="section-lede" style="margin-top:1.25rem">
+        Public GitHub is deliberately small: live site · <span class="mono">python repro.py</span> · CI greens · curated Rust excerpts.
+        Measurement notes live in <span class="mono">SCALE.md</span> on the repro pack.
+        Walkthrough video → drop the link into Academy materials when ready.
+      </p>
     </section>
 
     <!-- PROOF -->
