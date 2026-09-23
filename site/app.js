@@ -514,7 +514,7 @@ function initPalette() {
     { id: "factory", label: "05 AI factor factory" },
     { id: "letter", label: "06 Zheshang recommendation" },
     { id: "edge", label: "06b Edge vs peers" },
-    { id: "craft", label: "06c Web coding craft" },
+    { id: "craft", label: "06c Engineering discipline" },
     { id: "scale", label: "06d Engineering mass" },
     { id: "proof", label: "07 Proof / repro commands" },
     { id: "links", label: "Artifacts / links" },

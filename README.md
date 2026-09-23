@@ -21,7 +21,7 @@
 | **Open the portfolio** | https://nemo02070118.github.io/boatfx-repro/ |
 | **Run research smoke** | `pip install -r requirements.txt && python repro.py && python reproduce_headline.py` |
 | **See AI factory code** | [`system_showcase/`](system_showcase/) |
-| **See vibe-coding discipline** | [`VIBE_CODING.md`](VIBE_CODING.md) |
+| **See vibe-coding discipline** | [`VIBE_CODING.md`](VIBE_CODING.md) · [`DISCIPLINE.md`](DISCIPLINE.md) |
 | **See agent instructions** | [`AGENTS.md`](AGENTS.md) · [`CONTRIBUTING.md`](CONTRIBUTING.md) |
 
 ---
@@ -119,6 +119,7 @@ Details: [`system_showcase/README.md`](system_showcase/README.md)
 | CI on every push | `.github/workflows/ci.yml` |
 | Pages deploy from `site/` | `.github/workflows/pages.yml` |
 | Agent policy file | `AGENTS.md` |
+| Engineering discipline standard | `DISCIPLINE.md` |
 | Human contribution gates | `CONTRIBUTING.md` |
 | Citation metadata | `CITATION.cff` |
 | Security / secrets policy | `SECURITY.md` |
