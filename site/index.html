@@ -20,7 +20,7 @@
       } catch (e) {}
     })();
   </script>
-  <link rel="stylesheet" href="styles.css?theme1" />
+  <link rel="stylesheet" href="styles.css?theme2" />
 </head>
 <body>
   <div class="progress" id="progress" aria-hidden="true"></div>
@@ -62,8 +62,8 @@
     </nav>
     <div class="header-tools">
       <div class="theme-switch" id="theme-switch" role="group" aria-label="Theme">
-        <button type="button" data-theme="light" class="active" aria-pressed="true" title="Light">☀</button>
-        <button type="button" data-theme="dark" aria-pressed="false" title="Dark">☾</button>
+        <button type="button" data-theme="light" class="active" aria-pressed="true" data-i18n="theme.light">Light</button>
+        <button type="button" data-theme="dark" aria-pressed="false" data-i18n="theme.dark">Dark</button>
       </div>
       <div class="lang-switch" id="lang-switch" role="group" aria-label="Language">
         <button type="button" data-lang="en" class="active" aria-pressed="true">EN</button>
@@ -1094,7 +1094,7 @@
     <button type="button" class="lightbox-close" id="lightbox-close" aria-label="Close">×</button>
     <img id="lightbox-img" alt="" />
   </div>
-  <script src="i18n.js?theme1"></script>
-  <script src="app.js?theme1"></script>
+  <script src="i18n.js?theme2"></script>
+  <script src="app.js?theme2"></script>
 </body>
 </html>
