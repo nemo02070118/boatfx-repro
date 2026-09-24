@@ -572,6 +572,7 @@ function initPalette() {
   const hint = document.getElementById("cmd-hint");
   const items = [
     { id: "idea", label: "01 Idea — Global Weakness" },
+    { id: "tour", label: "01a Argument tour" },
     { id: "venues", label: "01b Venues — JF · EFA" },
     { id: "paper", label: "01c Paper map — claim tiers" },
     { id: "math", label: "02 Math — blind-spot lab" },
@@ -580,9 +581,9 @@ function initPalette() {
     { id: "factory", label: "05 AI factor factory" },
     { id: "letter", label: "06 Zheshang recommendation" },
     { id: "edge", label: "06b Edge vs peers" },
+    { id: "fusion", label: "06e AI × quant fusion" },
     { id: "craft", label: "06c Engineering discipline" },
     { id: "scale", label: "06d Engineering mass" },
-    { id: "fusion", label: "06e AI × quant fusion" },
     { id: "proof", label: "07 Proof / repro commands" },
     { id: "agency", label: "08 Academy · already in motion" },
     { id: "links", label: "Artifacts / links" },
@@ -674,6 +675,128 @@ initPanelLab();
 initFunnelLab();
 initPipeLab();
 initAgencyLab();
+initArgumentTour();
+initFusionFocus();
+
+function initArgumentTour() {
+  const stepsEl = document.getElementById("tour-steps");
+  const stage = document.getElementById("tour-stage");
+  const idxEl = document.getElementById("tour-index");
+  const prev = document.getElementById("tour-prev");
+  const next = document.getElementById("tour-next");
+  if (!stepsEl || !stage) return;
+
+  const STEPS = [
+    {
+      k: "Claim",
+      title: "The screen asks the wrong question",
+      body: "Unconditional screens ask whether a factor pays on average. A state-confined premium can average near zero and still be real inside its paying state.",
+      jump: "idea",
+      metric: "Proposition 2",
+    },
+    {
+      k: "Mechanism",
+      title: "t_g ≈ t_state √π",
+      body: "As the paying state grows rare, global t vanishes even if conditional strength stays large. Hard gates delete legs; continuous tilt keeps breadth.",
+      jump: "math",
+      metric: "Blind-spot identity",
+    },
+    {
+      k: "Machines",
+      title: "6,881 proposals · 0 clear the global screen",
+      body: "10.0% flagged regime-local → 3.15% survive block-shuffle → 1.08% clear BH one-at-a-time. Correction cost is shown on purpose. Anchor: 6.4× falsification excess.",
+      jump: "machine",
+      metric: "6.4×",
+    },
+    {
+      k: "Economics",
+      title: "Deployable overlay on public panels",
+      body: "24/24 same-base increments positive. VW ~172 bps/yr · IR ≈ 1.99. Public check: shipped tilt OUTPUT + python reproduce_headline.py.",
+      jump: "results",
+      metric: "172 bps",
+    },
+    {
+      k: "Factory",
+      title: "AI proposes · quant admits",
+      body: "Typed AST → sandbox → rationale → constitution gates. Study discards — that is where the blind spot bites. Same discipline as vibe-coding the public surface.",
+      jump: "factory",
+      metric: "Gated loop",
+    },
+    {
+      k: "Agency",
+      title: "Already in motion · on leave to go deeper",
+      body: "JF external review · EFA submitted · leave of absence to research full-time · ≤1 year college completed · Academy-eligible · SF-ready.",
+      jump: "agency",
+      metric: "Proof of work",
+    },
+  ];
+
+  let i = 0;
+  STEPS.forEach((s, n) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "tour-step" + (n === 0 ? " active" : "");
+    b.innerHTML = `<span>${String(n + 1).padStart(2, "0")}</span><b>${s.k}</b>`;
+    b.addEventListener("click", () => show(n));
+    stepsEl.appendChild(b);
+  });
+
+  function show(n) {
+    i = (n + STEPS.length) % STEPS.length;
+    const s = STEPS[i];
+    [...stepsEl.children].forEach((el, k) => el.classList.toggle("active", k === i));
+    stage.innerHTML = `
+      <div class="tour-metric">${s.metric}</div>
+      <h3>${s.title}</h3>
+      <p>${s.body}</p>
+      <button type="button" class="tour-jump" data-jump="${s.jump}">Open section →</button>
+    `;
+    if (idxEl) idxEl.textContent = `${i + 1} / ${STEPS.length}`;
+    stage.querySelector(".tour-jump")?.addEventListener("click", (e) => {
+      document.getElementById(e.currentTarget.dataset.jump)?.scrollIntoView({ behavior: "smooth" });
+    });
+  }
+
+  prev?.addEventListener("click", () => show(i - 1));
+  next?.addEventListener("click", () => show(i + 1));
+  window.addEventListener("keydown", (e) => {
+    if (document.activeElement?.tagName === "INPUT") return;
+    const sec = document.getElementById("tour");
+    if (!sec) return;
+    const r = sec.getBoundingClientRect();
+    const visible = r.top < window.innerHeight * 0.7 && r.bottom > 80;
+    if (!visible) return;
+    if (e.key === "ArrowRight") show(i + 1);
+    if (e.key === "ArrowLeft") show(i - 1);
+  });
+  show(0);
+}
+
+function initFusionFocus() {
+  const flow = document.getElementById("fusion-flow");
+  const togs = document.querySelectorAll(".fusion-tog");
+  if (!flow || !togs.length) return;
+  const NODES = [
+    { id: "propose", label: "LLM propose", side: "ai" },
+    { id: "type", label: "Type-check", side: "both" },
+    { id: "sand", label: "Sandbox", side: "both" },
+    { id: "rat", label: "Rationale", side: "quant" },
+    { id: "admit", label: "Admit / gates", side: "quant" },
+    { id: "study", label: "Study discards", side: "quant" },
+  ];
+  function render(focus) {
+    flow.innerHTML = NODES.map((n) => {
+      const on =
+        focus === "both" ||
+        n.side === "both" ||
+        n.side === focus;
+      return `<div class="fusion-node ${on ? "on" : "dim"}" data-side="${n.side}"><span>${n.label}</span></div>`;
+    }).join('<div class="fusion-arrow" aria-hidden="true">→</div>');
+    togs.forEach((t) => t.classList.toggle("active", t.dataset.focus === focus));
+  }
+  togs.forEach((t) => t.addEventListener("click", () => render(t.dataset.focus)));
+  render("both");
+}
 
 function initSpyNav() {
   const links = [...document.querySelectorAll("#spy-nav a[data-spy]")];
@@ -964,7 +1087,7 @@ function initAgencyLab() {
   const COPY = {
     motion: {
       title: "Already in motion",
-      body: "22 months on this system — not a prompt-weekend. JF MS 2026-0738 received Sep 21, 2026; passed desk; now in external review under Antoinette Schoar. EFA submitted. Public site + repro + CI + walkthrough shipped. Zheshang production systems interned from Aug 2025. The work predates the application form.",
+      body: "22 months on this system — not a prompt-weekend. JF MS 2026-0738: passed desk, now in external review under Antoinette Schoar. EFA submitted. I took academic leave to pursue this research full-time. Public site + repro + CI + walkthrough shipped. Zheshang production systems from Aug 2025. The work predates the application form.",
     },
     agency: {
       title: "Agency",
@@ -975,12 +1098,12 @@ function initAgencyLab() {
       body: "Original research counts. Live portfolio. python repro.py (60/60). python reproduce_headline.py (~172 bps · IR ≈ 2). system_showcase Rust excerpts. SCALE.md mass notes. MD letter: 56 modules · ~64k LoC · >95%. Video: youtu.be/tVHLUQy93rg. Chat logs are not the artifact — the repo is.",
     },
     elig: {
-      title: "Eligibility",
-      body: "Early first-year at Shanghai Lixin University of Accounting and Finance. Have not completed more than one year of full-time college after high school by August 2027. International applicant. Ready to live in San Francisco full-time for the Founding Class Fellowship (Sep 2027).",
+      title: "Leave of absence · eligibility",
+      body: "I took an academic leave from Shanghai Lixin University of Accounting and Finance to pursue this research full-time. I remain Academy-eligible: I have not completed more than one year of full-time college after high school by August 2027. International applicant. Ready to live in San Francisco full-time for the Founding Class Fellowship (Sep 2027).",
     },
     why: {
       title: "Why The Academy · why now",
-      body: "I want harder peers and external tests than I can create alone in Guizhou / Shanghai. SF for a year is the place to push AI×quant screening science into a sharper product surface without abandoning falsification discipline. Peers will ship apps and robots — I bring a research system already under JF external review. Different instrument. Same bar: proof.",
+      body: "I want harder peers and external tests than I can create alone. SF for a year is where I push AI×quant screening science into a sharper product surface without abandoning falsification discipline. Peers will ship apps and robots — I bring a research system already under JF external review. Different instrument. Same bar: proof.",
     },
   };
 

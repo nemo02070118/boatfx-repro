@@ -11,7 +11,7 @@
   --paper: #f6f8fa;
   --mono: "IBM Plex Mono", ui-monospace, monospace;
   --sans: "IBM Plex Sans", system-ui, sans-serif;
-  --display: "Syne", "IBM Plex Sans", sans-serif;
+  --display: "Fraunces", "Syne", Georgia, serif;
 }
 
 *,
@@ -1516,4 +1516,120 @@ nav a.active {
 
 @media (max-width: 980px) {
   .thesis-banner, .fusion-grid { grid-template-columns: 1fr; }
+}
+
+
+/* Tour + fusion focus + font polish */
+:root { font-synthesis: none; }
+h1, h2, h3, .brand, .paper-tab b, .tour-stage h3, .agency-panel h3 {
+  font-family: var(--display);
+  font-optical-sizing: auto;
+}
+.tour-shell {
+  margin-top: 1.5rem;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.55);
+  padding: 1rem 1.1rem 1.2rem;
+}
+.tour-steps {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+.tour-step {
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.65);
+  font: inherit;
+  text-align: left;
+  padding: 0.65rem 0.7rem;
+  cursor: pointer;
+  color: inherit;
+}
+.tour-step span {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+.tour-step b { display: block; margin-top: 0.2rem; font-size: 0.92rem; }
+.tour-step.active {
+  border-color: rgba(13,92,75,0.55);
+  background: rgba(13,92,75,0.1);
+}
+.tour-stage { min-height: 160px; padding: 0.35rem 0.25rem 0.85rem; }
+.tour-metric {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  border: 1px solid rgba(13,92,75,0.35);
+  color: var(--accent);
+  padding: 0.25rem 0.5rem;
+  margin-bottom: 0.65rem;
+}
+.tour-stage h3 { margin: 0 0 0.45rem; font-size: clamp(1.2rem, 2vw, 1.55rem); }
+.tour-stage p { margin: 0; color: var(--ink-soft); max-width: 62ch; line-height: 1.55; }
+.tour-jump, .tour-nav button {
+  margin-top: 0.9rem;
+  border: 1px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  padding: 0.5rem 0.85rem;
+  cursor: pointer;
+}
+.tour-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-top: 1px solid var(--line);
+  padding-top: 0.85rem;
+}
+.tour-nav button { margin-top: 0; }
+#tour-index { font-family: var(--mono); font-size: 0.85rem; color: var(--muted); }
+
+.fusion-lab { margin-top: 1.5rem; }
+.fusion-lab-head h3 { margin: 0 0 0.35rem; font-family: var(--display); }
+.fusion-lab-head p { margin: 0 0 0.85rem; color: var(--ink-soft); }
+.fusion-toggles { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.85rem; }
+.fusion-tog {
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.55);
+  font: inherit;
+  padding: 0.45rem 0.75rem;
+  cursor: pointer;
+  color: inherit;
+}
+.fusion-tog.active {
+  border-color: rgba(13,92,75,0.55);
+  background: rgba(13,92,75,0.12);
+}
+.fusion-flow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  background: #0a1018;
+}
+.fusion-node {
+  border: 1px solid rgba(255,255,255,0.12);
+  color: #d7e0ea;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.85rem;
+  transition: opacity 0.2s, border-color 0.2s;
+}
+.fusion-node.on { border-color: rgba(109,206,168,0.55); color: #fff; }
+.fusion-node.dim { opacity: 0.28; }
+.fusion-arrow { color: #8a93a3; font-family: var(--mono); }
+
+@media (max-width: 900px) {
+  .tour-steps { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .tour-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
