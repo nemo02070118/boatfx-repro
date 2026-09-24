@@ -1932,150 +1932,470 @@ function initBoatParliament() {
   const verdict = document.getElementById("ai-verdict");
   const form = document.getElementById("ai-form");
   const input = document.getElementById("ai-input");
-  const chips = document.getElementById("ai-chips");
+  const chipGroups = document.getElementById("ai-chip-groups");
+  const phaseEl = document.getElementById("ai-phase");
+  const statusEl = document.getElementById("ai-status");
+  const sessionEl = document.getElementById("ai-session");
+  const metricsEl = document.getElementById("ai-metrics");
+  const rerunBtn = document.getElementById("ai-rerun");
   if (!roster || !stream || !form) return;
 
   const AGENTS = [
-    { id: "captain", color: "#e879a9", en: { name: "Captain", role: "Chief analyst · synthesis", stance: "Neutral", conf: 43 }, zh: { name: "Captain", role: "总控 · 综合裁决", stance: "中性", conf: 43 } },
-    { id: "chanlun", color: "#5ec9a8", en: { name: "Chanlun Master", role: "Strokes · pivots · B/S points", stance: "Neutral", conf: 52 }, zh: { name: "缠论大师", role: "笔 · 中枢 · 买卖点", stance: "中性", conf: 52 } },
-    { id: "physics", color: "#a78bfa", en: { name: "Physics Engine", role: "Ising · LPPLS · microstructure", stance: "Caution", conf: 61 }, zh: { name: "物理引擎", role: "伊辛 · LPPLS · 微观结构", stance: "谨慎", conf: 61 } },
-    { id: "factor", color: "#38bdf8", en: { name: "Factor Analyst", role: "V12 cross-section score", stance: "Neutral", conf: 48 }, zh: { name: "因子分析师", role: "V12 截面评分", stance: "中性", conf: 48 } },
-    { id: "risk", color: "#fb923c", en: { name: "Risk Manager", role: "Drawdown · size · stop logic", stance: "Wait", conf: 78 }, zh: { name: "风控官", role: "回撤 · 仓位 · 止损逻辑", stance: "观望", conf: 78 } },
-    { id: "exec", color: "#fbbf24", en: { name: "Execution Agent", role: "Entry · exit · staging", stance: "Wait", conf: 55 }, zh: { name: "执行官", role: "进出场 · 分批", stance: "观望", conf: 55 } },
+    { id: "captain", color: "#e879a9", en: { name: "Captain", role: "Chief · synthesis", stance: "Neutral", conf: 43 }, zh: { name: "Captain", role: "总控 · 综合裁决", stance: "中性", conf: 43 } },
+    { id: "chanlun", color: "#5ec9a8", en: { name: "Chanlun Master", role: "Strokes · B/S points", stance: "Neutral", conf: 52 }, zh: { name: "缠论大师", role: "笔 · 买卖点", stance: "中性", conf: 52 } },
+    { id: "physics", color: "#a78bfa", en: { name: "Physics Engine", role: "Ising · LPPLS · TDA", stance: "Caution", conf: 61 }, zh: { name: "物理引擎", role: "伊辛 · LPPLS · TDA", stance: "谨慎", conf: 61 } },
+    { id: "factor", color: "#38bdf8", en: { name: "Factor Analyst", role: "V12 · SHAP", stance: "Neutral", conf: 48 }, zh: { name: "因子分析师", role: "V12 · SHAP", stance: "中性", conf: 48 } },
+    { id: "risk", color: "#fb923c", en: { name: "Risk Manager", role: "Size · stop · DD", stance: "Wait", conf: 78 }, zh: { name: "风控官", role: "仓位 · 止损 · 回撤", stance: "观望", conf: 78 } },
+    { id: "exec", color: "#fbbf24", en: { name: "Execution Agent", role: "Staging · tickets", stance: "Wait", conf: 55 }, zh: { name: "执行官", role: "分批 · 票据", stance: "观望", conf: 55 } },
   ];
+
+  const METRICS = {
+    en: [
+      { k: "Ising T", v: "2.075", s: "HIGH" },
+      { k: "LPPLS", v: "35%", s: "safe" },
+      { k: "V12 SR", v: "2.595", s: "run" },
+      { k: "Max DD", v: "11.6%", s: "run" },
+      { k: "SHAP pos", v: "−76%", s: "drag" },
+      { k: "Book", v: "~¥1.00M", s: "live" },
+    ],
+    zh: [
+      { k: "伊辛 T", v: "2.075", s: "HIGH" },
+      { k: "LPPLS", v: "35%", s: "安全" },
+      { k: "V12 SR", v: "2.595", s: "本跑" },
+      { k: "最大回撤", v: "11.6%", s: "本跑" },
+      { k: "SHAP 位置", v: "−76%", s: "拖累" },
+      { k: "账户", v: "约¥100万", s: "实盘" },
+    ],
+  };
+
+  function scene(user, msgs, verdict, vote, conf) {
+    return { user, msgs, verdict, vote, conf };
+  }
 
   const SCENES = {
     en: {
-      default: {
-        user: "Should I act on 600519.SH (Moutai) on the daily chart right now?",
-        msgs: [
-          { agent: "captain", text: "Framing the session: price ~1413, daily lens. I collect lane reports then call the vote. Priority: falsifiable structure over narrative." },
-          { agent: "chanlun", text: "Strokes and pivots are labeled; B1/S1 pairs are visible. Near-term structure does not give a clean continuation buy — overlapping pivots suggest digestion, not a fresh first-buy regime." },
-          { agent: "physics", text: "Ising T≈2.075 sits High (Tc≈2.269). Force-field mixed red/blue — no one-sided crowd. LPPLS bubble ~35% (safe band) but local down-pressure exists. Physics vote: do not chase." },
-          { agent: "factor", text: "V12 SHAP on this name: price-position strongly negative (−76% on panel), volatility positive. Cross-section edge is not screaming long vs the CSI-300 book." },
-          { agent: "risk", text: "Risk lane only: prefer wait · conf 78%. If forced, size tiny and set invalidation under the last pivot low — capital preservation beats story." },
-          { agent: "exec", text: "No staged entry until structure clears. If parliament stays wait, orders stay flat; watch for a cleaner B-side after pivot confirmation." },
+      default: scene(
+        "Should I act on 600519.SH (Moutai) on the daily chart right now?",
+        [
+          { agent: "captain", text: "Session frame: ~1413, daily. I collect lane reports then call the vote. Priority: falsifiable structure over narrative." },
+          { agent: "chanlun", text: "Strokes/pivots labeled; B1/S1 pairs visible. Near-term structure ≠ clean continuation buy — overlapping pivots = digestion, not a fresh first-buy regime." },
+          { agent: "physics", text: "Ising T≈2.075 High (Tc≈2.269). Force-field red/blue mosaic — no magnetized crowd. LPPLS ~35% safe band, local down-pressure present. Vote: do not chase." },
+          { agent: "factor", text: "V12 SHAP: price-position −76% (drag), volatility positive. Cross-section vs CSI-300 is not screaming long on this name." },
+          { agent: "risk", text: "Risk-only: wait · conf 78%. If forced: micro-size + invalidation under last pivot low. Capital > story." },
+          { agent: "exec", text: "No staged ticket until structure clears. Flat stays the default; watch for cleaner B-side after pivot hold." },
         ],
-        verdict: { title: "Parliament verdict", headline: "Continue to wait-and-see", body: "Composite confidence ~43%. Chanlun, Ising, and factor SHAP disagree enough that forced action loses to patience.", vote: { bull: 0, neutral: 4, bear: 0, wait: 2 }, conf: "43%" },
-      },
-      ising: {
-        user: "Explain why Ising is High on Moutai right now.",
-        msgs: [
-          { agent: "captain", text: "Physics-first session. I want temperature, force-field, and what High does / does not imply for size." },
-          { agent: "physics", text: "Ising maps local spin-like long/short pressure. T≈2.075 is below Tc≈2.269 but in the High band — interactions are hot, flips frequent. Heatmap red/blue mosaic = no magnetized majority." },
-          { agent: "chanlun", text: "High temperature lines up with overlapping pivots: structure is talking, not trending cleanly. That is consistent with digestion, not a one-way stroke." },
-          { agent: "factor", text: "Hot microstructure often coincides with noisy short-horizon factors. I do not treat High as a directional alpha — it is a regime flag for thinner conviction." },
-          { agent: "risk", text: "High → widen uncertainty band. Cut size, avoid pyramiding. If you trade, your stop must survive noise, not hope." },
-          { agent: "exec", text: "Execution implication: prefer limit / wait-for-confirm over market chase. No urgency premium while T stays High." },
+        { title: "Parliament verdict", headline: "Continue to wait-and-see", body: "Composite ~43%. Chanlun, Ising, and SHAP disagree enough that forced action loses to patience." },
+        { bull: 0, neutral: 4, bear: 0, wait: 2 }, "43%"
+      ),
+      ising: scene(
+        "Why is Ising High on Moutai — and what does that authorize?",
+        [
+          { agent: "captain", text: "Physics-first. I want T, force-field, and what High does / does not authorize for size." },
+          { agent: "physics", text: "Ising maps local long/short pressure to interacting spins. T≈2.075 < Tc≈2.269 but High-band: hot flips, no majority magnetization. Heatmap mosaic = contested tape." },
+          { agent: "chanlun", text: "High-T rhymes with overlapping pivots: structure talking, not trending. Digestion regime." },
+          { agent: "factor", text: "Hot microstructure ↔ noisy short-horizon factors. High is a regime flag that thins conviction — not directional alpha." },
+          { agent: "risk", text: "High → widen uncertainty. Cut size, ban pyramids. Stops must survive noise." },
+          { agent: "exec", text: "Prefer limit / confirm over market chase. No urgency premium while T stays High." },
         ],
-        verdict: { title: "Parliament verdict", headline: "High = regime caution, not a sell call", body: "Ising High means crowded flips and weak consensus microstructure — use it to shrink size and delay urgency, not as a standalone signal.", vote: { bull: 0, neutral: 3, bear: 0, wait: 3 }, conf: "61%" },
-      },
-      b1: {
-        user: "What does the labeled B1 mean on this Moutai daily?",
-        msgs: [
-          { agent: "captain", text: "Definition session: map the labeled B1 to Chanlun doctrine, then ask whether it is actionable now." },
-          { agent: "chanlun", text: "B1 = first buy after a trend-down completion — typically the first pullback buy once a diverging bottom structure prints. On this pane B1 marks are historical anchors with pairing lines to S1, not a fresh live trigger at 1413." },
-          { agent: "physics", text: "Around prior B1 zones temperature often cooled after a flush. Today's High T does not rhyme with a classic first-buy calm." },
-          { agent: "factor", text: "First-buy labels are structure events. Factor edge still needs cross-section confirmation — label alone ≠ V12 long." },
-          { agent: "risk", text: "Do not buy a label. Buy a plan: invalidation, size, and what would falsify the B1 thesis within N bars." },
-          { agent: "exec", text: "If a new B1 sets up later: stage 1/3 on confirm, 1/3 on hold of pivot, leave 1/3 for failure. Today: no order ticket." },
+        { title: "Parliament verdict", headline: "High = regime caution, not a sell call", body: "Use High to shrink size and delay urgency — never as a standalone signal." },
+        { bull: 0, neutral: 3, bear: 0, wait: 3 }, "61%"
+      ),
+      b1: scene(
+        "What does the labeled B1 mean on this Moutai daily — is it live?",
+        [
+          { agent: "captain", text: "Definition then actionability. Map B1 to doctrine; ask if 1413 is a fresh trigger." },
+          { agent: "chanlun", text: "B1 = first buy after downtrend completion (diverging bottom → first pullback). On this pane B1 marks are historical anchors with S1 pairing lines — not a live trigger at 1413." },
+          { agent: "physics", text: "Prior B1 zones often cooled after a flush. Today's High T does not rhyme with classic first-buy calm." },
+          { agent: "factor", text: "Labels are structure events. Factor edge still needs cross-section confirmation — label ≠ V12 long." },
+          { agent: "risk", text: "Do not buy a label. Buy a plan: invalidation, size, falsifier within N bars." },
+          { agent: "exec", text: "If a new B1 sets up: 1/3 confirm · 1/3 pivot hold · 1/3 for failure. Today: no ticket." },
         ],
-        verdict: { title: "Parliament verdict", headline: "B1 is annotated history, not today's order", body: "Treat on-chart B1/S1 as pedagogy + audit trail. Action needs a fresh completed structure — which the board does not grant now.", vote: { bull: 0, neutral: 5, bear: 0, wait: 1 }, conf: "72%" },
-      },
-      risk: {
-        user: "If I must trade Moutai anyway, what is the risk plan?",
-        msgs: [
-          { agent: "captain", text: "Forced-trade session. Risk Manager leads; others only constrain." },
-          { agent: "risk", text: "Hard caps: ≤5% of book, hard stop under last daily pivot low, time-stop 5 sessions if structure does not clarify. No add-ons while Ising High." },
-          { agent: "chanlun", text: "Only allow a long if price reclaims and holds the nearest pivot high on rising stroke quality — otherwise stand down." },
-          { agent: "physics", text: "High T → expect stop noise. Place stop beyond microstructure jitter, not on the last tick of the force-field." },
-          { agent: "factor", text: "If SHAP price-position stays deeply negative, treat any long as tactical, not as a V12 core slot." },
-          { agent: "exec", text: "Ticket: 1/3 probe on reclaim · cancel if reject · never market into High-T spikes. Flat is still the winning default." },
+        { title: "Parliament verdict", headline: "B1 is annotated history, not today's order", body: "Treat B1/S1 as pedagogy + audit trail. Action needs a fresh completed structure." },
+        { bull: 0, neutral: 5, bear: 0, wait: 1 }, "72%"
+      ),
+      risk: scene(
+        "If I must trade Moutai anyway, what is the damage-control plan?",
+        [
+          { agent: "captain", text: "Forced-trade session. Risk leads; others only constrain." },
+          { agent: "risk", text: "Hard caps: ≤5% book · hard stop under last daily pivot low · time-stop 5 sessions if unclear. No adds while Ising High." },
+          { agent: "chanlun", text: "Long only if reclaim + hold nearest pivot high on improving stroke quality — else stand down." },
+          { agent: "physics", text: "High T → stop noise. Place beyond microstructure jitter, not on the last force-field tick." },
+          { agent: "factor", text: "If SHAP price-position stays deep negative, any long is tactical — not a V12 core slot." },
+          { agent: "exec", text: "Ticket: 1/3 probe on reclaim · cancel on reject · never market into High-T spikes. Flat still wins." },
         ],
-        verdict: { title: "Parliament verdict", headline: "Tiny · invalidation-first · prefer flat", body: "Forced participation only under micro-size and explicit falsifiers. Consensus still prefers wait; this is damage control, not alpha hunting.", vote: { bull: 0, neutral: 1, bear: 0, wait: 5 }, conf: "78%" },
-      },
+        { title: "Parliament verdict", headline: "Tiny · invalidation-first · prefer flat", body: "Forced participation = damage control, not alpha hunting." },
+        { bull: 0, neutral: 1, bear: 0, wait: 5 }, "78%"
+      ),
+      v12: scene(
+        "Is the V12 CSI-300 backtest (Sharpe 2.595) trustworthy — or overfit?",
+        [
+          { agent: "captain", text: "Research integrity session. Factor Analyst leads; Risk audits the checks." },
+          { agent: "factor", text: "This run: SR≈2.595 · ann≈54.1% · max DD≈11.6% · 1237 days · avg hold≈2.7d. Factor ranks (rev_5d, mean_rv_20d, ss_20d…) + correlation matrix shown on desk." },
+          { agent: "risk", text: "I care about the antifragile stack: Monte Carlo permutation p≈0, Walk-Forward folds, PBO/DSR gauges on the panel. Labels ≠ live capacity." },
+          { agent: "physics", text: "Backtest edge can vanish when microstructure regime shifts (High-T / RMT risk). Treat SR as conditional on the sample's physics." },
+          { agent: "chanlun", text: "Cross-section book ≠ single-name Chanlun trigger. Do not import V12 SR into a Moutai ticket." },
+          { agent: "exec", text: "Even if research passes: stage capacity, slip budget, and kill-switch before any live sleeve." },
+        ],
+        { title: "Parliament verdict", headline: "Research-grade run · not a blank check", body: "Checks are present on purpose. Still: backtest ≠ live book. Keep labels honest." },
+        { bull: 1, neutral: 3, bear: 0, wait: 2 }, "58%"
+      ),
+      lppls: scene(
+        "LPPLS shows ~35% bubble probability — tradeable or noise?",
+        [
+          { agent: "captain", text: "Bubble-detection session. Physics owns the fit; Risk owns false positives." },
+          { agent: "physics", text: "LPPLS fit: R²≈0.464 · ω≈3.51 · exponent≈0.030 · critical time ~4d. 35% sits in the green/safe band on the gauge — not a crash alarm." },
+          { agent: "chanlun", text: "Mild down-pressure + overlapping pivots align with 'not euphoric blow-off'. Structure agrees: no chase." },
+          { agent: "factor", text: "Bubble gauges are regime features. I do not short solely on 35% — wait for factor + structure confluence." },
+          { agent: "risk", text: "Low bubble prob ≠ green light to lever long. Size still gated by Ising High and SHAP drag." },
+          { agent: "exec", text: "No bubble-fade ticket at 35%. Keep alerts; act only on structure break." },
+        ],
+        { title: "Parliament verdict", headline: "35% = monitoring, not a trade", body: "Safe-band LPPLS supports patience; it does not authorize leverage." },
+        { bull: 0, neutral: 4, bear: 0, wait: 2 }, "66%"
+      ),
+      shap: scene(
+        "SHAP shows price-position −76% — how should that veto a long?",
+        [
+          { agent: "captain", text: "Attribution session. Factor owns SHAP; Risk translates to size." },
+          { agent: "factor", text: "Panel attribution: price-position strongly negative (−76%), volatility positive (~+50%), trend/momentum near flat. Model is not supporting an unconditional long." },
+          { agent: "risk", text: "A −76% drag is a soft veto on core size. Probe only if other lanes flip hard — and even then micro." },
+          { agent: "chanlun", text: "SHAP drag + overlapping pivots = double caution. I will not promote a B-side from attribution alone." },
+          { agent: "physics", text: "Negative position factor often co-moves with contested Ising fields — consistent with High-T mosaic." },
+          { agent: "exec", text: "If forced: size as if the model already voted against you. Prefer wait." },
+        ],
+        { title: "Parliament verdict", headline: "Attribution veto stands", body: "Price-position drag is enough to keep Moutai off the core long list today." },
+        { bull: 0, neutral: 2, bear: 1, wait: 3 }, "71%"
+      ),
+      tda: scene(
+        "TDA says topology stable (Betti-1 huge) — does that make it tradeable?",
+        [
+          { agent: "captain", text: "Topology session. Physics interprets persistence; Chanlun checks if 'stable' equals actionable." },
+          { agent: "physics", text: "Desk read: Betti-0=1 · Betti-1≈9168 · max persistence≈37 · mean≈15.6. 'Stable topology / clear trend' on the card — but stability ≠ edge." },
+          { agent: "chanlun", text: "Stable topology can coexist with overlapping pivots. I still need a completed buy structure." },
+          { agent: "factor", text: "TDA is a regime descriptor. Pair with V12 score before promoting a name." },
+          { agent: "risk", text: "Do not size up solely because Betti looks 'healthy'. Health ≠ payoff." },
+          { agent: "exec", text: "Tradeable in the abstract; ticket still blocked by parliament wait." },
+        ],
+        { title: "Parliament verdict", headline: "Stable ≠ signal", body: "Topology clears a hygiene check; it does not clear a buy ticket." },
+        { bull: 0, neutral: 5, bear: 0, wait: 1 }, "64%"
+      ),
+      mesh: scene(
+        "How do the six agents actually collaborate — where is this still naive?",
+        [
+          { agent: "captain", text: "Meta session. I admit: today is sequential lane → vote. Real mesh needs critique, memory, and tool calls." },
+          { agent: "chanlun", text: "I should be able to challenge Physics when High-T conflicts with a clean stroke — not only speak once." },
+          { agent: "physics", text: "Ideal: pull live Ising/LPPLS/TDA tools mid-debate, not canned numbers. Demo is high-fidelity replay." },
+          { agent: "factor", text: "Ideal: refresh SHAP + cross-section rank on the symbol under discussion, then rebut Risk." },
+          { agent: "risk", text: "Ideal: hard veto power — not just a vote bar. Some calls should be non-overridable." },
+          { agent: "exec", text: "Ideal: emit staged tickets with broker constraints. Here I narrate; on desk I should write orders." },
+        ],
+        { title: "Parliament verdict", headline: "Lane demo · mesh still open research", body: "This site proves the UX + lane discipline. Deeper critique loops and tool-use are the next build — challenge me." },
+        { bull: 0, neutral: 4, bear: 0, wait: 2 }, "55%"
+      ),
+      book: scene(
+        "¥50k → ~¥1.00M on A-shares — what does that prove vs the research?",
+        [
+          { agent: "captain", text: "Honesty session. Personal book ≠ V12 backtest ≠ JF paper. Keep the labels." },
+          { agent: "risk", text: "A path from 50k to ~1.00M is a survival + skill receipt — not a promise of transferable capacity or low drawdown forever." },
+          { agent: "factor", text: "Do not confuse one account path with cross-section SR. Different animals." },
+          { agent: "chanlun", text: "Live tape training informs how I read structure — still not a blank check on any single B1." },
+          { agent: "physics", text: "Regimes change. Past path does not freeze Ising temperature." },
+          { agent: "exec", text: "Broker snapshot is evidence of process under fire. Size and risk rules still dominate any victory lap." },
+        ],
+        { title: "Parliament verdict", headline: "Labeled evidence · not a performance ad", body: "Book is real and separate. Research and paper stand on their own falsifiers." },
+        { bull: 0, neutral: 6, bear: 0, wait: 0 }, "80%"
+      ),
+      levels: scene(
+        "Multi-level Chanlun shows strong bear on daily — override or obey?",
+        [
+          { agent: "captain", text: "Multi-scale session. Chanlun leads on联立; Risk decides if higher TF vetoes." },
+          { agent: "chanlun", text: "Desk card: daily strong-bear with stroke/pivot counts. Higher-TF bear usually vetoes eager lower-TF buys." },
+          { agent: "physics", text: "Bearish multi-scale + High-T = contested declines, not a clean cascade — still not a buy." },
+          { agent: "factor", text: "Cross-section long does not heal a single-name higher-TF bear unless the book is explicitly relative." },
+          { agent: "risk", text: "Obey the higher-TF veto for directional size. Rel-value sleeves only with explicit hedges." },
+          { agent: "exec", text: "No long ticket while daily联立 stays strong-bear. Reassess on pivot reclaim." },
+        ],
+        { title: "Parliament verdict", headline: "Higher-TF bear veto holds", body: "Multi-level structure overrides impatience. Wait for reclaim, not hope." },
+        { bull: 0, neutral: 1, bear: 2, wait: 3 }, "74%"
+      ),
+      execplan: scene(
+        "Write a concrete entry/exit plan if parliament flips to a buy later.",
+        [
+          { agent: "captain", text: "Contingency session. Execution drafts; Risk hard-gates; others set triggers." },
+          { agent: "chanlun", text: "Trigger: daily reclaim + hold of nearest pivot high with improving stroke quality; invalidate on loss of pivot low." },
+          { agent: "physics", text: "Gate: Ising leaves High or force-field magnetizes coherently with the long. Else delay." },
+          { agent: "factor", text: "Gate: SHAP price-position drag softens and V12 rank not in bottom decile vs CSI-300 peers." },
+          { agent: "risk", text: "Size ≤3–5% · hard stop · time-stop 5–8 sessions · no add until first scale works." },
+          { agent: "exec", text: "Staging: 30% on confirm · 40% on hold · 30% reserved. Limits only on first fill. Kill-switch if High-T spike widens spreads." },
+        ],
+        { title: "Parliament verdict", headline: "Plan ready · trigger not live", body: "We can script the buy. Today the triggers are off — so the ticket stays unsent." },
+        { bull: 0, neutral: 3, bear: 0, wait: 3 }, "69%"
+      ),
     },
     zh: {
-      default: {
-        user: "日线上贵州茅台（600519.SH）现在要不要动手？",
-        msgs: [
-          { agent: "captain", text: "本次会话：价格约 1413，日线视角。先收各车道报告再开投票。优先可证伪结构，而不是故事。" },
-          { agent: "chanlun", text: "笔与中枢已标注，B1/S1 配对可见。近端没有干净的延续性一买——中枢重叠更像消化，而不是新的一买体制。" },
-          { agent: "physics", text: "伊辛 T≈2.075 处于 High（Tc≈2.269）。力场红蓝混杂——没有单边拥挤。LPPLS 泡沫约 35%（安全带）但有局部下行压力。物理票：不追。" },
-          { agent: "factor", text: "V12 SHAP：价格位置强负向（约 −76%），波动正向。相对沪深300 截面，这里没有强烈的多头尖叫。" },
-          { agent: "risk", text: "风控只说风控：建议观望，置信度 78%。若必须做，仓位做小，并在最近中枢低点下设失效——保本优先于叙事。" },
-          { agent: "exec", text: "结构未清前不分批进场。若议会维持观望，保持空计划，等待更干净的 B 侧确认。" },
+      default: scene(
+        "日线上贵州茅台（600519.SH）现在要不要动手？",
+        [
+          { agent: "captain", text: "会话框定：约 1413，日线。先收车道报告再投票。优先可证伪结构，而非叙事。" },
+          { agent: "chanlun", text: "笔/中枢已标，B1/S1 配对可见。近端≠干净延续一买——中枢重叠=消化，不是新的一买体制。" },
+          { agent: "physics", text: "伊辛 T≈2.075 High（Tc≈2.269）。力场红蓝马赛克——无磁化多数。LPPLS≈35% 安全带，有局部下行压力。票：不追。" },
+          { agent: "factor", text: "V12 SHAP：价格位置 −76%（拖累），波动正向。相对沪深300 截面，该标的没有多头尖叫。" },
+          { agent: "risk", text: "风控只说风控：观望 · 置信 78%。若强制：微仓 + 最近中枢低下失效。保本 > 故事。" },
+          { agent: "exec", text: "结构未清不分批。空仓为默认；等中枢站稳后的更干净 B 侧。" },
         ],
-        verdict: { title: "议会裁决", headline: "继续观望", body: "综合置信度约 43%。缠论、伊辛与因子 SHAP 信号混杂——等待优于强行交易。", vote: { bull: 0, neutral: 4, bear: 0, wait: 2 }, conf: "43%" },
-      },
-      ising: {
-        user: "解释一下为什么茅台上伊辛是 High。",
-        msgs: [
-          { agent: "captain", text: "物理优先会话。我要温度、力场，以及 High 对仓位意味着什么、不意味着什么。" },
-          { agent: "physics", text: "伊辛把局部多空压力映射成自旋互动。T≈2.075 低于 Tc≈2.269 但仍在 High 带——互动热、翻转频繁。热力图红蓝马赛克＝没有磁化多数。" },
-          { agent: "chanlun", text: "高温与重叠中枢同向：结构在说话，但不是干净趋势。更像消化，而不是单向笔。" },
-          { agent: "factor", text: "热微观结构常伴随短周期因子噪声。High 不是方向 alpha，而是降低置信度的体制旗标。" },
-          { agent: "risk", text: "High → 加宽不确定带。砍仓、禁止加仓。若交易，止损必须扛得住噪声。" },
-          { agent: "exec", text: "执行含义：限价/等确认，优于市价追。T 仍 High 时不付急迫溢价。" },
+        { title: "议会裁决", headline: "继续观望", body: "综合约 43%。缠论、伊辛与 SHAP 分歧够大——强行不如耐心。" },
+        { bull: 0, neutral: 4, bear: 0, wait: 2 }, "43%"
+      ),
+      ising: scene(
+        "为什么茅台伊辛是 High——它授权做什么？",
+        [
+          { agent: "captain", text: "物理优先。我要 T、力场，以及 High 对仓位授权/不授权什么。" },
+          { agent: "physics", text: "伊辛把局部多空映射成自旋互动。T≈2.075 < Tc≈2.269 但在 High 带：翻转热、无多数磁化。热力图马赛克=争夺盘。" },
+          { agent: "chanlun", text: "高温与重叠中枢同向：结构在说话，不是趋势。消化体制。" },
+          { agent: "factor", text: "热微观 ↔ 短周期因子噪声。High 是降置信的体制旗，不是方向 alpha。" },
+          { agent: "risk", text: "High → 加宽不确定。砍仓、禁金字塔。止损必须扛噪声。" },
+          { agent: "exec", text: "限价/等确认优于市价追。T 仍 High 不付急迫溢价。" },
         ],
-        verdict: { title: "议会裁决", headline: "High = 体制谨慎，不是卖出信号", body: "伊辛 High 表示翻转拥挤、微观共识弱——用来缩仓、延后急迫，而不是单独下单依据。", vote: { bull: 0, neutral: 3, bear: 0, wait: 3 }, conf: "61%" },
-      },
-      b1: {
-        user: "图上标的 B1 在这根日线上是什么意思？",
-        msgs: [
-          { agent: "captain", text: "定义会话：把标注 B1 映射回缠论教义，再问此刻是否可交易。" },
-          { agent: "chanlun", text: "B1＝下跌趋势结束后的第一类买点——通常是背驰底结构后的首次回抽买。本图 B1 是历史锚点并与 S1 配对，不是 1413 处的新鲜触发。" },
-          { agent: "physics", text: "历史 B1 附近温度常在宣泄后回落。今日 High T 并不像经典一买的冷静区。" },
-          { agent: "factor", text: "一买标签是结构事件。因子优势仍需截面确认——标签本身 ≠ V12 做多。" },
-          { agent: "risk", text: "不要买标签。买计划：失效条件、仓位、以及多少根 K 内证伪。" },
-          { agent: "exec", text: "若日后新 B1 成立：确认 1/3、站稳中枢再 1/3、留 1/3 给失败。今日：无票。" },
+        { title: "议会裁决", headline: "High = 体制谨慎，不是卖出信号", body: "用 High 缩仓、延后急迫——绝不当单独信号。" },
+        { bull: 0, neutral: 3, bear: 0, wait: 3 }, "61%"
+      ),
+      b1: scene(
+        "图上的 B1 是什么意思——此刻算不算活的买点？",
+        [
+          { agent: "captain", text: "先定义再问可执行性。把 B1 映射回教义，再问 1413 是否新鲜触发。" },
+          { agent: "chanlun", text: "B1＝下跌结束后的一买（背驰底→首次回抽）。本图 B1 是历史锚点并与 S1 配对——不是 1413 的活触发。" },
+          { agent: "physics", text: "历史 B1 区常在宣泄后降温。今日 High T 不像经典一买冷静区。" },
+          { agent: "factor", text: "标签是结构事件。因子优势仍需截面确认——标签 ≠ V12 做多。" },
+          { agent: "risk", text: "不要买标签。买计划：失效、仓位、N 根内证伪。" },
+          { agent: "exec", text: "若新 B1 成立：确认 1/3 · 站稳 1/3 · 失败预留 1/3。今日：无票。" },
         ],
-        verdict: { title: "议会裁决", headline: "B1 是标注历史，不是今日订单", body: "把图上 B1/S1 当作教学与审计轨迹。行动需要新的完整结构——议会此刻不授予。", vote: { bull: 0, neutral: 5, bear: 0, wait: 1 }, conf: "72%" },
-      },
-      risk: {
-        user: "如果我必须交易茅台，风控方案是什么？",
-        msgs: [
-          { agent: "captain", text: "强制交易会话。风控官主笔；其他人只设约束。" },
-          { agent: "risk", text: "硬顶：账户 ≤5%，硬止损在最近日线中枢低点下，5 个交易日结构不清则时间止损。伊辛 High 期间禁止加仓。" },
-          { agent: "chanlun", text: "仅当价格收回并站稳最近中枢高点、笔质量改善时才允许多；否则停下。" },
-          { agent: "physics", text: "High T → 预期止损噪声。止损要放在微观抖动之外，而不是力场最后一跳。" },
-          { agent: "factor", text: "若 SHAP 价格位置仍深负，任何多头只当战术，不当 V12 核心仓。" },
-          { agent: "exec", text: "票据：收回确认试探 1/3 · 拒绝即撤 · 绝不在 High-T 尖刺市价追。空仓仍是默认最优。" },
+        { title: "议会裁决", headline: "B1 是标注历史，不是今日订单", body: "把 B1/S1 当教学与审计。行动需要新的完整结构。" },
+        { bull: 0, neutral: 5, bear: 0, wait: 1 }, "72%"
+      ),
+      risk: scene(
+        "如果我必须交易茅台，止损方案怎么写？",
+        [
+          { agent: "captain", text: "强制交易会话。风控主笔；其他人只设约束。" },
+          { agent: "risk", text: "硬顶：≤5% 账户 · 硬止损在日线中枢低下 · 5 日结构不清则时间止损。伊辛 High 禁加仓。" },
+          { agent: "chanlun", text: "仅当收回并站稳最近中枢高、笔质量改善才允许多——否则停。" },
+          { agent: "physics", text: "High T → 止损噪声。止损放在微观抖动外，而非力场最后一跳。" },
+          { agent: "factor", text: "若 SHAP 位置仍深负，任何多头只当战术，不当 V12 核心。" },
+          { agent: "exec", text: "票据：收回试探 1/3 · 拒绝即撤 · 绝不在 High-T 尖刺市价追。空仓仍胜。" },
         ],
-        verdict: { title: "议会裁决", headline: "极小仓 · 失效优先 · 更想空仓", body: "强制参与只在微仓与明确证伪条件下。共识仍偏观望——这是止损方案，不是找 alpha。", vote: { bull: 0, neutral: 1, bear: 0, wait: 5 }, conf: "78%" },
-      },
+        { title: "议会裁决", headline: "极小仓 · 失效优先 · 更想空仓", body: "强制参与=止损方案，不是找 alpha。" },
+        { bull: 0, neutral: 1, bear: 0, wait: 5 }, "78%"
+      ),
+      v12: scene(
+        "V12 沪深300 回测 Sharpe 2.595——可信还是过拟合？",
+        [
+          { agent: "captain", text: "研究诚信会话。因子分析师主讲；风控审计检验栈。" },
+          { agent: "factor", text: "本跑：SR≈2.595 · 年化≈54.1% · 最大回撤≈11.6% · 1237 日 · 均持仓≈2.7 日。因子排名与相关矩阵在桌面上。" },
+          { agent: "risk", text: "我看反脆弱栈：蒙特卡洛置换 p≈0、Walk-Forward、PBO/DSR。标签 ≠ 实盘容量。" },
+          { agent: "physics", text: "微观体制一变（High-T / RMT 风险），回测优势可蒸发。SR 对样本物理条件敏感。" },
+          { agent: "chanlun", text: "截面组合 ≠ 单标的缠论触发。别把 V12 SR 进口到茅台票据。" },
+          { agent: "exec", text: "即便研究过关：先容量、滑点预算、熔断，再谈活袖。" },
+        ],
+        { title: "议会裁决", headline: "研究级本跑 · 不是空白支票", body: "检验是故意装的。仍：回测 ≠ 实盘。标签要诚实。" },
+        { bull: 1, neutral: 3, bear: 0, wait: 2 }, "58%"
+      ),
+      lppls: scene(
+        "LPPLS 泡沫概率约 35%——能交易还是噪声？",
+        [
+          { agent: "captain", text: "泡沫检测会话。物理管拟合；风控管假阳性。" },
+          { agent: "physics", text: "LPPLS：R²≈0.464 · ω≈3.51 · 指数≈0.030 · 临界时约 4 日。35% 在绿色安全带——不是崩盘警报。" },
+          { agent: "chanlun", text: "轻度下行压力 + 重叠中枢，对齐「非狂热吹破」。结构同意：不追。" },
+          { agent: "factor", text: "泡沫计是体制特征。我不会仅因 35% 去做空——等因子+结构合流。" },
+          { agent: "risk", text: "低泡沫概率 ≠ 加杠杆做多绿灯。仓位仍受伊辛 High 与 SHAP 拖累约束。" },
+          { agent: "exec", text: "35% 不开泡沫交易。留警报；只在结构破坏时动手。" },
+        ],
+        { title: "议会裁决", headline: "35% = 监控，不是交易", body: "安全带 LPPLS 支持耐心；不授权杠杆。" },
+        { bull: 0, neutral: 4, bear: 0, wait: 2 }, "66%"
+      ),
+      shap: scene(
+        "SHAP 显示价格位置 −76%——如何否决做多？",
+        [
+          { agent: "captain", text: "归因会话。因子管 SHAP；风控翻译成仓位。" },
+          { agent: "factor", text: "面板：价格位置强负（−76%），波动约 +50%，趋势/动量接近平坦。模型不支持无条件做多。" },
+          { agent: "risk", text: "−76% 拖累是对核心仓位的软否决。只有其他车道硬翻转才允许微仓试探。" },
+          { agent: "chanlun", text: "SHAP 拖累 + 重叠中枢 = 双重谨慎。我不会单靠归因推 B 侧。" },
+          { agent: "physics", text: "负向位置因子常与争夺型伊辛场同向——与 High-T 马赛克一致。" },
+          { agent: "exec", text: "若强制：按模型已投反对票来上仓。更想观望。" },
+        ],
+        { title: "议会裁决", headline: "归因否决成立", body: "价格位置拖累足以让茅台今天不进核心多头名单。" },
+        { bull: 0, neutral: 2, bear: 1, wait: 3 }, "71%"
+      ),
+      tda: scene(
+        "TDA 说拓扑稳定（Betti-1 很大）——是否可交易？",
+        [
+          { agent: "captain", text: "拓扑会话。物理解释持续；缠论检查「稳定」是否等于可下单。" },
+          { agent: "physics", text: "桌面：Betti-0=1 · Betti-1≈9168 · 最大持续≈37 · 均值≈15.6。卡片写「拓扑稳定/趋势清晰」——但稳定 ≠ 优势。" },
+          { agent: "chanlun", text: "稳定拓扑可与重叠中枢共存。我仍要完整买点结构。" },
+          { agent: "factor", text: "TDA 是体制描述符。与 V12 分数配对后才谈晋级。" },
+          { agent: "risk", text: "别因为 Betti「健康」就加仓。健康 ≠ 收益。" },
+          { agent: "exec", text: "抽象上可交易；票据仍被议会观望挡住。" },
+        ],
+        { title: "议会裁决", headline: "稳定 ≠ 信号", body: "拓扑通过卫生检查；不通过买入票据。" },
+        { bull: 0, neutral: 5, bear: 0, wait: 1 }, "64%"
+      ),
+      mesh: scene(
+        "六个 Agent 究竟怎么协作——哪里还太天真？",
+        [
+          { agent: "captain", text: "元会话。承认：今天是顺序车道→投票。真 mesh 要互驳、记忆与工具调用。" },
+          { agent: "chanlun", text: "当 High-T 与干净笔冲突时，我应能反驳物理——而不是只说一次。" },
+          { agent: "physics", text: "理想：辩论中途拉取活的伊辛/LPPLS/TDA 工具，而非罐头数字。演示是高保真回放。" },
+          { agent: "factor", text: "理想：对讨论标的刷新 SHAP + 截面排名，再反驳风控。" },
+          { agent: "risk", text: "理想：硬否决权——不只是投票条。有些决议不可覆盖。" },
+          { agent: "exec", text: "理想：输出带券商约束的分批票据。这里我叙事；桌上我应写单。" },
+        ],
+        { title: "议会裁决", headline: "车道演示 · mesh 仍是开放研究", body: "站点证明 UX 与车道纪律。更深互驳与工具调用是下一刀——请拍砖。" },
+        { bull: 0, neutral: 4, bear: 0, wait: 2 }, "55%"
+      ),
+      book: scene(
+        "A股 5万到约100万——这证明了什么、不能证明什么？",
+        [
+          { agent: "captain", text: "诚实会话。个人账户 ≠ V12 回测 ≠ JF 论文。标签分开。" },
+          { agent: "risk", text: "5万→约100万是生存与技能收据——不是可迁移容量承诺，也不是永远低回撤。" },
+          { agent: "factor", text: "别把单账户路径与截面 SR 混淆。不是一类动物。" },
+          { agent: "chanlun", text: "实盘训练影响我读结构的方式——仍不是对任意 B1 的空白支票。" },
+          { agent: "physics", text: "体制会变。过去路径冻不住伊辛温度。" },
+          { agent: "exec", text: "券商快照是炮火下的过程证据。仓位与风控规则仍压过任何庆功。" },
+        ],
+        { title: "议会裁决", headline: "有标签的证据 · 不是业绩广告", body: "账户真实且独立。研究与论文各自靠可证伪条件站住。" },
+        { bull: 0, neutral: 6, bear: 0, wait: 0 }, "80%"
+      ),
+      levels: scene(
+        "多级别联立日线强势空头——服从还是覆盖？",
+        [
+          { agent: "captain", text: "多尺度会话。缠论主讲联立；风控决定高周期是否否决。" },
+          { agent: "chanlun", text: "桌面卡片：日线强势空头并有笔/中枢计数。高周期空头通常否决急切的低周期买。" },
+          { agent: "physics", text: "多尺度偏空 + High-T = 争夺式下跌，不是干净瀑布——仍不是买。" },
+          { agent: "factor", text: "截面多头治不好单标的高周期空，除非明确做相对价值。" },
+          { agent: "risk", text: "方向仓服从高周期否决。相对价值袖只在有对冲时。" },
+          { agent: "exec", text: "日线联立仍强空则无多单。收回中枢再评估。" },
+        ],
+        { title: "议会裁决", headline: "高周期空头否决成立", body: "多级别结构压过急躁。等收回，不靠希望。" },
+        { bull: 0, neutral: 1, bear: 2, wait: 3 }, "74%"
+      ),
+      execplan: scene(
+        "若议会日后翻多，写出具体进出场计划。",
+        [
+          { agent: "captain", text: "预案会话。执行起草；风控硬门；其他人设触发。" },
+          { agent: "chanlun", text: "触发：日线收回并站稳最近中枢高且笔质量改善；跌破中枢低失效。" },
+          { agent: "physics", text: "门控：伊辛离开 High，或力场与多头同向磁化。否则推迟。" },
+          { agent: "factor", text: "门控：SHAP 位置拖累缓和，且 V12 排名不在沪深300 同伴最差十分位。" },
+          { agent: "risk", text: "仓位 ≤3–5% · 硬止损 · 5–8 日时间止损 · 首档未成不加法。" },
+          { agent: "exec", text: "分批：确认 30% · 站稳 40% · 预留 30%。首笔只用限价。High-T 尖刺扩点差则熔断。" },
+        ],
+        { title: "议会裁决", headline: "计划就绪 · 触发未亮", body: "买可以写成脚本。今日触发全灭——票据不发。" },
+        { bull: 0, neutral: 3, bear: 0, wait: 3 }, "69%"
+      ),
     },
   };
 
-  const CHIP_KEYS = {
+  const CHIP_GROUPS = {
     en: [
-      { label: "Should I buy Moutai now?", key: "default" },
-      { label: "Explain Ising High", key: "ising" },
-      { label: "What does B1 mean here?", key: "b1" },
-      { label: "Risk if I must trade", key: "risk" },
+      { g: "Tape", items: [
+        { label: "Buy Moutai now?", key: "default" },
+        { label: "Ising High meaning", key: "ising" },
+        { label: "Is B1 live?", key: "b1" },
+        { label: "Multi-level bear", key: "levels" },
+      ]},
+      { g: "Research", items: [
+        { label: "V12 overfit?", key: "v12" },
+        { label: "LPPLS 35%", key: "lppls" },
+        { label: "SHAP −76% veto", key: "shap" },
+        { label: "TDA stable?", key: "tda" },
+      ]},
+      { g: "Decision", items: [
+        { label: "Forced-trade risk", key: "risk" },
+        { label: "Buy plan if flip", key: "execplan" },
+        { label: "Agent mesh gaps", key: "mesh" },
+        { label: "¥50k→¥1M meaning", key: "book" },
+      ]},
     ],
     zh: [
-      { label: "现在要不要买茅台？", key: "default" },
-      { label: "解释伊辛 High", key: "ising" },
-      { label: "这里的 B1 是什么", key: "b1" },
-      { label: "若必须交易的风控", key: "risk" },
+      { g: "盘口", items: [
+        { label: "现在买茅台？", key: "default" },
+        { label: "伊辛 High 含义", key: "ising" },
+        { label: "B1 算活点吗？", key: "b1" },
+        { label: "多级别强空", key: "levels" },
+      ]},
+      { g: "研究", items: [
+        { label: "V12 过拟合？", key: "v12" },
+        { label: "LPPLS 35%", key: "lppls" },
+        { label: "SHAP −76% 否决", key: "shap" },
+        { label: "TDA 稳定？", key: "tda" },
+      ]},
+      { g: "决策", items: [
+        { label: "强制交易风控", key: "risk" },
+        { label: "若翻多的计划", key: "execplan" },
+        { label: "Agent 协作缺口", key: "mesh" },
+        { label: "5万→100万含义", key: "book" },
+      ]},
     ],
   };
 
   let busy = false;
   let activeAgent = null;
+  let lastKey = "default";
+  let sessionLog = [];
+  let abort = false;
 
   function L() {
     return (typeof langNow === "function" && langNow() === "zh") ? "zh" : "en";
   }
 
-  function pickScene(q) {
+  function setPhase(name) {
+    if (!phaseEl) return;
+    phaseEl.querySelectorAll("[data-phase]").forEach((el) => {
+      el.classList.toggle("on", el.dataset.phase === name);
+    });
+  }
+
+  function setStatus(text) {
+    if (statusEl) statusEl.textContent = text;
+  }
+
+  function paintMetrics() {
+    if (!metricsEl) return;
     const lang = L();
+    metricsEl.innerHTML = `<h4>${lang === "zh" ? "桌面指标" : "Desk metrics"}</h4>` +
+      METRICS[lang].map((m) => `<div class="ai-metric"><span>${m.k}</span><b>${m.v}</b><em>${m.s}</em></div>`).join("");
+  }
+
+  function paintSession() {
+    if (!sessionEl) return;
+    const lang = L();
+    const rows = sessionLog.slice(-5).reverse();
+    sessionEl.innerHTML = `<h4>${lang === "zh" ? "本会话" : "Session"}</h4>` +
+      (rows.length
+        ? rows.map((r) => `<button type="button" class="ai-sess" data-key="${r.key}"><b>${r.conf}</b><span>${r.label}</span></button>`).join("")
+        : `<p class="ai-sess-empty">${lang === "zh" ? "点下方问题召集议会" : "Pick a question to convene"}</p>`);
+    sessionEl.querySelectorAll(".ai-sess").forEach((b) => {
+      b.addEventListener("click", () => runSession(null, b.dataset.key));
+    });
+  }
+
+  function pickScene(q, key) {
+    const lang = L();
+    if (key && SCENES[lang][key]) return { pack: SCENES[lang][key], key };
     const s = (q || "").toLowerCase();
-    if (/ising|伊辛|temperature|温度|high/.test(s) && !/buy|买|b1|一买/.test(s)) return SCENES[lang].ising;
-    if (/\bb1\b|一买|first buy|买卖点/.test(s)) return SCENES[lang].b1;
-    if (/risk|风控|must|必须|仓位|stop/.test(s)) return SCENES[lang].risk;
-    return SCENES[lang].default;
+    const rules = [
+      [/mesh|协作|naive|天真|agent/, "mesh"],
+      [/book|50k|5万|100万|1\.00m|账户|本金/, "book"],
+      [/exec|计划|entry|exit|进出|分批|flip|翻多/, "execplan"],
+      [/level|联立|多级别|strong bear|强空/, "levels"],
+      [/shap|归因|−76|-76|price-position|位置/, "shap"],
+      [/tda|betti|拓扑|topology/, "tda"],
+      [/lppls|泡沫|bubble/, "lppls"],
+      [/v12|sharpe|过拟合|overfit|回测|walk-forward|monte/, "v12"],
+      [/ising|伊辛|temperature|温度/, "ising"],
+      [/b1|一买|first buy|买卖点/, "b1"],
+      [/risk|风控|must|必须|仓位|stop|止损/, "risk"],
+    ];
+    for (const [re, k] of rules) {
+      if (re.test(s)) return { pack: SCENES[lang][k], key: k };
+    }
+    return { pack: SCENES[lang].default, key: "default" };
   }
 
   function paintRoster() {
@@ -2083,7 +2403,8 @@ function initBoatParliament() {
     roster.innerHTML = AGENTS.map((a) => {
       const d = a[lang];
       const on = activeAgent === a.id ? " on" : "";
-      return `<button type="button" class="ai-agent${on}" data-id="${a.id}" style="--ac:${a.color}">
+      const speak = activeAgent === a.id && busy ? " speak" : "";
+      return `<button type="button" class="ai-agent${on}${speak}" data-id="${a.id}" style="--ac:${a.color}">
         <i></i><b>${d.name}</b><em>${d.role}</em>
         <span class="ai-stance">${d.stance} · ${d.conf}%</span>
       </button>`;
@@ -2099,12 +2420,19 @@ function initBoatParliament() {
   }
 
   function paintChips() {
+    if (!chipGroups) return;
     const lang = L();
-    chips.innerHTML = CHIP_KEYS[lang].map((c) => `<button type="button" class="ai-chip" data-key="${c.key}">${c.label}</button>`).join("");
-    chips.querySelectorAll(".ai-chip").forEach((b) => {
+    chipGroups.innerHTML = CHIP_GROUPS[lang].map((g) => `
+      <div class="ai-chip-group">
+        <span class="ai-chip-g">${g.g}</span>
+        <div class="ai-chips">${g.items.map((c) =>
+          `<button type="button" class="ai-chip${c.key === lastKey ? " on" : ""}" data-key="${c.key}">${c.label}</button>`
+        ).join("")}</div>
+      </div>`).join("");
+    chipGroups.querySelectorAll(".ai-chip").forEach((b) => {
       b.addEventListener("click", () => {
         input.value = b.textContent;
-        runSession(b.textContent);
+        runSession(b.textContent, b.dataset.key);
       });
     });
   }
@@ -2127,6 +2455,7 @@ function initBoatParliament() {
   }
 
   async function typeBubble(agentId, text) {
+    if (abort) return;
     const agent = AGENTS.find((a) => a.id === agentId);
     const lang = L();
     const name = agent[lang].name;
@@ -2134,44 +2463,77 @@ function initBoatParliament() {
     el.className = "ai-bubble";
     el.dataset.agent = agentId;
     el.style.setProperty("--ac", agent.color);
-    el.innerHTML = `<header><b>${name}</b><span class="mono">streaming</span></header><p></p>`;
+    el.innerHTML = `<header><b>${name}</b><span class="mono">streaming ▍</span></header><p></p>`;
     stream.appendChild(el);
+    activeAgent = agentId;
+    paintRoster();
     const p = el.querySelector("p");
-    const step = Math.max(1, Math.floor(text.length / 48));
+    const step = Math.max(1, Math.floor(text.length / 56));
     for (let i = 0; i < text.length; i += step) {
+      if (abort) break;
       p.textContent = text.slice(0, i + step);
       stream.scrollTop = stream.scrollHeight;
-      await sleep(16);
+      await sleep(12);
     }
     p.textContent = text;
     el.querySelector("span").textContent = "done";
-    activeAgent = agentId;
-    paintRoster();
   }
 
-  async function runSession(q) {
-    if (busy) return;
+  async function runSession(q, key) {
+    if (busy) {
+      abort = true;
+      await sleep(40);
+    }
+    abort = false;
     busy = true;
     const lang = L();
-    const pack = pickScene(q);
+    const picked = pickScene(q, key);
+    const pack = picked.pack;
+    lastKey = picked.key;
+    paintChips();
+    setPhase("brief");
+    setStatus(lang === "zh" ? "召集中…" : "Convening…");
     stream.innerHTML = "";
     verdict.hidden = true;
+    paintConsensus({ bull: 0, neutral: 0, bear: 0, wait: 0 });
+
     const user = document.createElement("article");
     user.className = "ai-bubble user";
-    user.innerHTML = `<header><b>${lang === "zh" ? "你" : "You"}</b></header><p></p>`;
+    user.innerHTML = `<header><b>${lang === "zh" ? "你" : "You"}</b><span class="mono">${lastKey}</span></header><p></p>`;
     user.querySelector("p").textContent = q || pack.user;
     stream.appendChild(user);
+    await sleep(220);
+    if (abort) { busy = false; return; }
 
+    setPhase("speak");
     for (const m of pack.msgs) {
-      await sleep(280);
+      if (abort) break;
+      setStatus(`${AGENTS.find((a) => a.id === m.agent)[lang].name} · live`);
+      await sleep(160);
       await typeBubble(m.agent, m.text);
     }
+    if (abort) { busy = false; setPhase("brief"); return; }
+
+    setPhase("vote");
+    setStatus(lang === "zh" ? "计票中…" : "Tallying…");
+    await sleep(380);
+    paintConsensus(pack.vote);
+    await sleep(220);
+
+    setPhase("verdict");
     const v = pack.verdict;
-    paintConsensus(v.vote);
     verdict.hidden = false;
-    verdict.innerHTML = `<span class="ai-verdict-k">${v.title}</span><h3></h3><p></p><em>${v.conf}</em>`;
+    verdict.innerHTML = `<span class="ai-verdict-k">${v.title}</span><h3></h3><p></p><em>${pack.conf}</em>`;
     verdict.querySelector("h3").textContent = v.headline;
     verdict.querySelector("p").textContent = v.body;
+    stream.scrollTop = stream.scrollHeight;
+
+    sessionLog = sessionLog.filter((x) => x.key !== lastKey);
+    sessionLog.push({ key: lastKey, conf: pack.conf, label: (q || pack.user).slice(0, 36) });
+    paintSession();
+    setStatus(lang === "zh" ? "6 个智能体在线" : "6 agents online");
+    activeAgent = "captain";
+    paintRoster();
     busy = false;
   }
 
@@ -2179,28 +2541,33 @@ function initBoatParliament() {
     e.preventDefault();
     runSession(input.value.trim() || SCENES[L()].default.user);
   });
+  rerunBtn?.addEventListener("click", () => runSession(null, lastKey));
 
   document.addEventListener("hj:lang", () => {
     paintRoster();
     paintChips();
-    if (!stream.children.length) return;
-    if (!busy) runSession(SCENES[L()].default.user);
+    paintMetrics();
+    paintSession();
+    if (!busy) runSession(null, lastKey);
   });
 
   paintRoster();
   paintChips();
-  paintConsensus(SCENES.en.default.verdict.vote);
+  paintMetrics();
+  paintSession();
+  paintConsensus(SCENES.en.default.vote);
+  setPhase("brief");
+
   const io = new IntersectionObserver(
     (entries) => {
       entries.forEach((en) => {
         if (en.isIntersecting) {
-          runSession(SCENES[L()].default.user);
+          runSession(null, "default");
           io.disconnect();
         }
       });
     },
-    { threshold: 0.25 }
+    { threshold: 0.2 }
   );
   io.observe(document.getElementById("ai-parliament"));
 }
-
