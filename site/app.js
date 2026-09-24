@@ -674,6 +674,7 @@ initPalette();
 initSpyNav();
 initCredBars();
 initPaperLab();
+initPaperTabI18n();
 initPanelLab();
 initFunnelLab();
 initPipeLab();
@@ -1255,6 +1256,11 @@ function initArgumentTour() {
     });
   }
 
+  function labelNav() {
+    if (prev) prev.textContent = langNow() === "zh" ? "← 上一步" : "← Prev";
+    if (next) next.textContent = langNow() === "zh" ? "下一步 →" : "Next →";
+  }
+  labelNav();
   prev?.addEventListener("click", () => show(i - 1));
   next?.addEventListener("click", () => show(i + 1));
   window.addEventListener("keydown", (e) => {
@@ -1267,7 +1273,7 @@ function initArgumentTour() {
     if (e.key === "ArrowRight") show(i + 1);
     if (e.key === "ArrowLeft") show(i - 1);
   });
-  document.addEventListener("hj:lang", () => show(i));
+  document.addEventListener("hj:lang", () => { labelNav(); show(i); });
   show(0);
 }
 
@@ -1546,6 +1552,32 @@ function initPiScenarios() {
         if (th) { th.value = String(s.thr); th.dispatchEvent(new Event("input")); }
         host.querySelectorAll("button").forEach((x) => x.classList.toggle("active", x === b));
       });
+    });
+  }
+  paint();
+  document.addEventListener("hj:lang", paint);
+}
+
+
+function initPaperTabI18n() {
+  const MAP = {
+    load: { en: ["Tier I", "Load-bearing", "Deployable overlay"], zh: ["层级 I", "承重", "可部署 overlay"] },
+    id: { en: ["Tier II", "Identification", "Blind spot is real"], zh: ["层级 II", "识别", "盲区真实"] },
+    machine: { en: ["Tier II·b", "Machine pool", "6,881 discards"], zh: ["层级 II·b", "机器池", "6,881 丢弃"] },
+    prop2: { en: ["Core", "Proposition 2", "State blind spot"], zh: ["核心", "命题 2", "状态盲区"] },
+    suggest: { en: ["Tier III", "Suggestive", "Reported, not leaned on"], zh: ["层级 III", "提示性", "报告但不倚重"] },
+  };
+  function paint() {
+    const L = (localStorage.getItem("hj-lang") || "en") === "zh" ? "zh" : "en";
+    document.querySelectorAll(".paper-tab").forEach((tab) => {
+      const m = MAP[tab.dataset.claim];
+      if (!m) return;
+      const [tier, b, em] = m[L];
+      const on = tab.classList.contains("active");
+      const sel = tab.getAttribute("aria-selected");
+      tab.innerHTML = `<span class="tier">${tier}</span><b>${b}</b><em>${em}</em>`;
+      if (on) tab.classList.add("active");
+      if (sel) tab.setAttribute("aria-selected", sel);
     });
   }
   paint();
