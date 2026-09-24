@@ -20,7 +20,7 @@
       } catch (e) {}
     })();
   </script>
-  <link rel="stylesheet" href="styles.css?theme2" />
+  <link rel="stylesheet" href="styles.css?term2" />
 </head>
 <body>
   <div class="progress" id="progress" aria-hidden="true"></div>
@@ -39,6 +39,7 @@
         <span class="nav-drawer-title" data-i18n="nav.menu">Menu</span>
         <button type="button" class="nav-close" id="nav-close" aria-label="Close">×</button>
       </div>
+      <a href="#terminal" data-spy="terminal" data-i18n="nav.terminal">Terminal</a>
       <a href="#idea" data-spy="idea" data-i18n="nav.idea">Idea</a>
       <a href="#tour" data-spy="tour" data-i18n="nav.tour">Tour</a>
       <a href="#venues" data-spy="venues" data-i18n="nav.venues">Venues</a>
@@ -83,6 +84,7 @@
         <span class="pulse"></span>
         <span class="chip" data-i18n="hero.chip.jf">JF external review</span>
         <span class="chip chip-alt" data-i18n="hero.chip.efa">EFA submitted</span>
+        <span class="chip chip-alt" data-i18n="hero.chip.term">BOAT Terminal · multi-agent desk</span>
         <span class="chip chip-alt" data-i18n="hero.leave">Leave of absence · full-time research</span>
         <span class="sep">·</span>
         <span data-i18n="hero.role">Independent researcher · builder · already in motion</span>
@@ -91,7 +93,8 @@
       <p class="lede" data-i18n="hero.lede">I build an AI agent factory that proposes return factors by the thousand— then prove that unconditional screens have a structural blind spot for factors that only pay inside a market state.</p>
       <p class="lede-sub" data-i18n="hero.sub">Flagship paper: Global Weakness, Local Strength — at the Journal of Finance (MS 2026-0738): passed desk review · in external review with editor Antoinette Schoar; also submitted to the Eastern Finance Association (EFA).</p>
       <div class="cta-row">
-        <a class="btn primary" data-magnetic href="#idea" data-i18n="hero.cta1">Enter the argument</a>
+        <a class="btn primary" data-magnetic href="#terminal" data-i18n="hero.cta.term">Open BOAT Terminal</a>
+        <a class="btn ghost" data-magnetic href="#idea" data-i18n="hero.cta1">Enter the argument</a>
         <a class="btn ghost" data-magnetic id="github-link" href="https://github.com/" target="_blank" rel="noopener" data-i18n="hero.cta.repro">Repro pack</a>
         <a class="btn ghost" data-magnetic href="#venues" data-i18n="hero.cta.venues">JF · EFA</a>
         <a class="btn ghost" data-magnetic href="#letter" data-i18n="hero.cta.letter">Zheshang letter</a>
@@ -163,6 +166,116 @@
         <span>56 modules · 95%+ coverage</span>
       </div>
     </div>
+
+
+    <!-- BOAT TERMINAL · early showcase -->
+    <section id="terminal" class="section reveal terminal-showcase">
+      <p class="section-kicker" data-i18n="term.kicker">00 · BOAT Terminal</p>
+      <h2 data-i18n="term.title">A student quant desk I built to learn in public</h2>
+      <p class="section-lede" data-i18n="term.lede">
+        About one year of nights: Rust for compute, Python for strategies &amp; AI, Flutter for the desk UI.
+        The title sounds a bit big — the intent is smaller: ship a usable framework, show work, and ask sharper people for critique.
+      </p>
+
+      <div class="term-meta">
+        <div><span data-i18n="term.m1s">Stack</span><b>Rust · Python · Flutter</b></div>
+        <div><span data-i18n="term.m2s">Lens</span><b data-i18n="term.m2b">600519.SH · Moutai walkthrough</b></div>
+        <div><span data-i18n="term.m3s">Agents</span><b data-i18n="term.m3b">6-agent parliament · DeepSeek</b></div>
+        <div><span data-i18n="term.m4s">Personal book</span><b data-i18n="term.m4b">¥50k → ~¥1.00M A-share</b></div>
+      </div>
+
+      <div class="term-pitch">
+        <article>
+          <h3 data-i18n="term.p1t">Why post it</h3>
+          <p data-i18n="term.p1p">Quant is lonely. I published the desk to record the process, invite exchange, and learn from people who have gone further on Chanlun, factors, physics models, or multi-agent systems.</p>
+        </article>
+        <article>
+          <h3 data-i18n="term.p2t">Honest scope</h3>
+          <p data-i18n="term.p2p">Still rough and iterating. Backtests and live books are different animals — I show both with labels. The JF paper track is a separate scientific claim; this terminal is the builder desk.</p>
+        </article>
+        <article>
+          <h3 data-i18n="term.p3t">What you can try here</h3>
+          <p data-i18n="term.p3p">Below: a professional multi-agent dialogue replay on Moutai, plus figure gallery. On the public site the chat is a high-fidelity demo (no API keys in Pages) — the real desk uses DeepSeek.</p>
+        </article>
+      </div>
+
+      <!-- Professional multi-agent dialog -->
+      <div class="ai-parliament" id="ai-parliament" aria-label="Multi-agent dialogue">
+        <header class="ai-parliament-bar">
+          <div class="ai-brand">
+            <span class="ai-dot"></span>
+            <strong data-i18n="term.ai.brand">OpenClaw · Agent Parliament</strong>
+          </div>
+          <div class="ai-context">
+            <span class="mono">600519.SH</span>
+            <span data-i18n="term.ai.ctx">Moutai · daily · demo session</span>
+          </div>
+          <div class="ai-status" data-i18n="term.ai.status">6 agents online</div>
+        </header>
+
+        <div class="ai-parliament-body">
+          <aside class="ai-roster" id="ai-roster" aria-label="Agents"></aside>
+          <div class="ai-stream-wrap">
+            <div class="ai-stream" id="ai-stream" role="log" aria-live="polite"></div>
+            <div class="ai-verdict" id="ai-verdict" hidden></div>
+            <div class="ai-composer">
+              <div class="ai-chips" id="ai-chips"></div>
+              <form class="ai-form" id="ai-form">
+                <input type="text" id="ai-input" autocomplete="off" data-i18n-placeholder="term.ai.ph" placeholder="Ask the parliament about 600519.SH…" />
+                <button type="submit" class="btn primary" data-i18n="term.ai.send">Send</button>
+              </form>
+              <p class="ai-note" data-i18n="term.ai.note">Demo replay · DeepSeek-shaped answers · not live brokerage advice</p>
+            </div>
+          </div>
+          <aside class="ai-consensus" id="ai-consensus" aria-label="Consensus"></aside>
+        </div>
+      </div>
+
+      <div class="term-figures">
+        <h3 data-i18n="term.fig.h">Figures · Moutai walkthrough</h3>
+        <div class="term-fig-grid" id="term-gallery">
+          <button type="button" class="term-fig" data-full="assets/terminal/term-1.webp">
+            <picture><source srcset="assets/terminal/term-1.webp" type="image/webp" /><img src="assets/terminal/term-1.jpg" alt="Fig1 Chanlun + Ising" loading="lazy" /></picture>
+            <span data-i18n="term.fig1">① K-line · Chanlun · Ising</span>
+          </button>
+          <button type="button" class="term-fig" data-full="assets/terminal/term-2.webp">
+            <picture><source srcset="assets/terminal/term-2.webp" type="image/webp" /><img src="assets/terminal/term-2.jpg" alt="Fig2 V12 backtest" loading="lazy" /></picture>
+            <span data-i18n="term.fig2">② V12 backtest · MC / WF</span>
+          </button>
+          <button type="button" class="term-fig" data-full="assets/terminal/term-3.webp">
+            <picture><source srcset="assets/terminal/term-3.webp" type="image/webp" /><img src="assets/terminal/term-3.jpg" alt="Fig3 AI dialogue" loading="lazy" /></picture>
+            <span data-i18n="term.fig3">③ 6-agent dialogue</span>
+          </button>
+          <button type="button" class="term-fig" data-full="assets/terminal/term-4.webp">
+            <picture><source srcset="assets/terminal/term-4.webp" type="image/webp" /><img src="assets/terminal/term-4.jpg" alt="Fig4 LPPLS TDA" loading="lazy" /></picture>
+            <span data-i18n="term.fig4">④ LPPLS · TDA · entropy</span>
+          </button>
+          <button type="button" class="term-fig" data-full="assets/terminal/term-5.webp">
+            <picture><source srcset="assets/terminal/term-5.webp" type="image/webp" /><img src="assets/terminal/term-5.jpg" alt="Fig5 Parliament cards" loading="lazy" /></picture>
+            <span data-i18n="term.fig5">⑤ Parliament · physics cards</span>
+          </button>
+          <button type="button" class="term-fig" data-full="assets/terminal/term-6.webp">
+            <picture><source srcset="assets/terminal/term-6.webp" type="image/webp" /><img src="assets/terminal/term-6.jpg" alt="Fig6 Account snapshot" loading="lazy" /></picture>
+            <span data-i18n="term.fig6">⑥ Personal book ~¥1.00M</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="term-details">
+        <article>
+          <h3 data-i18n="term.d1t">Fig 1 · Chart + Chanlun + Ising</h3>
+          <p data-i18n="term.d1p">Standard candles with Chanlun strokes, pivots, and labeled B1/S1/B2/S3 points plus pairing lines. RSI below. Bottom: Ising force-field (long/short microstructure) and Ising thermometer (T≈2.075 · High) — a statistical-physics reading of the tape.</p>
+        </article>
+        <article>
+          <h3 data-i18n="term.d2t">Fig 2 · V12 cross-section backtest</h3>
+          <p data-i18n="term.d2p">CSI 300 constituents. Equity + underwater drawdown (Sharpe ≈ 2.60 · ann. ≈ 54% · max DD ≈ 11.6% on this run). Factor correlation matrix, importance ranks, Monte Carlo permutation, and Walk-Forward folds — overfitting checks on purpose.</p>
+        </article>
+        <article>
+          <h3 data-i18n="term.d3t">Fig 3 · Six agents, one question</h3>
+          <p data-i18n="term.d3p">Captain · Chanlun Master · Physics Engine · Factor Analyst · Risk Manager · Execution Agent. Each answers from its lane; Captain tallies a parliament verdict. DeepSeek API on the real desk — collaboration depth is still the open research question I want peers to challenge.</p>
+        </article>
+      </div>
+    </section>
 
     <!-- IDEA -->
     <section id="idea" class="section reveal">
@@ -1094,7 +1207,7 @@
     <button type="button" class="lightbox-close" id="lightbox-close" aria-label="Close">×</button>
     <img id="lightbox-img" alt="" />
   </div>
-  <script src="i18n.js?theme2"></script>
-  <script src="app.js?theme2"></script>
+  <script src="i18n.js?term2"></script>
+  <script src="app.js?term2"></script>
 </body>
 </html>

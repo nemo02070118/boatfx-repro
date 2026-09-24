@@ -575,6 +575,7 @@ function initPalette() {
   const list = document.getElementById("palette-list");
   const hint = document.getElementById("cmd-hint");
   const items = [
+    { id: "terminal", label: "00 BOAT Terminal · multi-agent desk" },
     { id: "idea", label: "01 Idea — Global Weakness" },
     { id: "tour", label: "01a Argument tour" },
     { id: "venues", label: "01b Venues — JF · EFA" },
@@ -696,6 +697,7 @@ initStackLab();
 if (window.initLangToggle) window.initLangToggle();
 initThemeToggle();
 initMobileNav();
+initBoatParliament();
 
 
 
@@ -909,8 +911,9 @@ function initWikiGallery() {
     img.src = "";
     document.body.style.overflow = "";
   }
-  document.querySelectorAll("#wiki-gallery img, #wiki-gallery .wiki-thumb, #hkex-gallery img, #hkex-gallery .wiki-thumb, #camp-gallery img, #camp-gallery .wiki-thumb").forEach((el) => {
+  document.querySelectorAll("#wiki-gallery img, #wiki-gallery .wiki-thumb, #hkex-gallery img, #hkex-gallery .wiki-thumb, #camp-gallery img, #camp-gallery .wiki-thumb, #term-gallery .term-fig").forEach((el) => {
     el.addEventListener("click", (ev) => {
+      ev.preventDefault();
       ev.stopPropagation();
       const src = el.dataset.full || el.getAttribute("src") || el.querySelector("img")?.getAttribute("src");
       if (src) open(src);
@@ -1919,5 +1922,285 @@ function initThemeToggle() {
   root.querySelectorAll("[data-theme]").forEach((btn) => {
     btn.addEventListener("click", () => apply(btn.dataset.theme));
   });
+}
+
+
+function initBoatParliament() {
+  const roster = document.getElementById("ai-roster");
+  const stream = document.getElementById("ai-stream");
+  const consensus = document.getElementById("ai-consensus");
+  const verdict = document.getElementById("ai-verdict");
+  const form = document.getElementById("ai-form");
+  const input = document.getElementById("ai-input");
+  const chips = document.getElementById("ai-chips");
+  if (!roster || !stream || !form) return;
+
+  const AGENTS = [
+    { id: "captain", color: "#e879a9", en: { name: "Captain", role: "Chief analyst · synthesis", stance: "Neutral", conf: 43 }, zh: { name: "Captain", role: "总控 · 综合裁决", stance: "中性", conf: 43 } },
+    { id: "chanlun", color: "#5ec9a8", en: { name: "Chanlun Master", role: "Strokes · pivots · B/S points", stance: "Neutral", conf: 52 }, zh: { name: "缠论大师", role: "笔 · 中枢 · 买卖点", stance: "中性", conf: 52 } },
+    { id: "physics", color: "#a78bfa", en: { name: "Physics Engine", role: "Ising · LPPLS · microstructure", stance: "Caution", conf: 61 }, zh: { name: "物理引擎", role: "伊辛 · LPPLS · 微观结构", stance: "谨慎", conf: 61 } },
+    { id: "factor", color: "#38bdf8", en: { name: "Factor Analyst", role: "V12 cross-section score", stance: "Neutral", conf: 48 }, zh: { name: "因子分析师", role: "V12 截面评分", stance: "中性", conf: 48 } },
+    { id: "risk", color: "#fb923c", en: { name: "Risk Manager", role: "Drawdown · size · stop logic", stance: "Wait", conf: 78 }, zh: { name: "风控官", role: "回撤 · 仓位 · 止损逻辑", stance: "观望", conf: 78 } },
+    { id: "exec", color: "#fbbf24", en: { name: "Execution Agent", role: "Entry · exit · staging", stance: "Wait", conf: 55 }, zh: { name: "执行官", role: "进出场 · 分批", stance: "观望", conf: 55 } },
+  ];
+
+  const SCENES = {
+    en: {
+      default: {
+        user: "Should I act on 600519.SH (Moutai) on the daily chart right now?",
+        msgs: [
+          { agent: "captain", text: "Framing the session: price ~1413, daily lens. I collect lane reports then call the vote. Priority: falsifiable structure over narrative." },
+          { agent: "chanlun", text: "Strokes and pivots are labeled; B1/S1 pairs are visible. Near-term structure does not give a clean continuation buy — overlapping pivots suggest digestion, not a fresh first-buy regime." },
+          { agent: "physics", text: "Ising T≈2.075 sits High (Tc≈2.269). Force-field mixed red/blue — no one-sided crowd. LPPLS bubble ~35% (safe band) but local down-pressure exists. Physics vote: do not chase." },
+          { agent: "factor", text: "V12 SHAP on this name: price-position strongly negative (−76% on panel), volatility positive. Cross-section edge is not screaming long vs the CSI-300 book." },
+          { agent: "risk", text: "Risk lane only: prefer wait · conf 78%. If forced, size tiny and set invalidation under the last pivot low — capital preservation beats story." },
+          { agent: "exec", text: "No staged entry until structure clears. If parliament stays wait, orders stay flat; watch for a cleaner B-side after pivot confirmation." },
+        ],
+        verdict: { title: "Parliament verdict", headline: "Continue to wait-and-see", body: "Composite confidence ~43%. Chanlun, Ising, and factor SHAP disagree enough that forced action loses to patience.", vote: { bull: 0, neutral: 4, bear: 0, wait: 2 }, conf: "43%" },
+      },
+      ising: {
+        user: "Explain why Ising is High on Moutai right now.",
+        msgs: [
+          { agent: "captain", text: "Physics-first session. I want temperature, force-field, and what High does / does not imply for size." },
+          { agent: "physics", text: "Ising maps local spin-like long/short pressure. T≈2.075 is below Tc≈2.269 but in the High band — interactions are hot, flips frequent. Heatmap red/blue mosaic = no magnetized majority." },
+          { agent: "chanlun", text: "High temperature lines up with overlapping pivots: structure is talking, not trending cleanly. That is consistent with digestion, not a one-way stroke." },
+          { agent: "factor", text: "Hot microstructure often coincides with noisy short-horizon factors. I do not treat High as a directional alpha — it is a regime flag for thinner conviction." },
+          { agent: "risk", text: "High → widen uncertainty band. Cut size, avoid pyramiding. If you trade, your stop must survive noise, not hope." },
+          { agent: "exec", text: "Execution implication: prefer limit / wait-for-confirm over market chase. No urgency premium while T stays High." },
+        ],
+        verdict: { title: "Parliament verdict", headline: "High = regime caution, not a sell call", body: "Ising High means crowded flips and weak consensus microstructure — use it to shrink size and delay urgency, not as a standalone signal.", vote: { bull: 0, neutral: 3, bear: 0, wait: 3 }, conf: "61%" },
+      },
+      b1: {
+        user: "What does the labeled B1 mean on this Moutai daily?",
+        msgs: [
+          { agent: "captain", text: "Definition session: map the labeled B1 to Chanlun doctrine, then ask whether it is actionable now." },
+          { agent: "chanlun", text: "B1 = first buy after a trend-down completion — typically the first pullback buy once a diverging bottom structure prints. On this pane B1 marks are historical anchors with pairing lines to S1, not a fresh live trigger at 1413." },
+          { agent: "physics", text: "Around prior B1 zones temperature often cooled after a flush. Today's High T does not rhyme with a classic first-buy calm." },
+          { agent: "factor", text: "First-buy labels are structure events. Factor edge still needs cross-section confirmation — label alone ≠ V12 long." },
+          { agent: "risk", text: "Do not buy a label. Buy a plan: invalidation, size, and what would falsify the B1 thesis within N bars." },
+          { agent: "exec", text: "If a new B1 sets up later: stage 1/3 on confirm, 1/3 on hold of pivot, leave 1/3 for failure. Today: no order ticket." },
+        ],
+        verdict: { title: "Parliament verdict", headline: "B1 is annotated history, not today's order", body: "Treat on-chart B1/S1 as pedagogy + audit trail. Action needs a fresh completed structure — which the board does not grant now.", vote: { bull: 0, neutral: 5, bear: 0, wait: 1 }, conf: "72%" },
+      },
+      risk: {
+        user: "If I must trade Moutai anyway, what is the risk plan?",
+        msgs: [
+          { agent: "captain", text: "Forced-trade session. Risk Manager leads; others only constrain." },
+          { agent: "risk", text: "Hard caps: ≤5% of book, hard stop under last daily pivot low, time-stop 5 sessions if structure does not clarify. No add-ons while Ising High." },
+          { agent: "chanlun", text: "Only allow a long if price reclaims and holds the nearest pivot high on rising stroke quality — otherwise stand down." },
+          { agent: "physics", text: "High T → expect stop noise. Place stop beyond microstructure jitter, not on the last tick of the force-field." },
+          { agent: "factor", text: "If SHAP price-position stays deeply negative, treat any long as tactical, not as a V12 core slot." },
+          { agent: "exec", text: "Ticket: 1/3 probe on reclaim · cancel if reject · never market into High-T spikes. Flat is still the winning default." },
+        ],
+        verdict: { title: "Parliament verdict", headline: "Tiny · invalidation-first · prefer flat", body: "Forced participation only under micro-size and explicit falsifiers. Consensus still prefers wait; this is damage control, not alpha hunting.", vote: { bull: 0, neutral: 1, bear: 0, wait: 5 }, conf: "78%" },
+      },
+    },
+    zh: {
+      default: {
+        user: "日线上贵州茅台（600519.SH）现在要不要动手？",
+        msgs: [
+          { agent: "captain", text: "本次会话：价格约 1413，日线视角。先收各车道报告再开投票。优先可证伪结构，而不是故事。" },
+          { agent: "chanlun", text: "笔与中枢已标注，B1/S1 配对可见。近端没有干净的延续性一买——中枢重叠更像消化，而不是新的一买体制。" },
+          { agent: "physics", text: "伊辛 T≈2.075 处于 High（Tc≈2.269）。力场红蓝混杂——没有单边拥挤。LPPLS 泡沫约 35%（安全带）但有局部下行压力。物理票：不追。" },
+          { agent: "factor", text: "V12 SHAP：价格位置强负向（约 −76%），波动正向。相对沪深300 截面，这里没有强烈的多头尖叫。" },
+          { agent: "risk", text: "风控只说风控：建议观望，置信度 78%。若必须做，仓位做小，并在最近中枢低点下设失效——保本优先于叙事。" },
+          { agent: "exec", text: "结构未清前不分批进场。若议会维持观望，保持空计划，等待更干净的 B 侧确认。" },
+        ],
+        verdict: { title: "议会裁决", headline: "继续观望", body: "综合置信度约 43%。缠论、伊辛与因子 SHAP 信号混杂——等待优于强行交易。", vote: { bull: 0, neutral: 4, bear: 0, wait: 2 }, conf: "43%" },
+      },
+      ising: {
+        user: "解释一下为什么茅台上伊辛是 High。",
+        msgs: [
+          { agent: "captain", text: "物理优先会话。我要温度、力场，以及 High 对仓位意味着什么、不意味着什么。" },
+          { agent: "physics", text: "伊辛把局部多空压力映射成自旋互动。T≈2.075 低于 Tc≈2.269 但仍在 High 带——互动热、翻转频繁。热力图红蓝马赛克＝没有磁化多数。" },
+          { agent: "chanlun", text: "高温与重叠中枢同向：结构在说话，但不是干净趋势。更像消化，而不是单向笔。" },
+          { agent: "factor", text: "热微观结构常伴随短周期因子噪声。High 不是方向 alpha，而是降低置信度的体制旗标。" },
+          { agent: "risk", text: "High → 加宽不确定带。砍仓、禁止加仓。若交易，止损必须扛得住噪声。" },
+          { agent: "exec", text: "执行含义：限价/等确认，优于市价追。T 仍 High 时不付急迫溢价。" },
+        ],
+        verdict: { title: "议会裁决", headline: "High = 体制谨慎，不是卖出信号", body: "伊辛 High 表示翻转拥挤、微观共识弱——用来缩仓、延后急迫，而不是单独下单依据。", vote: { bull: 0, neutral: 3, bear: 0, wait: 3 }, conf: "61%" },
+      },
+      b1: {
+        user: "图上标的 B1 在这根日线上是什么意思？",
+        msgs: [
+          { agent: "captain", text: "定义会话：把标注 B1 映射回缠论教义，再问此刻是否可交易。" },
+          { agent: "chanlun", text: "B1＝下跌趋势结束后的第一类买点——通常是背驰底结构后的首次回抽买。本图 B1 是历史锚点并与 S1 配对，不是 1413 处的新鲜触发。" },
+          { agent: "physics", text: "历史 B1 附近温度常在宣泄后回落。今日 High T 并不像经典一买的冷静区。" },
+          { agent: "factor", text: "一买标签是结构事件。因子优势仍需截面确认——标签本身 ≠ V12 做多。" },
+          { agent: "risk", text: "不要买标签。买计划：失效条件、仓位、以及多少根 K 内证伪。" },
+          { agent: "exec", text: "若日后新 B1 成立：确认 1/3、站稳中枢再 1/3、留 1/3 给失败。今日：无票。" },
+        ],
+        verdict: { title: "议会裁决", headline: "B1 是标注历史，不是今日订单", body: "把图上 B1/S1 当作教学与审计轨迹。行动需要新的完整结构——议会此刻不授予。", vote: { bull: 0, neutral: 5, bear: 0, wait: 1 }, conf: "72%" },
+      },
+      risk: {
+        user: "如果我必须交易茅台，风控方案是什么？",
+        msgs: [
+          { agent: "captain", text: "强制交易会话。风控官主笔；其他人只设约束。" },
+          { agent: "risk", text: "硬顶：账户 ≤5%，硬止损在最近日线中枢低点下，5 个交易日结构不清则时间止损。伊辛 High 期间禁止加仓。" },
+          { agent: "chanlun", text: "仅当价格收回并站稳最近中枢高点、笔质量改善时才允许多；否则停下。" },
+          { agent: "physics", text: "High T → 预期止损噪声。止损要放在微观抖动之外，而不是力场最后一跳。" },
+          { agent: "factor", text: "若 SHAP 价格位置仍深负，任何多头只当战术，不当 V12 核心仓。" },
+          { agent: "exec", text: "票据：收回确认试探 1/3 · 拒绝即撤 · 绝不在 High-T 尖刺市价追。空仓仍是默认最优。" },
+        ],
+        verdict: { title: "议会裁决", headline: "极小仓 · 失效优先 · 更想空仓", body: "强制参与只在微仓与明确证伪条件下。共识仍偏观望——这是止损方案，不是找 alpha。", vote: { bull: 0, neutral: 1, bear: 0, wait: 5 }, conf: "78%" },
+      },
+    },
+  };
+
+  const CHIP_KEYS = {
+    en: [
+      { label: "Should I buy Moutai now?", key: "default" },
+      { label: "Explain Ising High", key: "ising" },
+      { label: "What does B1 mean here?", key: "b1" },
+      { label: "Risk if I must trade", key: "risk" },
+    ],
+    zh: [
+      { label: "现在要不要买茅台？", key: "default" },
+      { label: "解释伊辛 High", key: "ising" },
+      { label: "这里的 B1 是什么", key: "b1" },
+      { label: "若必须交易的风控", key: "risk" },
+    ],
+  };
+
+  let busy = false;
+  let activeAgent = null;
+
+  function L() {
+    return (typeof langNow === "function" && langNow() === "zh") ? "zh" : "en";
+  }
+
+  function pickScene(q) {
+    const lang = L();
+    const s = (q || "").toLowerCase();
+    if (/ising|伊辛|temperature|温度|high/.test(s) && !/buy|买|b1|一买/.test(s)) return SCENES[lang].ising;
+    if (/\bb1\b|一买|first buy|买卖点/.test(s)) return SCENES[lang].b1;
+    if (/risk|风控|must|必须|仓位|stop/.test(s)) return SCENES[lang].risk;
+    return SCENES[lang].default;
+  }
+
+  function paintRoster() {
+    const lang = L();
+    roster.innerHTML = AGENTS.map((a) => {
+      const d = a[lang];
+      const on = activeAgent === a.id ? " on" : "";
+      return `<button type="button" class="ai-agent${on}" data-id="${a.id}" style="--ac:${a.color}">
+        <i></i><b>${d.name}</b><em>${d.role}</em>
+        <span class="ai-stance">${d.stance} · ${d.conf}%</span>
+      </button>`;
+    }).join("");
+    roster.querySelectorAll(".ai-agent").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        activeAgent = btn.dataset.id;
+        paintRoster();
+        const bubble = stream.querySelector(`[data-agent="${activeAgent}"]`);
+        if (bubble) bubble.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+    });
+  }
+
+  function paintChips() {
+    const lang = L();
+    chips.innerHTML = CHIP_KEYS[lang].map((c) => `<button type="button" class="ai-chip" data-key="${c.key}">${c.label}</button>`).join("");
+    chips.querySelectorAll(".ai-chip").forEach((b) => {
+      b.addEventListener("click", () => {
+        input.value = b.textContent;
+        runSession(b.textContent);
+      });
+    });
+  }
+
+  function paintConsensus(vote) {
+    const lang = L();
+    const total = Math.max(1, vote.bull + vote.neutral + vote.bear + vote.wait);
+    const rows = [
+      { k: lang === "zh" ? "看多" : "Bull", v: vote.bull, c: "#f87171" },
+      { k: lang === "zh" ? "中性" : "Neutral", v: vote.neutral, c: "#fbbf24" },
+      { k: lang === "zh" ? "看空" : "Bear", v: vote.bear, c: "#4ade80" },
+      { k: lang === "zh" ? "观望" : "Wait", v: vote.wait, c: "#94a3b8" },
+    ];
+    consensus.innerHTML = `<h4>${lang === "zh" ? "共识条" : "Consensus"}</h4>` + rows.map((r) => `
+      <div class="ai-vote"><span>${r.k}</span><div class="ai-vote-bar"><i style="width:${(r.v / total) * 100}%;background:${r.c}"></i></div><b>${r.v}</b></div>`).join("");
+  }
+
+  function sleep(ms) {
+    return new Promise((r) => setTimeout(r, ms));
+  }
+
+  async function typeBubble(agentId, text) {
+    const agent = AGENTS.find((a) => a.id === agentId);
+    const lang = L();
+    const name = agent[lang].name;
+    const el = document.createElement("article");
+    el.className = "ai-bubble";
+    el.dataset.agent = agentId;
+    el.style.setProperty("--ac", agent.color);
+    el.innerHTML = `<header><b>${name}</b><span class="mono">streaming</span></header><p></p>`;
+    stream.appendChild(el);
+    const p = el.querySelector("p");
+    const step = Math.max(1, Math.floor(text.length / 48));
+    for (let i = 0; i < text.length; i += step) {
+      p.textContent = text.slice(0, i + step);
+      stream.scrollTop = stream.scrollHeight;
+      await sleep(16);
+    }
+    p.textContent = text;
+    el.querySelector("span").textContent = "done";
+    activeAgent = agentId;
+    paintRoster();
+  }
+
+  async function runSession(q) {
+    if (busy) return;
+    busy = true;
+    const lang = L();
+    const pack = pickScene(q);
+    stream.innerHTML = "";
+    verdict.hidden = true;
+    const user = document.createElement("article");
+    user.className = "ai-bubble user";
+    user.innerHTML = `<header><b>${lang === "zh" ? "你" : "You"}</b></header><p></p>`;
+    user.querySelector("p").textContent = q || pack.user;
+    stream.appendChild(user);
+
+    for (const m of pack.msgs) {
+      await sleep(280);
+      await typeBubble(m.agent, m.text);
+    }
+    const v = pack.verdict;
+    paintConsensus(v.vote);
+    verdict.hidden = false;
+    verdict.innerHTML = `<span class="ai-verdict-k">${v.title}</span><h3></h3><p></p><em>${v.conf}</em>`;
+    verdict.querySelector("h3").textContent = v.headline;
+    verdict.querySelector("p").textContent = v.body;
+    busy = false;
+  }
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    runSession(input.value.trim() || SCENES[L()].default.user);
+  });
+
+  document.addEventListener("hj:lang", () => {
+    paintRoster();
+    paintChips();
+    if (!stream.children.length) return;
+    if (!busy) runSession(SCENES[L()].default.user);
+  });
+
+  paintRoster();
+  paintChips();
+  paintConsensus(SCENES.en.default.verdict.vote);
+  const io = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((en) => {
+        if (en.isIntersecting) {
+          runSession(SCENES[L()].default.user);
+          io.disconnect();
+        }
+      });
+    },
+    { threshold: 0.25 }
+  );
+  io.observe(document.getElementById("ai-parliament"));
 }
 
