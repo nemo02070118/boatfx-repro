@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Huannian Jin — Global Weakness, Local Strength</title>
   <meta name="description" content="Global Weakness, Local Strength — submitted to Journal of Finance; submitted to Eastern Finance Association (EFA). AI factor factory · Zheshang systems · public repro pack." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
-  <link rel="stylesheet" href="styles.css?v3d1" />
+  <link rel="stylesheet" href="styles.css?m1" />
 </head>
 <body>
   <div class="progress" id="progress" aria-hidden="true"></div>
@@ -20,7 +20,15 @@
 
   <header class="top">
     <a class="mark" href="#top" data-magnetic>HJ</a>
+    <button type="button" class="nav-burger" id="nav-burger" aria-label="Menu" aria-controls="spy-nav" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="nav-scrim" id="nav-scrim" hidden></div>
     <nav id="spy-nav">
+      <div class="nav-drawer-head">
+        <span class="nav-drawer-title" data-i18n="nav.menu">Menu</span>
+        <button type="button" class="nav-close" id="nav-close" aria-label="Close">×</button>
+      </div>
       <a href="#idea" data-spy="idea" data-i18n="nav.idea">Idea</a>
       <a href="#tour" data-spy="tour" data-i18n="nav.tour">Tour</a>
       <a href="#venues" data-spy="venues" data-i18n="nav.venues">Venues</a>
@@ -1072,7 +1080,7 @@
     <button type="button" class="lightbox-close" id="lightbox-close" aria-label="Close">×</button>
     <img id="lightbox-img" alt="" />
   </div>
-  <script src="i18n.js?v3d1"></script>
-  <script src="app.js?v3d1"></script>
+  <script src="i18n.js?m1"></script>
+  <script src="app.js?m1"></script>
 </body>
 </html>

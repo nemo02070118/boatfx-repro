@@ -694,6 +694,7 @@ initHkexLab();
 initCampLab();
 initStackLab();
 if (window.initLangToggle) window.initLangToggle();
+initMobileNav();
 
 
 
@@ -1846,5 +1847,46 @@ function initCampLab() {
       },
     },
   ]);
+}
+
+
+function initMobileNav() {
+  const burger = document.getElementById("nav-burger");
+  const nav = document.getElementById("spy-nav");
+  const scrim = document.getElementById("nav-scrim");
+  const closeBtn = document.getElementById("nav-close");
+  if (!burger || !nav) return;
+
+  function open() {
+    document.body.classList.add("nav-open");
+    burger.setAttribute("aria-expanded", "true");
+    if (scrim) scrim.hidden = false;
+    document.body.style.overflow = "hidden";
+  }
+  function close() {
+    document.body.classList.remove("nav-open");
+    burger.setAttribute("aria-expanded", "false");
+    if (scrim) scrim.hidden = true;
+    document.body.style.overflow = "";
+  }
+  function toggle() {
+    if (document.body.classList.contains("nav-open")) close();
+    else open();
+  }
+
+  burger.addEventListener("click", toggle);
+  closeBtn?.addEventListener("click", close);
+  scrim?.addEventListener("click", close);
+  nav.querySelectorAll("a[href^='#']").forEach((a) => {
+    a.addEventListener("click", () => {
+      if (matchMedia("(max-width: 980px)").matches) close();
+    });
+  });
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") close();
+  });
+  window.addEventListener("resize", () => {
+    if (!matchMedia("(max-width: 980px)").matches) close();
+  });
 }
 
