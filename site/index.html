@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
-  <link rel="stylesheet" href="styles.css?v3b1" />
+  <link rel="stylesheet" href="styles.css?v3c1" />
 </head>
 <body>
   <div class="progress" id="progress" aria-hidden="true"></div>
@@ -76,11 +76,17 @@
       </div>
         </div>
         <aside class="hero-portrait" aria-label="Portrait">
-          <button type="button" class="portrait-main" data-full="assets/portrait/portrait-1.jpg" aria-label="Portrait 1">
-            <img src="assets/portrait/portrait-1.jpg" alt="Huannian Jin — portrait" width="640" height="800" />
+          <button type="button" class="portrait-main" data-full="assets/portrait/portrait-1.webp" aria-label="Portrait 1">
+            <picture>
+              <source srcset="assets/portrait/portrait-1.webp" type="image/webp" />
+              <img src="assets/portrait/portrait-1.jpg" alt="Huannian Jin — portrait" width="640" height="800" loading="eager" decoding="async" />
+            </picture>
           </button>
-          <button type="button" class="portrait-alt" data-full="assets/portrait/portrait-2.jpg" aria-label="Portrait 2">
-            <img src="assets/portrait/portrait-2.jpg" alt="Huannian Jin — alternate portrait" width="480" height="600" />
+          <button type="button" class="portrait-alt" data-full="assets/portrait/portrait-2.webp" aria-label="Portrait 2">
+            <picture>
+              <source srcset="assets/portrait/portrait-2.webp" type="image/webp" />
+              <img src="assets/portrait/portrait-2.jpg" alt="Huannian Jin — alternate portrait" width="480" height="600" loading="lazy" decoding="async" />
+            </picture>
           </button>
           <p class="portrait-cap" data-i18n="hero.portrait.cap">Huannian Jin · independent researcher</p>
         </aside>
@@ -543,11 +549,7 @@
     <section id="factory" class="section reveal factory">
       <p class="section-kicker" data-i18n="factory.kicker">05 · AI agent factory</p>
       <h2 data-i18n="factory.title">Visible traces — not chatbot cosplay</h2>
-      <p class="section-lede">
-        Agents emit typed ASTs over nine microstructure signals. Admission requires
-        executability, non-constancy, dispersion, and an economic rationale.
-        Click a pipeline gate — see what the model is allowed to do.
-      </p>
+      <p class="section-lede"><span data-i18n="factory.lede">Agents emit typed ASTs over nine microstructure signals.</span></p>
 
       <div class="pipeline interactive" id="pipeline" aria-label="Agent pipeline">
         <button type="button" class="pipe-step active" data-pipe="0"><span>01</span>LLM propose</button>
@@ -561,7 +563,7 @@
 
       <div class="factor-panel">
         <div class="factor-list" id="factor-list"></div>
-        <div class="factor-detail" id="factor-detail"><p class="hint">Select a machine-emitted factor →</p></div>
+        <div class="factor-detail" id="factor-detail"><p class="hint" data-i18n="factory.hint">Select a machine-emitted factor →</p></div>
       </div>
     </section>
 
@@ -573,63 +575,61 @@
 
       <div class="letter-layout">
         <div class="letter-metrics">
-          <div><b>56</b><span>modules from ground up</span></div>
-          <div><b>~64k</b><span>lines of code</span></div>
-          <div><b>&gt;95%</b><span>test coverage</span></div>
-          <div><b>1</b><span>sole developer · task system</span></div>
+          <div><b>56</b><span data-i18n="letter.m1">modules from ground up</span></div>
+          <div><b>~64k</b><span data-i18n="letter.m2">lines of code</span></div>
+          <div><b>&gt;95%</b><span data-i18n="letter.m3">test coverage</span></div>
+          <div><b>1</b><span data-i18n="letter.m4">sole developer · task system</span></div>
         </div>
-        <blockquote class="letter-quote">
-          “He independently completed the decomposition of complex modules, built the system’s
-          mathematical foundation layer and data processing layer… demonstrating excellent
-          systems thinking and architectural design ability.”
-          <footer>— Liao Jingchi, Managing Director, Zheshang Securities</footer>
+        <blockquote class="letter-quote"><span data-i18n="letter.quote">Quote</span>
+          <footer><span data-i18n="letter.quote.f">— Liao Jingchi, Managing Director, Zheshang Securities</span></footer>
         </blockquote>
         <figure class="letter-fig">
           <img src="assets/recommendation-letter.jpg" alt="Recommendation letter from Liao Jingchi, Managing Director, Zheshang Securities" />
-          <figcaption>Signed MD letter on file · available to Academy admissions (password-gated with JF manuscript)</figcaption>
+          <figcaption><span data-i18n="letter.fig">Signed MD letter on file</span></figcaption>
         </figure>
       </div>
 
       <div class="letter-detail">
         <article>
-          <h3>What he owned</h3>
+          <h3 data-i18n="letter.o1t">What he owned</h3>
           <ul>
-            <li>Fully involved in design &amp; development of the firm’s <strong>quantitative trading system</strong></li>
-            <li><strong>Sole developer</strong> of the task subsystem — complex architecture, end-to-end delivery</li>
-            <li>Built mathematical foundation layer, data processing layer, and multiple core modules from scratch</li>
-            <li>Shipped <strong>56 modules · ~64,000 LoC · &gt;95% test coverage</strong> under a rigorous QA framework</li>
+            <li data-i18n="letter.o1a">Fully involved in design &amp; development of the firm’s quantitative trading system</li>
+            <li data-i18n="letter.o1b">Sole developer of the task subsystem — complex architecture, end-to-end delivery</li>
+            <li data-i18n="letter.o1c">Built mathematical foundation layer, data processing layer, and multiple core modules from scratch</li>
+            <li data-i18n="letter.o1d">Shipped 56 modules · ~64,000 LoC · &gt;95% test coverage under a rigorous QA framework</li>
           </ul>
         </article>
         <article>
-          <h3>Engineering depth (letter)</h3>
+          <h3 data-i18n="letter.o2t">Engineering depth (letter)</h3>
           <ul>
-            <li>High-precision computation</li>
-            <li>Distributed data storage</li>
-            <li>Real-time data synchronization</li>
-            <li>Dependency management for complex systems</li>
-            <li>Root-cause debugging under production pressure</li>
+            <li data-i18n="letter.o2a">High-precision computation</li>
+            <li data-i18n="letter.o2b">Distributed data storage</li>
+            <li data-i18n="letter.o2c">Real-time data synchronization</li>
+            <li data-i18n="letter.o2d">Dependency management for complex systems</li>
+            <li data-i18n="letter.o2e">Root-cause debugging under production pressure</li>
           </ul>
         </article>
         <article>
-          <h3>How he worked</h3>
+          <h3 data-i18n="letter.o3t">How he worked</h3>
           <ul>
-            <li>Integrated quantitative trading business logic into system architecture</li>
-            <li>Clear technical communication; proactive alignment with business requirements</li>
-            <li>Described as rigorous, efficient, meticulous, highly focused, and passionate about quant finance</li>
-            <li>MD endorsement: <em>highest recommendation</em> for graduate programs</li>
+            <li data-i18n="letter.o3a">Integrated quantitative trading business logic into system architecture</li>
+            <li data-i18n="letter.o3b">Clear technical communication; proactive alignment with business requirements</li>
+            <li data-i18n="letter.o3c">Described as rigorous, efficient, meticulous, highly focused, and passionate about quant finance</li>
+            <li data-i18n="letter.o3d">MD endorsement: highest recommendation for graduate programs</li>
           </ul>
         </article>
       </div>
 
       <div class="letter-tags">
-        <span>High-precision computation</span>
-        <span>Distributed storage</span>
-        <span>Realtime sync</span>
-        <span>Math → production systems</span>
-        <span>Root-cause debugging</span>
-        <span>Sole owner · task system</span>
-        <span>MD highest recommendation</span>
+        <span data-i18n="letter.tag1">High-precision computation</span>
+        <span data-i18n="letter.tag2">Distributed storage</span>
+        <span data-i18n="letter.tag3">Realtime sync</span>
+        <span data-i18n="letter.tag4">Math → production systems</span>
+        <span data-i18n="letter.tag5">Root-cause debugging</span>
+        <span data-i18n="letter.tag6">Sole owner · task system</span>
+        <span data-i18n="letter.tag7">MD highest recommendation</span>
       </div>
+
     </section>
 
     <!-- EDGE vs peers -->
@@ -639,24 +639,24 @@
       <p class="section-lede"><span data-i18n="edge.lede">The Founding Class includes apps, hardware, nonprofits, ARR. Official language also counts original research as built. My instrument is inspectable judgment under AI-scale factor supply.</span></p>
       <div class="edge-grid">
         <article>
-          <h3>Common Stage-1 surfaces</h3>
+          <h3 data-i18n="edge.a1t">Common Stage-1 surfaces</h3>
           <ul>
-            <li>Product demos · audience · ARR</li>
-            <li>Hardware / community / teaching</li>
-            <li>“I used AI to ship faster”</li>
-            <li>One metric, thin falsification</li>
+            <li data-i18n="edge.a1a">Product demos · audience · ARR</li>
+            <li data-i18n="edge.a1b">Hardware / community / teaching</li>
+            <li data-i18n="edge.a1c">“I used AI to ship faster”</li>
+            <li data-i18n="edge.a1d">One metric, thin falsification</li>
           </ul>
         </article>
         <article class="edge-you">
-          <h3>This surface (research × systems)</h3>
+          <h3 data-i18n="edge.a2t">This surface (research × systems)</h3>
           <ul>
-            <li><b>JF</b> MS 2026-0738: passed desk · external review (Schoar) + <b>EFA</b></li>
-            <li>AI×quant factory with <b>gates</b> — propose cheap, admit expensive</li>
-            <li>Falsification excess <b>6.4×</b> · claim tiers stated upfront</li>
-            <li>Public repro · CI greens · walkthrough video</li>
-            <li>Zheshang MD letter: sole task-system owner · 56 modules · 64k LoC · &gt;95%</li>
-            <li><b>Academic leave</b> from Shanghai Lixin to pursue this research full-time · still ≤1 year of college completed</li>
-            <li>Killed own wrong regime layer when data said no</li>
+            <li data-i18n="edge.a2a">JF MS 2026-0738: passed desk · external review (Schoar) + EFA</li>
+            <li data-i18n="edge.a2b">AI×quant factory with gates — propose cheap, admit expensive</li>
+            <li data-i18n="edge.a2c">Falsification excess 6.4× · claim tiers stated upfront</li>
+            <li data-i18n="edge.a2d">Public repro · CI greens · walkthrough video</li>
+            <li data-i18n="edge.a2e">Zheshang MD letter: sole task-system owner · 56 modules · 64k LoC · &gt;95%</li>
+            <li data-i18n="edge.a2f">Academic leave from Shanghai Lixin · still ≤1 year of college completed</li>
+            <li data-i18n="edge.a2g">Killed own wrong regime layer when data said no</li>
           </ul>
         </article>
       </div>
@@ -664,55 +664,43 @@
 
     <!-- AI × QUANT -->
     <section id="fusion" class="section reveal">
-      <p class="section-kicker">06e · AI × quant</p>
-      <h2>Not “AI for trading tweets” — a gated research factory</h2>
-      <p class="section-lede">
-        The Academy asks for agency when something captures attention.
-        What captured mine: machines will flood the factor zoo; the screen will still be unconditional.
-        So I built the loop that makes that diagnosis testable — and I took leave to push it harder.
-      </p>
+      <p class="section-kicker" data-i18n="fusion.kicker">06e · AI × quant</p>
+      <h2 data-i18n="fusion.title">Not “AI for trading tweets” — a gated research factory</h2>
+      <p class="section-lede" data-i18n="fusion.lede">The Academy asks for agency when something captures attention.</p>
       <div class="fusion-grid">
         <article>
-          <h3>AI side</h3>
+          <h3 data-i18n="fusion.ai.t">AI side</h3>
           <ul>
-            <li>LLM agents propose typed factor ASTs (DeepSeek breadth · Claude/GPT depth)</li>
-            <li>Sandbox + constitution + rationale gates before admission</li>
-            <li>Same vibe-coding stack for the public site: Cursor / Claude Code / Codex / OpenAI / cloud agents</li>
-            <li>Policy as code: <span class="mono">AGENTS.md</span> · human gate · CI</li>
+            <li data-i18n="fusion.ai.a">LLM agents propose typed factor ASTs</li>
+            <li data-i18n="fusion.ai.b">Sandbox + constitution + rationale gates before admission</li>
+            <li data-i18n="fusion.ai.c">Same vibe-coding stack for the public site</li>
+            <li data-i18n="fusion.ai.d">Policy as code: AGENTS.md · human gate · CI</li>
           </ul>
         </article>
         <article>
-          <h3>Quant side</h3>
+          <h3 data-i18n="fusion.q.t">Quant side</h3>
           <ul>
-            <li>Proposition 2 blind-spot identity · hierarchical own-regime tilt</li>
-            <li>OSAP deployable economics · Romano–Wolf / e-BH / Lo (2002)</li>
-            <li>6,881 machine factors studied as a population — including discards</li>
-            <li>Production systems internship: math layer → data layer → 56 modules</li>
+            <li data-i18n="fusion.q.a">Proposition 2 blind-spot identity · hierarchical own-regime tilt</li>
+            <li data-i18n="fusion.q.b">OSAP deployable economics · Romano–Wolf / e-BH / Lo (2002)</li>
+            <li data-i18n="fusion.q.c">6,881 machine factors studied as a population — including discards</li>
+            <li data-i18n="fusion.q.d">Production systems internship: math layer → data layer → 56 modules</li>
           </ul>
         </article>
         <article class="fusion-join">
-          <h3>The join</h3>
-          <p>
-            AI expands the proposal set. Quant discipline decides what enters science.
-            The paper’s load-bearing claim is not “the model is smart” —
-            it is that <strong>unconditional screening misses state-dependent premia</strong>,
-            and that the miss is recoverable under falsification-grade tests.
-          </p>
-          <p class="fusion-cta">
-            Long game: keep tightening identification, broaden assets carefully,
-            and keep the public receipt surface honest while the private monorepo grows.
-          </p>
+          <h3 data-i18n="fusion.j.t">The join</h3>
+          <p data-i18n="fusion.j.p">AI expands the proposal set. Quant discipline decides what enters science.</p>
+          <p class="fusion-cta" data-i18n="fusion.j.cta">Long game: keep tightening identification.</p>
         </article>
       </div>
       <div class="fusion-lab" id="fusion-lab">
         <div class="fusion-lab-head">
-          <h3>Live contrast · what each side owns</h3>
-          <p>Toggle AI vs Quant emphasis — see the same pipeline with different ownership highlights.</p>
+          <h3 data-i18n="fusion.lab.h">Live contrast · what each side owns</h3>
+          <p data-i18n="fusion.lab.p">Toggle AI vs Quant emphasis.</p>
         </div>
         <div class="fusion-toggles">
-          <button type="button" class="fusion-tog active" data-focus="both">Both</button>
-          <button type="button" class="fusion-tog" data-focus="ai">AI owns proposal</button>
-          <button type="button" class="fusion-tog" data-focus="quant">Quant owns admission</button>
+          <button type="button" class="fusion-tog active" data-focus="both" data-i18n="fusion.tog.both">Both</button>
+          <button type="button" class="fusion-tog" data-focus="ai" data-i18n="fusion.tog.ai">AI owns proposal</button>
+          <button type="button" class="fusion-tog" data-focus="quant" data-i18n="fusion.tog.quant">Quant owns admission</button>
         </div>
         <div class="fusion-flow" id="fusion-flow"></div>
       </div>
@@ -720,68 +708,58 @@
 
     <!-- BUILD CRAFT -->
     <section id="craft" class="section reveal">
-      <p class="section-kicker">06c · Engineering discipline</p>
-      <h2>How work actually ships</h2>
-      <p class="section-lede">
-        I use agents every day. That is normal.
-        What I refuse is <em>ungated speed</em> — the same refusal as the factor factory.
-      </p>
+      <p class="section-kicker" data-i18n="craft.kicker">06c · Engineering discipline</p>
+      <h2 data-i18n="craft.title">How work actually ships</h2>
+      <p class="section-lede" data-i18n="craft.lede">I use agents every day. That is normal.</p>
       <div class="craft-grid">
         <article>
-          <h3>Loop</h3>
-          <p><span class="mono">intent → agent draft → human gate → verify → CI → ship</span>. Cursor, Claude Code, Codex, OpenAI, cloud agents draft; I own taste, numbers, and merge.</p>
+          <h3 data-i18n="craft.1t">Loop</h3>
+          <p data-i18n="craft.1p">intent → agent draft → human gate → verify → CI → ship.</p>
         </article>
         <article>
-          <h3>Policy as code</h3>
-          <p>Machine-readable rules live in <span class="mono">AGENTS.md</span>, <span class="mono">VIBE_CODING.md</span>, <span class="mono">DISCIPLINE.md</span>, <span class="mono">CONTRIBUTING.md</span>, <span class="mono">SECURITY.md</span>.</p>
+          <h3 data-i18n="craft.2t">Policy as code</h3>
+          <p data-i18n="craft.2p">Machine-readable rules live in AGENTS.md…</p>
         </article>
         <article>
-          <h3>Thin public surface</h3>
-          <p>Static <span class="mono">site/</span> on purpose — fast for reviewers on phones. Research lung = Python repro. Factory guts = curated Rust excerpts.</p>
+          <h3 data-i18n="craft.3t">Thin public surface</h3>
+          <p data-i18n="craft.3p">Static site/ on purpose — fast for reviewers on phones.</p>
         </article>
         <article>
-          <h3>Fail closed</h3>
-          <p>No invented metrics. No JF PDF in public git. No keys in repo. Red CI = no ship. Essay and walkthrough stay human-voiced.</p>
+          <h3 data-i18n="craft.4t">Fail closed</h3>
+          <p data-i18n="craft.4p">No invented metrics. No JF PDF in public git.</p>
         </article>
         <article>
-          <h3>Same gates as research</h3>
-          <p>LLM propose → type-check → sandbox → constitution → admit. Coding agents get the same philosophy: draft freely, enter only through gates.</p>
+          <h3 data-i18n="craft.5t">Same gates as research</h3>
+          <p data-i18n="craft.5p">LLM propose → type-check → sandbox → constitution → admit.</p>
         </article>
         <article>
-          <h3>Receipts</h3>
-          <p>Local <span class="mono">scripts/verify.*</span> · Actions <span class="mono">repro-smoke</span> + <span class="mono">pages</span> · measured scale in <span class="mono">SCALE.md</span>.</p>
+          <h3 data-i18n="craft.6t">Receipts</h3>
+          <p data-i18n="craft.6p">Local scripts/verify.* · Actions repro-smoke + pages.</p>
         </article>
       </div>
     </section>
 
     <!-- SCALE -->
     <section id="scale" class="section reveal">
-      <p class="section-kicker">06d · Engineering mass</p>
-      <h2>Large private body · thin public receipt</h2>
-      <p class="section-lede">
-        Competitors dump folders. I show <em>partition</em>:
-        a serious monorepo behind the curtain, and a public surface you can verify in minutes.
-      </p>
+      <p class="section-kicker" data-i18n="scale.kicker">06d · Engineering mass</p>
+      <h2 data-i18n="scale.title">Large private body · thin public receipt</h2>
+      <p class="section-lede" data-i18n="scale.lede">Competitors dump folders. I show partition.</p>
       <div class="letter-metrics scale-metrics">
-        <div><b>12</b><span>crates in private boatfx</span></div>
-        <div><b>~2.3k</b><span>Rust source files</span></div>
-        <div><b>~670k</b><span>Rust LoC (ex-build)</span></div>
-        <div><b>77</b><span>llm_agent modules</span></div>
-        <div><b>56</b><span>Zheshang modules shipped</span></div>
-        <div><b>&gt;95%</b><span>enterprise coverage</span></div>
+        <div><b>12</b><span data-i18n="scale.m1">crates in private boatfx</span></div>
+        <div><b>~2.3k</b><span data-i18n="scale.m2">Rust source files</span></div>
+        <div><b>~670k</b><span data-i18n="scale.m3">Rust LoC (ex-build)</span></div>
+        <div><b>77</b><span data-i18n="scale.m4">llm_agent modules</span></div>
+        <div><b>56</b><span data-i18n="scale.m5">Zheshang modules shipped</span></div>
+        <div><b>&gt;95%</b><span data-i18n="scale.m6">enterprise coverage</span></div>
       </div>
-      <p class="section-lede" style="margin-top:1.25rem">
-        Public GitHub is deliberately small: live site · <span class="mono">python repro.py</span> · CI greens · curated Rust excerpts.
-        Measurement notes live in <span class="mono">SCALE.md</span>. Discipline standard: <span class="mono">DISCIPLINE.md</span>.
-        Walkthrough should show a <em>live verify</em> — not a file-tree scroll.
-      </p>
+      <p class="section-lede" style="margin-top:1.25rem" data-i18n="scale.note">Public GitHub is deliberately small.</p>
     </section>
 
     <!-- PROOF -->
     <section id="proof" class="section reveal">
-      <p class="section-kicker">07 · Proof of work</p>
-      <h2>Verify in one command</h2>
-      <p class="section-lede">Headline arithmetic regenerates from shipped tilt output—no router source required.</p>
+      <p class="section-kicker" data-i18n="proof.kicker">07 · Proof of work</p>
+      <h2 data-i18n="proof.title">Verify in one command</h2>
+      <p class="section-lede" data-i18n="proof.lede">Headline arithmetic regenerates from shipped tilt output—no router source required.</p>
 
       <div class="terminal-block">
         <div class="terminal-bar"><span></span><span></span><span></span><i>boatfx-repro</i></div>
@@ -789,10 +767,10 @@
       </div>
 
       <ul class="proof-list">
-        <li>Public grammar + 60 sample factors with rationales · <span class="mono">python repro.py</span> → 60/60</li>
-        <li>Tilt <em>output</em> shipped · <span class="mono">python reproduce_headline.py</span> → ~172 bps · IR ≈ 2</li>
-        <li>Full pool &amp; ranking policy withheld on purpose — documented boundary, not omission</li>
-        <li>JF MS 2026-0738 · passed desk · external review (editor: Antoinette Schoar) · EFA submitted · PDF password-gated</li>
+        <li data-i18n="proof.l1">Public grammar + 60 sample factors · python repro.py → 60/60</li>
+        <li data-i18n="proof.l2">Tilt output shipped · python reproduce_headline.py → ~172 bps · IR ≈ 2</li>
+        <li data-i18n="proof.l3">Full pool &amp; ranking policy withheld on purpose</li>
+        <li data-i18n="proof.l4">JF MS 2026-0738 · passed desk · external review · EFA submitted</li>
       </ul>
     </section>
 
@@ -818,17 +796,28 @@
 
       <div class="wiki-gallery" id="wiki-gallery">
         <figure class="wiki-hero" data-wiki="badge">
-          <img src="assets/wiki/wiki-5.jpg" alt="VIP badge — Wiki Finance Expo Hong Kong 2026" data-full="assets/wiki/wiki-5.jpg" />
+          <img src="assets/wiki/wiki-5.jpg" data-webp="assets/wiki/wiki-5.webp" alt="VIP badge — Wiki Finance Expo Hong Kong 2026" data-full="assets/wiki/wiki-5.webp" />
           <figcaption data-i18n="field.cap.badge">VIP badge · TRADEHALL · 23–24 July 2026</figcaption>
         </figure>
         <div class="wiki-grid">
-          <button type="button" class="wiki-thumb" data-wiki="floor" data-full="assets/wiki/wiki-1.jpg"><img src="assets/wiki/wiki-1.jpg" alt="Expo floor" /><span data-i18n="field.cap.floor">Expo floor</span></button>
-          <button type="button" class="wiki-thumb" data-wiki="after" data-full="assets/wiki/wiki-2.jpg"><img src="assets/wiki/wiki-2.jpg" alt="After party" /><span data-i18n="field.cap.after">After party</span></button>
-          <button type="button" class="wiki-thumb" data-wiki="pose" data-full="assets/wiki/wiki-3.jpg"><img src="assets/wiki/wiki-3.jpg" alt="VIP on floor" /><span data-i18n="field.cap.pose">VIP guest</span></button>
-          <button type="button" class="wiki-thumb" data-wiki="panel" data-full="assets/wiki/wiki-4.jpg"><img src="assets/wiki/wiki-4.jpg" alt="Panel hall" /><span data-i18n="field.cap.panel">Panel hall</span></button>
+          <button type="button" class="wiki-thumb" data-wiki="floor" data-full="assets/wiki/wiki-1.webp">
+            <picture><source srcset="assets/wiki/wiki-1.webp" type="image/webp" /><img src="assets/wiki/wiki-1.jpg" alt="Expo floor" loading="lazy" decoding="async" /></picture>
+            <span data-i18n="field.cap.floor">Expo floor</span>
+          </button>
+          <button type="button" class="wiki-thumb" data-wiki="after" data-full="assets/wiki/wiki-2.webp">
+            <picture><source srcset="assets/wiki/wiki-2.webp" type="image/webp" /><img src="assets/wiki/wiki-2.jpg" alt="After party" loading="lazy" decoding="async" /></picture>
+            <span data-i18n="field.cap.after">After party</span>
+          </button>
+          <button type="button" class="wiki-thumb" data-wiki="pose" data-full="assets/wiki/wiki-3.webp">
+            <picture><source srcset="assets/wiki/wiki-3.webp" type="image/webp" /><img src="assets/wiki/wiki-3.jpg" alt="VIP on floor" loading="lazy" decoding="async" /></picture>
+            <span data-i18n="field.cap.pose">VIP guest</span>
+          </button>
+          <button type="button" class="wiki-thumb" data-wiki="panel" data-full="assets/wiki/wiki-4.webp">
+            <picture><source srcset="assets/wiki/wiki-4.webp" type="image/webp" /><img src="assets/wiki/wiki-4.jpg" alt="Panel hall" loading="lazy" decoding="async" /></picture>
+            <span data-i18n="field.cap.panel">Panel hall</span>
+          </button>
         </div>
       </div>
-
 
       <div class="field-dossier">
         <header>
@@ -945,7 +934,7 @@
     <button type="button" class="lightbox-close" id="lightbox-close" aria-label="Close">×</button>
     <img id="lightbox-img" alt="" />
   </div>
-  <script src="i18n.js?v3b1"></script>
-  <script src="app.js?v3b1"></script>
+  <script src="i18n.js?v3c1"></script>
+  <script src="app.js?v3c1"></script>
 </body>
 </html>

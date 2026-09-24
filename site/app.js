@@ -421,7 +421,11 @@ function initRegimeCanvas() {
     mouse.y = (e.clientY - r.top) / r.height;
   });
 
-  const particles = Array.from({ length: 64 }, () => ({
+  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches
+    || matchMedia("(max-width: 720px)").matches
+    || matchMedia("(pointer: coarse)").matches;
+  const particleN = reduceMotion ? 18 : 64;
+  const particles = Array.from({ length: particleN }, () => ({
     x: Math.random(),
     y: 0.15 + Math.random() * 0.7,
     local: Math.random(),
@@ -434,7 +438,7 @@ function initRegimeCanvas() {
     const t = (now - t0) / 1000;
     const dpr = Math.min(devicePixelRatio || 1, 2);
     const cssW = canvas.clientWidth || 1400;
-    const cssH = 480;
+    const cssH = reduceMotion ? 280 : 480;
     canvas.width = cssW * dpr;
     canvas.height = cssH * dpr;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -492,7 +496,7 @@ function initRegimeCanvas() {
     ctx.fillText("X = discarded by global t", 24, cssH - 14);
     ctx.fillText("Dot size / opacity = continuous state weight", mid + 24, cssH - 14);
 
-    requestAnimationFrame(frame);
+    if (!reduceMotion || document.visibilityState === "visible") requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
 }
@@ -700,24 +704,25 @@ function initFusionFocus() {
   const togs = document.querySelectorAll(".fusion-tog");
   if (!flow || !togs.length) return;
   const NODES = [
-    { id: "propose", label: "LLM propose", side: "ai" },
-    { id: "type", label: "Type-check", side: "both" },
-    { id: "sand", label: "Sandbox", side: "both" },
-    { id: "rat", label: "Rationale", side: "quant" },
-    { id: "admit", label: "Admit / gates", side: "quant" },
-    { id: "study", label: "Study discards", side: "quant" },
+    { id: "propose", en: "LLM propose", zh: "LLM 提案", side: "ai" },
+    { id: "type", en: "Type-check", zh: "类型检查", side: "both" },
+    { id: "sand", en: "Sandbox", zh: "沙箱", side: "both" },
+    { id: "rat", en: "Rationale", zh: "经济理由", side: "quant" },
+    { id: "admit", en: "Admit / gates", zh: "准入 / 闸门", side: "quant" },
+    { id: "study", en: "Study discards", zh: "研究丢弃", side: "quant" },
   ];
+  let focusNow = "both";
   function render(focus) {
+    focusNow = focus;
+    const L = (typeof langNow === "function" ? langNow() : "en") === "zh" ? "zh" : "en";
     flow.innerHTML = NODES.map((n) => {
-      const on =
-        focus === "both" ||
-        n.side === "both" ||
-        n.side === focus;
-      return `<div class="fusion-node ${on ? "on" : "dim"}" data-side="${n.side}"><span>${n.label}</span></div>`;
+      const on = focus === "both" || n.side === "both" || n.side === focus;
+      return `<div class="fusion-node ${on ? "on" : "dim"}" data-side="${n.side}"><span>${n[L]}</span></div>`;
     }).join('<div class="fusion-arrow" aria-hidden="true">→</div>');
     togs.forEach((t) => t.classList.toggle("active", t.dataset.focus === focus));
   }
   togs.forEach((t) => t.addEventListener("click", () => render(t.dataset.focus)));
+  document.addEventListener("hj:lang", () => render(focusNow));
   render("both");
 }
 
@@ -924,7 +929,7 @@ function initFieldLab() {
   const CH = [
     {
       id: "invite",
-      img: "assets/wiki/wiki-5.jpg",
+      img: "assets/wiki/wiki-5.webp",
       en: {
         k: "01 · Invite",
         t: "VIP credential — not a hallway pass",
@@ -940,7 +945,7 @@ function initFieldLab() {
     },
     {
       id: "floor",
-      img: "assets/wiki/wiki-1.jpg",
+      img: "assets/wiki/wiki-1.webp",
       en: {
         k: "02 · Floor",
         t: "Branded marble · WikiGold · partner strip",
@@ -956,7 +961,7 @@ function initFieldLab() {
     },
     {
       id: "panel",
-      img: "assets/wiki/wiki-4.jpg",
+      img: "assets/wiki/wiki-4.webp",
       en: {
         k: "03 · Rooms",
         t: "RWA / tokenization · institutional adoption",
@@ -972,7 +977,7 @@ function initFieldLab() {
     },
     {
       id: "pose",
-      img: "assets/wiki/wiki-3.jpg",
+      img: "assets/wiki/wiki-3.webp",
       en: {
         k: "04 · Presence",
         t: "On the floor with a lanyard — agency visible",
@@ -988,7 +993,7 @@ function initFieldLab() {
     },
     {
       id: "after",
-      img: "assets/wiki/wiki-2.jpg",
+      img: "assets/wiki/wiki-2.webp",
       en: {
         k: "05 · After",
         t: "After party · same brand, different temperature",

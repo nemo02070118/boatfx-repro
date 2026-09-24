@@ -2258,3 +2258,57 @@ body.lang-zh .section-kicker {
     margin-bottom: 1.5rem;
   }
 }
+
+
+/* --- mobile perf v3c --- */
+@media (max-width: 720px) {
+  .hero-top {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+  .hero-portrait {
+    position: relative;
+    width: min(100%, 280px);
+    aspect-ratio: 4 / 5;
+    justify-self: start;
+    margin: 0 0 2rem;
+  }
+  .portrait-alt {
+    display: none; /* single-column: show primary only on small phones */
+  }
+  .portrait-cap {
+    right: 0;
+    bottom: -1.6rem;
+  }
+  .hero-stage canvas {
+    max-height: 280px;
+  }
+  .wiki-hero img,
+  .wiki-thumb img,
+  .field-shot img {
+    max-height: 240px;
+  }
+}
+
+@media (max-width: 900px) and (min-width: 721px) {
+  .hero-portrait {
+    width: min(260px, 55vw);
+  }
+  .portrait-alt {
+    width: 38%;
+    right: -4%;
+    bottom: -4%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portrait-main img,
+  .portrait-alt img,
+  .wiki-thumb img,
+  .field-shot img {
+    transition: none !important;
+  }
+  .marquee-track {
+    animation: none !important;
+  }
+}
