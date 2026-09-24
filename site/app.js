@@ -694,6 +694,7 @@ initHkexLab();
 initCampLab();
 initStackLab();
 if (window.initLangToggle) window.initLangToggle();
+initThemeToggle();
 initMobileNav();
 
 
@@ -1887,6 +1888,36 @@ function initMobileNav() {
   });
   window.addEventListener("resize", () => {
     if (!matchMedia("(max-width: 980px)").matches) close();
+  });
+}
+
+
+function initThemeToggle() {
+  const root = document.getElementById("theme-switch");
+  if (!root) return;
+
+  function apply(theme) {
+    const t = theme === "dark" ? "dark" : "light";
+    document.documentElement.setAttribute("data-theme", t);
+    document.documentElement.style.colorScheme = t;
+    try { localStorage.setItem("hj-theme", t); } catch (e) {}
+    root.querySelectorAll("[data-theme]").forEach((btn) => {
+      const on = btn.dataset.theme === t;
+      btn.classList.toggle("active", on);
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    document.dispatchEvent(new CustomEvent("hj:theme", { detail: { theme: t } }));
+  }
+
+  let theme = "light";
+  try {
+    theme = localStorage.getItem("hj-theme")
+      || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  } catch (e) {}
+  apply(theme);
+
+  root.querySelectorAll("[data-theme]").forEach((btn) => {
+    btn.addEventListener("click", () => apply(btn.dataset.theme));
   });
 }
 

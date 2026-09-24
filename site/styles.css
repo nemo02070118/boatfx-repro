@@ -1,4 +1,6 @@
-:root {
+:root,
+html[data-theme="light"] {
+  color-scheme: light;
   --bg: #ebeff3;
   --bg-deep: #dde3ea;
   --ink: #0a1018;
@@ -9,9 +11,37 @@
   --accent-soft: rgba(13, 92, 75, 0.12);
   --warn: #c45c26;
   --paper: #f6f8fa;
+  --top-bg: rgba(235, 239, 243, 0.88);
+  --drawer-bg: #f4f6f8;
+  --card: rgba(255, 255, 255, 0.55);
+  --card-solid: #ffffff;
+  --glow-a: rgba(13, 92, 75, 0.09);
+  --glow-b: rgba(196, 92, 38, 0.07);
+  --shadow: rgba(10, 16, 24, 0.08);
   --mono: "IBM Plex Mono", ui-monospace, monospace;
-  --sans: "IBM Plex Sans", system-ui, sans-serif;
-  --display: "Fraunces", "Syne", Georgia, serif;
+  --sans: "IBM Plex Sans", "Noto Sans SC", system-ui, sans-serif;
+  --display: "Fraunces", "Syne", "Noto Sans SC", Georgia, serif;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0c1016;
+  --bg-deep: #070a0e;
+  --ink: #e8eef4;
+  --ink-soft: #b0bac6;
+  --muted: #8a93a3;
+  --line: rgba(232, 238, 244, 0.12);
+  --accent: #5ec9a8;
+  --accent-soft: rgba(94, 201, 168, 0.14);
+  --warn: #e0894f;
+  --paper: #121820;
+  --top-bg: rgba(12, 16, 22, 0.9);
+  --drawer-bg: #0e141c;
+  --card: rgba(18, 24, 32, 0.72);
+  --card-solid: #151c26;
+  --glow-a: rgba(94, 201, 168, 0.12);
+  --glow-b: rgba(224, 137, 79, 0.08);
+  --shadow: rgba(0, 0, 0, 0.35);
 }
 
 *,
@@ -24,13 +54,14 @@ body {
   margin: 0;
   color: var(--ink);
   background:
-    radial-gradient(1100px 520px at 8% -8%, rgba(13, 92, 75, 0.09), transparent 55%),
-    radial-gradient(900px 480px at 100% 0%, rgba(196, 92, 38, 0.07), transparent 50%),
+    radial-gradient(1100px 520px at 8% -8%, var(--glow-a), transparent 55%),
+    radial-gradient(900px 480px at 100% 0%, var(--glow-b), transparent 50%),
     linear-gradient(180deg, var(--bg), var(--bg-deep));
   font-family: var(--sans);
   font-size: 1.05rem;
   line-height: 1.55;
   cursor: none;
+  transition: background 0.35s ease, color 0.25s ease;
 }
 
 body.touch { cursor: auto; }
@@ -93,7 +124,7 @@ a { color: var(--accent); text-underline-offset: 3px; }
   gap: 1rem;
   padding: 0.75rem 1.25rem;
   backdrop-filter: blur(12px);
-  background: rgba(235, 239, 243, 0.82);
+  background: var(--top-bg);
   border-bottom: 1px solid var(--line);
 }
 
@@ -2366,7 +2397,7 @@ body.lang-zh .section-kicker {
     flex-wrap: nowrap;
     align-items: center;
     gap: 0.45rem;
-    background: rgba(235, 239, 243, 0.94);
+    background: var(--top-bg);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
   }
@@ -2484,7 +2515,7 @@ body.lang-zh .section-kicker {
     align-items: stretch;
     gap: 0;
     padding: calc(env(safe-area-inset-top) + 1rem) 1.1rem calc(env(safe-area-inset-bottom) + 1.5rem);
-    background: #f4f6f8;
+    background: var(--drawer-bg);
     border-right: 1px solid var(--line);
     box-shadow: 18px 0 40px rgba(10, 16, 24, 0.18);
     transform: translateX(-105%);
@@ -2762,7 +2793,7 @@ body.lang-zh .section-kicker {
     position: sticky;
     bottom: calc(env(safe-area-inset-bottom) + 0.5rem);
     z-index: 20;
-    background: rgba(235, 239, 243, 0.92);
+    background: var(--top-bg);
     backdrop-filter: blur(10px);
     padding: 0.55rem;
     border: 1px solid var(--line);
@@ -2951,5 +2982,180 @@ body.lang-zh .section-kicker {
   }
   .hero-stage canvas {
     height: 180px !important;
+  }
+}
+
+
+/* === theme switch === */
+.theme-switch {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  background: var(--card);
+  overflow: hidden;
+}
+.theme-switch button {
+  border: 0;
+  background: transparent;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.85rem;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--muted);
+  min-width: 2.2rem;
+  min-height: 2rem;
+}
+.theme-switch button.active {
+  background: var(--accent);
+  color: #f4f7f5;
+}
+html[data-theme="dark"] .theme-switch button.active {
+  color: #0a1018;
+}
+
+html[data-theme="dark"] .top {
+  background: var(--top-bg);
+  border-bottom-color: var(--line);
+}
+html[data-theme="dark"] .mark { color: var(--ink); }
+html[data-theme="dark"] nav a { color: var(--ink-soft); }
+html[data-theme="dark"] nav a:hover,
+html[data-theme="dark"] nav a.active { color: var(--ink); }
+
+html[data-theme="dark"] .beats article,
+html[data-theme="dark"] .venue,
+html[data-theme="dark"] .tier,
+html[data-theme="dark"] .math-card,
+html[data-theme="dark"] .expert,
+html[data-theme="dark"] .craft-grid article,
+html[data-theme="dark"] .edge-grid article,
+html[data-theme="dark"] .fusion-grid article,
+html[data-theme="dark"] .field-notes article,
+html[data-theme="dark"] .letter-quote,
+html[data-theme="dark"] .paper-stage,
+html[data-theme="dark"] .atlas-panel,
+html[data-theme="dark"] .stack-stage,
+html[data-theme="dark"] .field-stage,
+html[data-theme="dark"] .tour-shell,
+html[data-theme="dark"] .pi-lab.deluxe,
+html[data-theme="dark"] .panel-inspect,
+html[data-theme="dark"] .agency-panel,
+html[data-theme="dark"] .field-dossier {
+  background: var(--card);
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+html[data-theme="dark"] .btn.ghost {
+  border-color: var(--line);
+  color: var(--ink);
+  background: transparent;
+}
+html[data-theme="dark"] .btn.primary {
+  background: var(--accent);
+  color: #0a1018;
+  border-color: var(--accent);
+}
+html[data-theme="dark"] .chip {
+  border-color: rgba(94, 201, 168, 0.35);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+html[data-theme="dark"] .chip-alt {
+  border-color: rgba(126, 182, 255, 0.35);
+  background: rgba(126, 182, 255, 0.1);
+  color: #9ec4ff;
+}
+
+html[data-theme="dark"] .lang-switch,
+html[data-theme="dark"] .cmd-hint,
+html[data-theme="dark"] .nav-burger {
+  background: var(--card);
+  border-color: var(--line);
+  color: var(--ink);
+}
+html[data-theme="dark"] .lang-switch button { color: var(--muted); }
+html[data-theme="dark"] .lang-switch button.active {
+  background: var(--accent);
+  color: #0a1018;
+}
+html[data-theme="dark"] .nav-burger span { background: var(--ink); }
+
+html[data-theme="dark"] #spy-nav {
+  background: var(--drawer-bg);
+  border-color: var(--line);
+  color: var(--ink);
+}
+html[data-theme="dark"] .data-table th:first-child,
+html[data-theme="dark"] .data-table td:first-child {
+  background: var(--paper);
+}
+html[data-theme="dark"] .marquee {
+  border-color: var(--line);
+  color: var(--muted);
+}
+html[data-theme="dark"] .terminal-block,
+html[data-theme="dark"] .terminal {
+  background: #0a1018;
+  color: #d7e0ea;
+}
+html[data-theme="dark"] .lightbox {
+  background: rgba(0, 0, 0, 0.88);
+}
+html[data-theme="dark"] .palette {
+  background: var(--drawer-bg);
+  color: var(--ink);
+  border-color: var(--line);
+}
+html[data-theme="dark"] .palette input {
+  background: var(--paper);
+  color: var(--ink);
+  border-color: var(--line);
+}
+html[data-theme="dark"] .grain { opacity: 0.045; }
+html[data-theme="dark"] .cursor {
+  border-color: rgba(232, 238, 244, 0.45);
+  mix-blend-mode: difference;
+}
+html[data-theme="dark"] .cursor-dot { background: var(--ink); }
+
+html[data-theme="dark"] .paper-tab,
+html[data-theme="dark"] .tour-step,
+html[data-theme="dark"] .agency-tab,
+html[data-theme="dark"] .stack-rail button,
+html[data-theme="dark"] .stack-layers button,
+html[data-theme="dark"] .field-chapters button,
+html[data-theme="dark"] .pi-scenarios button,
+html[data-theme="dark"] .atlas-node,
+html[data-theme="dark"] .fusion-tog,
+html[data-theme="dark"] .funnel-step,
+html[data-theme="dark"] .pipe-step,
+html[data-theme="dark"] .factor-btn {
+  background: var(--card);
+  border-color: var(--line);
+  color: var(--ink-soft);
+}
+html[data-theme="dark"] .paper-tab.active,
+html[data-theme="dark"] .tour-step.active,
+html[data-theme="dark"] .agency-tab.active,
+html[data-theme="dark"] .stack-rail button.active,
+html[data-theme="dark"] .stack-layers button.active,
+html[data-theme="dark"] .field-chapters button.active,
+html[data-theme="dark"] .pi-scenarios button.active,
+html[data-theme="dark"] .atlas-node.active,
+html[data-theme="dark"] .fusion-tog.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+@media (max-width: 980px) {
+  html[data-theme="dark"] .top {
+    background: var(--top-bg);
+  }
+  html[data-theme="dark"] #spy-nav {
+    background: var(--drawer-bg);
+  }
+  html[data-theme="dark"] .tour-nav {
+    background: var(--top-bg);
   }
 }

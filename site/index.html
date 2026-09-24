@@ -10,7 +10,17 @@
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
-  <link rel="stylesheet" href="styles.css?m1" />
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("hj-theme");
+        if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        document.documentElement.setAttribute("data-theme", t);
+        document.documentElement.style.colorScheme = t;
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="styles.css?theme1" />
 </head>
 <body>
   <div class="progress" id="progress" aria-hidden="true"></div>
@@ -51,6 +61,10 @@
       <a href="#proof" data-spy="proof" data-i18n="nav.proof">Proof</a>
     </nav>
     <div class="header-tools">
+      <div class="theme-switch" id="theme-switch" role="group" aria-label="Theme">
+        <button type="button" data-theme="light" class="active" aria-pressed="true" title="Light">☀</button>
+        <button type="button" data-theme="dark" aria-pressed="false" title="Dark">☾</button>
+      </div>
       <div class="lang-switch" id="lang-switch" role="group" aria-label="Language">
         <button type="button" data-lang="en" class="active" aria-pressed="true">EN</button>
         <button type="button" data-lang="zh" aria-pressed="false">中文</button>
@@ -1080,7 +1094,7 @@
     <button type="button" class="lightbox-close" id="lightbox-close" aria-label="Close">×</button>
     <img id="lightbox-img" alt="" />
   </div>
-  <script src="i18n.js?m1"></script>
-  <script src="app.js?m1"></script>
+  <script src="i18n.js?theme1"></script>
+  <script src="app.js?theme1"></script>
 </body>
 </html>
