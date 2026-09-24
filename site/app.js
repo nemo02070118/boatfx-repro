@@ -666,6 +666,7 @@ initReveal();
 initCounters();
 initTex();
 initPiLab();
+initPiScenarios();
 initRegimeCanvas();
 initFactors();
 initTerminal();
@@ -680,186 +681,15 @@ initAgencyLab();
 initArgumentTour();
 initFusionFocus();
 initWikiGallery();
+initFieldLab();
 initStackLab();
 if (window.initLangToggle) window.initLangToggle();
 
-function initWikiGallery() {
-  const lb = document.getElementById("lightbox");
-  const img = document.getElementById("lightbox-img");
-  const close = document.getElementById("lightbox-close");
-  if (!lb || !img) return;
-  function open(src) {
-    img.src = src;
-    lb.hidden = false;
-    document.body.style.overflow = "hidden";
-  }
-  function shut() {
-    lb.hidden = true;
-    img.src = "";
-    document.body.style.overflow = "";
-  }
-  document.querySelectorAll("#wiki-gallery img, #wiki-gallery .wiki-thumb").forEach((el) => {
-    el.addEventListener("click", () => {
-      const src = el.dataset.full || el.getAttribute("src") || el.querySelector("img")?.src;
-      if (src) open(src);
-    });
-  });
-  close?.addEventListener("click", shut);
-  lb.addEventListener("click", (e) => {
-    if (e.target === lb) shut();
-  });
-  window.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") shut();
-  });
-}
 
-function initStackLab() {
-  const rail = document.getElementById("stack-rail");
-  const stage = document.getElementById("stack-stage");
-  if (!rail || !stage) return;
 
-  const CRATES = [
-    { id: "boat_factor", en: "Factor research core · LLM agent factory · DSL / gates / constitution / WASM sandbox", zh: "因子研究核心 · LLM agent 工厂 · DSL / 闸门 / 宪章 / WASM 沙箱" },
-    { id: "boat_backtest", en: "Backtest engine for strategies and overlays", zh: "策略与 overlay 回测引擎" },
-    { id: "boat_execution", en: "Execution path · order routing toward live venues", zh: "执行路径 · 对接实盘下单" },
-    { id: "boat_risk", en: "Risk controls and limits", zh: "风控与限额" },
-    { id: "boat_signal", en: "Signal generation and transforms", zh: "信号生成与变换" },
-    { id: "boat_gateway", en: "Gateway / connectivity layer", zh: "网关与连接层" },
-    { id: "boat_monitor", en: "Monitoring and observability hooks", zh: "监控与可观测性" },
-    { id: "boat_shm", en: "Shared-memory / low-latency plumbing", zh: "共享内存 / 低延迟管线" },
-    { id: "boat_web", en: "Web surfaces for internal tools", zh: "内部工具 Web 面" },
-    { id: "boat_common", en: "Shared types and utilities", zh: "共享类型与工具" },
-    { id: "boat_team", en: "Team / collaboration utilities", zh: "团队协作工具" },
-    { id: "boat_bench_harness", en: "Benchmark harness for performance work", zh: "性能基准测试架" },
-    { id: "captain", en: "App shell (apps/captain) — operator-facing surface", zh: "应用壳 apps/captain — 操作者界面" },
-    { id: "public", en: "Public receipt: boatfx-repro (site · repro · showcase · CI)", zh: "公网收据：boatfx-repro（站 · repro · showcase · CI）" },
-  ];
 
-  function lang() {
-    return localStorage.getItem("hj-lang") || "en";
-  }
 
-  function show(id) {
-    const c = CRATES.find((x) => x.id === id) || CRATES[0];
-    rail.querySelectorAll("button").forEach((b) => b.classList.toggle("active", b.dataset.id === c.id));
-    const blurb = lang() === "zh" ? c.zh : c.en;
-    const title = lang() === "zh" ? "私有栈节点" : "Private stack node";
-    const note =
-      lang() === "zh"
-        ? "公开仓不倾倒整树。这里只展示角色分区——可核对、不可泄密。"
-        : "The public repo does not dump the tree. This map shows role partition — inspectable, not leaked.";
-    stage.innerHTML = `<p class="stack-k">${title}</p><h3>${c.id}</h3><p>${blurb}</p><p class="stack-note">${note}</p>`;
-  }
 
-  CRATES.forEach((c, i) => {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.dataset.id = c.id;
-    b.textContent = c.id;
-    if (i === 0) b.classList.add("active");
-    b.addEventListener("click", () => show(c.id));
-    rail.appendChild(b);
-  });
-  show("boat_factor");
-  document.addEventListener("hj:lang", () => {
-    const active = rail.querySelector("button.active")?.dataset.id || "boat_factor";
-    show(active);
-  });
-}
-
-function initArgumentTour() {
-  const stepsEl = document.getElementById("tour-steps");
-  const stage = document.getElementById("tour-stage");
-  const idxEl = document.getElementById("tour-index");
-  const prev = document.getElementById("tour-prev");
-  const next = document.getElementById("tour-next");
-  if (!stepsEl || !stage) return;
-
-  const STEPS = [
-    {
-      k: "Claim",
-      title: "The screen asks the wrong question",
-      body: "Unconditional screens ask whether a factor pays on average. A state-confined premium can average near zero and still be real inside its paying state.",
-      jump: "idea",
-      metric: "Proposition 2",
-    },
-    {
-      k: "Mechanism",
-      title: "t_g ≈ t_state √π",
-      body: "As the paying state grows rare, global t vanishes even if conditional strength stays large. Hard gates delete legs; continuous tilt keeps breadth.",
-      jump: "math",
-      metric: "Blind-spot identity",
-    },
-    {
-      k: "Machines",
-      title: "6,881 proposals · 0 clear the global screen",
-      body: "10.0% flagged regime-local → 3.15% survive block-shuffle → 1.08% clear BH one-at-a-time. Correction cost is shown on purpose. Anchor: 6.4× falsification excess.",
-      jump: "machine",
-      metric: "6.4×",
-    },
-    {
-      k: "Economics",
-      title: "Deployable overlay on public panels",
-      body: "24/24 same-base increments positive. VW ~172 bps/yr · IR ≈ 1.99. Public check: shipped tilt OUTPUT + python reproduce_headline.py.",
-      jump: "results",
-      metric: "172 bps",
-    },
-    {
-      k: "Factory",
-      title: "AI proposes · quant admits",
-      body: "Typed AST → sandbox → rationale → constitution gates. Study discards — that is where the blind spot bites. Same discipline as vibe-coding the public surface.",
-      jump: "factory",
-      metric: "Gated loop",
-    },
-    {
-      k: "Agency",
-      title: "Already in motion · on leave to go deeper",
-      body: "JF external review · EFA submitted · leave of absence to research full-time · ≤1 year college completed · Academy-eligible · SF-ready.",
-      jump: "agency",
-      metric: "Proof of work",
-    },
-  ];
-
-  let i = 0;
-  STEPS.forEach((s, n) => {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.className = "tour-step" + (n === 0 ? " active" : "");
-    b.innerHTML = `<span>${String(n + 1).padStart(2, "0")}</span><b>${s.k}</b>`;
-    b.addEventListener("click", () => show(n));
-    stepsEl.appendChild(b);
-  });
-
-  function show(n) {
-    i = (n + STEPS.length) % STEPS.length;
-    const s = STEPS[i];
-    [...stepsEl.children].forEach((el, k) => el.classList.toggle("active", k === i));
-    stage.innerHTML = `
-      <div class="tour-metric">${s.metric}</div>
-      <h3>${s.title}</h3>
-      <p>${s.body}</p>
-      <button type="button" class="tour-jump" data-jump="${s.jump}">Open section →</button>
-    `;
-    if (idxEl) idxEl.textContent = `${i + 1} / ${STEPS.length}`;
-    stage.querySelector(".tour-jump")?.addEventListener("click", (e) => {
-      document.getElementById(e.currentTarget.dataset.jump)?.scrollIntoView({ behavior: "smooth" });
-    });
-  }
-
-  prev?.addEventListener("click", () => show(i - 1));
-  next?.addEventListener("click", () => show(i + 1));
-  window.addEventListener("keydown", (e) => {
-    if (document.activeElement?.tagName === "INPUT") return;
-    const sec = document.getElementById("tour");
-    if (!sec) return;
-    const r = sec.getBoundingClientRect();
-    const visible = r.top < window.innerHeight * 0.7 && r.bottom > 80;
-    if (!visible) return;
-    if (e.key === "ArrowRight") show(i + 1);
-    if (e.key === "ArrowLeft") show(i - 1);
-  });
-  show(0);
-}
 
 function initFusionFocus() {
   const flow = document.getElementById("fusion-flow");
@@ -919,106 +749,7 @@ function initCredBars() {
 }
 
 /* ---------- paper claim map ---------- */
-function initPaperLab() {
-  const stage = document.getElementById("paper-stage");
-  const tabs = document.querySelectorAll(".paper-tab");
-  if (!stage || !tabs.length) return;
 
-  const CLAIMS = {
-    load: {
-      title: "Tier I · Load-bearing — deployable overlay",
-      lead: "The claim I lean on: conditioning adds net-of-cost active return on investable books.",
-      bullets: [
-        "Chen–Zimmermann OSAP · seven allocators × four panels → 24/24 same-base increments positive",
-        "Institutionally investable: ~134–172 bps/yr active · IR ≈ 1.7–2.0 (VW headline 172 · IR ≈ 1.99)",
-        "Survives Romano–Wolf / e-BH; Lo (2002) holds on tradeable panels (20/24 familywise)",
-        "Public check: shipped tilt OUTPUT + python reproduce_headline.py — router estimation code withheld",
-      ],
-      formula: "\\text{active bps}_{\\mathrm{VW}} \\approx 172 \\quad \\mathrm{IR}\\approx 1.99",
-      badge: "Recomputable from public pack",
-    },
-    id: {
-      title: "Tier II · Identification — the blind spot is structural",
-      lead: "Rescued factors carry genuine state-dependent structure — verified by falsification, not vibes.",
-      bullets: [
-        "Cross-fit: state labels ⊥ conditional alpha on purged month halves · increment positive in 100% of splits",
-        "Own-regime beats placebo regime borrowed from another factor by ~3–5×",
-        "States persist ~8.6 months on average — tradeable, not monthly noise",
-        "Deflated Sharpe ≈ 1 across panels · funding scarcity (HKM / Baa–Aaa) steepens local strength; vol placebos fail",
-      ],
-      formula: "t_g \\approx t_{\\mathrm{state}}\\sqrt{\\pi}",
-      badge: "Scientific claim · independently checkable on Alpha191/101",
-    },
-    machine: {
-      title: "Tier II·b · Machine population — where the blind spot bites",
-      lead: "6,881 genuinely machine-generated factors; none clears the global screen — yet structure remains.",
-      bullets: [
-        "10.0% flagged regime-local (bootstrap 95% · 9.3–10.7%)",
-        "3.15% survive block-shuffle falsification · 1.08% clear BH one-at-a-time",
-        "Assumption-free anchor: flagged set yields 6.4× falsification passes vs global-null allowance (219 vs 34)",
-        "Same order of magnitude on human libraries: Alpha191 13.8% · Alpha101 11.6%",
-      ],
-      formula: "6{,}881 \\rightarrow 10.0\\% \\rightarrow 3.15\\% \\rightarrow 1.08\\%",
-      badge: "Correction cost made visible on purpose",
-    },
-    prop2: {
-      title: "Proposition 2 · State blind spot",
-      lead: "A state-confined premium’s global t-statistic vanishes as the paying state grows rare.",
-      bullets: [
-        "Unconditional mean dilutes local strength by state frequency π",
-        "First-order identity: t_g ≈ t_state √π — rare paying states look globally weak",
-        "Hard gates delete legs; continuous tilt keeps breadth and reweights",
-        "Interactive lab below: drag π, t_state, and the screen threshold",
-      ],
-      formula: "t_g \\approx t_{\\mathrm{state}}\\sqrt{\\pi}",
-      badge: "Mechanism — not a backtest slogan",
-    },
-    suggest: {
-      title: "Tier III · Suggestive — reported, not leaned on",
-      lead: "I show these for completeness. They are not load-bearing for the paper’s central claim.",
-      bullets: [
-        "Shorting-cost natural experiments and short cross-asset panels",
-        "Observational funding interactions — I stop short of a causal claim",
-        "OOS corroboration vs matched placebos can be directional rather than decisive",
-        "Honesty rule: raw rescue rates always appear beside FDR-controlled floors",
-      ],
-      formula: "\\text{do not lean}",
-      badge: "Explicitly down-weighted",
-    },
-  };
-
-  function show(key) {
-    const c = CLAIMS[key];
-    if (!c) return;
-    stage.innerHTML = `
-      <div class="paper-badge">${c.badge}</div>
-      <h3>${c.title}</h3>
-      <p class="paper-lead">${c.lead}</p>
-      <div class="paper-tex" data-tex="${c.formula}"></div>
-      <ul>${c.bullets.map((b) => `<li>${b}</li>`).join("")}</ul>
-      <button type="button" class="paper-jump" data-jump="${key === "prop2" ? "math" : key === "machine" ? "machine" : key === "load" ? "results" : "math"}">Open related lab →</button>
-    `;
-    if (window.katex) {
-      stage.querySelectorAll(".paper-tex").forEach((el) => {
-        window.katex.render(el.dataset.tex, el, { throwOnError: false, displayMode: true });
-      });
-    }
-    stage.querySelector(".paper-jump")?.addEventListener("click", (e) => {
-      document.getElementById(e.currentTarget.dataset.jump)?.scrollIntoView({ behavior: "smooth" });
-    });
-  }
-
-  tabs.forEach((tab) => {
-    tab.addEventListener("click", () => {
-      tabs.forEach((t) => {
-        t.classList.toggle("active", t === tab);
-        t.setAttribute("aria-selected", t === tab ? "true" : "false");
-      });
-      show(tab.dataset.claim);
-    });
-  });
-  show("load");
-}
 
 /* ---------- results panel inspector ---------- */
 function initPanelLab() {
@@ -1108,42 +839,7 @@ function initPanelLab() {
 }
 
 /* ---------- funnel lab ---------- */
-function initFunnelLab() {
-  const detail = document.getElementById("funnel-detail");
-  const steps = document.querySelectorAll("#funnel [data-funnel]");
-  if (!detail || !steps.length) return;
-  const COPY = [
-    {
-      title: "Pool · 6,881 machine factors",
-      body: "Genuinely machine-generated — not a human shortlist. None clears the unconditional global screen. The question is what the discards still contain.",
-    },
-    {
-      title: "Flagged regime-local · 10.0%",
-      body: "Bootstrap 95% interval 9.3–10.7%. A minority — but well above chance. Same order of magnitude reappears on Alpha191 (13.8%) and Alpha101 (11.6%).",
-    },
-    {
-      title: "Block-shuffle falsification · 3.15%",
-      body: "Induced-null pipeline: shuffle regime labels in blocks and re-run. The router does not manufacture signal from noise; global-pass factors produce no false rescues on the same test.",
-    },
-    {
-      title: "BH one-factor-at-a-time · 1.08%",
-      body: "Correction cost made visible on purpose. Raw rescue rates always sit beside FDR-controlled floors so readers see the conservative figure.",
-    },
-    {
-      title: "Assumption-free anchor · 6.4×",
-      body: "Flagged set produces 219 falsification passes versus 34 allowed under a global null — the load-bearing machine-pool fact without leaning on a single cutoff.",
-    },
-  ];
-  function show(i) {
-    const c = COPY[i] || COPY[0];
-    steps.forEach((s) => s.classList.toggle("active", String(s.dataset.funnel) === String(i)));
-    detail.innerHTML = `<h4>${c.title}</h4><p>${c.body}</p>`;
-  }
-  steps.forEach((s) => {
-    s.addEventListener("click", () => show(s.dataset.funnel));
-  });
-  show(0);
-}
+
 
 /* ---------- pipeline lab ---------- */
 function initPipeLab() {
@@ -1168,6 +864,621 @@ function initPipeLab() {
 }
 
 /* ---------- Academy agency map ---------- */
+
+
+function langNow() {
+  return localStorage.getItem("hj-lang") || "en";
+}
+
+function initWikiGallery() {
+  const lb = document.getElementById("lightbox");
+  const img = document.getElementById("lightbox-img");
+  const close = document.getElementById("lightbox-close");
+  if (!lb || !img) return;
+  function open(src) {
+    img.src = src;
+    lb.hidden = false;
+    document.body.style.overflow = "hidden";
+  }
+  function shut() {
+    lb.hidden = true;
+    img.src = "";
+    document.body.style.overflow = "";
+  }
+  document.querySelectorAll("#wiki-gallery img, #wiki-gallery .wiki-thumb").forEach((el) => {
+    el.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      const src = el.dataset.full || el.getAttribute("src") || el.querySelector("img")?.getAttribute("src");
+      if (src) open(src);
+    });
+  });
+  close?.addEventListener("click", shut);
+  lb.addEventListener("click", (e) => {
+    if (e.target === lb) shut();
+  });
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") shut();
+  });
+}
+
+function initFieldLab() {
+  const chapters = document.getElementById("field-chapters");
+  const stage = document.getElementById("field-stage");
+  if (!chapters || !stage) return;
+
+  const CH = [
+    {
+      id: "invite",
+      img: "assets/wiki/wiki-5.jpg",
+      en: {
+        k: "01 · Invite",
+        t: "VIP credential — not a hallway pass",
+        p: "Physical badge: WIKI FINANCE EXPO HONG KONG 2026 · Sparking Opportunity, Trading Safety · VIP in orange · 23–24 July · TRADEHALL sponsor strip. This is the receipt I keep: invitation status, dates, venue brand — inspectable without a LinkedIn caption.",
+        facts: ["Status: VIP", "Site: wikiexpo.com", "Sponsor strip: TRADEHALL", "Hours: 09:00–18:00"],
+      },
+      zh: {
+        k: "01 · 邀请",
+        t: "VIP 凭证——不是走廊通行证",
+        p: "实体胸卡：WIKI FINANCE EXPO HONG KONG 2026 · Sparking Opportunity, Trading Safety · 橙色 VIP · 7月23–24日 · TRADEHALL 赞助条。这是我留下的收据：邀请身份、日期、场地品牌——无需 LinkedIn 文案也能核对。",
+        facts: ["身份：VIP", "站点：wikiexpo.com", "赞助条：TRADEHALL", "时段：09:00–18:00"],
+      },
+    },
+    {
+      id: "floor",
+      img: "assets/wiki/wiki-1.jpg",
+      en: {
+        k: "02 · Floor",
+        t: "Branded marble · WikiGold · partner strip",
+        p: "Daylight expo hall: Hong Kong skyline backdrop, WikiGold standing mark, RS Finance floor graphic, Ronin gimbal in frame. I walked this as a researcher — mapping who sells rails, who sells risk language, who sells “safety.”",
+        facts: ["Backdrop: Wiki Finance Expo HK 2026", "Floor: RS Finance / partners", "Atmosphere: filmed / streamed"],
+      },
+      zh: {
+        k: "02 · 展厅",
+        t: "品牌大理石厅 · WikiGold · 合作方条带",
+        p: "日间展厅：香港天际线背板、WikiGold 立牌、RS Finance 地面图形、画面里的 Ronin 云台。我以研究者身份走动——谁在卖通道、谁在卖风险话术、谁在卖「安全」。",
+        facts: ["背板：Wiki Finance Expo HK 2026", "地面：RS Finance / 合作方", "氛围：拍摄 / 直播"],
+      },
+    },
+    {
+      id: "panel",
+      img: "assets/wiki/wiki-4.jpg",
+      en: {
+        k: "03 · Rooms",
+        t: "RWA / tokenization · institutional adoption",
+        p: "Panel discourse on tokenization moving from pilot to mainstream — Bitget stage mark, WikiEXPO / WikiGlobal branding, packed chairs. This is where my blind-spot agenda meets public market language: if AI floods predictors, screens still ask the wrong unconditional question.",
+        facts: ["Theme: RWA & institutional adoption", "Signal: industry discourse, not a classroom"],
+      },
+      zh: {
+        k: "03 · 会场",
+        t: "RWA / 代币化 · 机构采纳",
+        p: "分论坛讨论代币化从试点走向主流——Bitget 舞台标识、WikiEXPO / WikiGlobal 品牌、坐满的椅子。这是我的盲区议程接触公开市场语言的地方：若 AI 让预测器泛滥，筛选仍在问错无条件问题。",
+        facts: ["主题：RWA 与机构采纳", "信号：行业话语，不是课堂"],
+      },
+    },
+    {
+      id: "pose",
+      img: "assets/wiki/wiki-3.jpg",
+      en: {
+        k: "04 · Presence",
+        t: "On the floor with a lanyard — agency visible",
+        p: "I showed up. Lanyard on. Peers in frame. For Academy reviewers: this is the same person who ships the repro pack — already in motion in industry rooms when invited, not only in a private notebook.",
+        facts: ["Proof: body on site", "Not: remote cosplay"],
+      },
+      zh: {
+        k: "04 · 在场",
+        t: "胸卡在身出现在展厅——行动力可见",
+        p: "我到场了。挂着胸卡。同侪同框。给 Academy 审阅者：这与交付可复现包的是同一个人——受邀后出现在行业现场，而不只是在私人笔记本里。",
+        facts: ["证据：人在现场", "不是：远程扮演"],
+      },
+    },
+    {
+      id: "after",
+      img: "assets/wiki/wiki-2.jpg",
+      en: {
+        k: "05 · After",
+        t: "After party · same brand, different temperature",
+        p: "Night LED: AFTER PARTY WIKI FINANCE EXPO HONG KONG 2026 · Victoria Harbour skyline · WikiFX / WikiBit / WikiGold strip. Informal rooms still carry the slogan. I stayed — because field contact includes the social layer where deals and introductions actually happen.",
+        facts: ["Tone: lounge / neon", "Brand continuity: Trading Safety"],
+      },
+      zh: {
+        k: "05 · 夜场",
+        t: "After party · 同一品牌，不同温度",
+        p: "夜间 LED：AFTER PARTY WIKI FINANCE EXPO HONG KONG 2026 · 维多利亚港天际线 · WikiFX / WikiBit / WikiGold 条带。非正式场合仍挂着口号。我留下——因为现场接触包含交易与引荐真正发生的社交层。",
+        facts: ["气质：lounge / 霓虹", "品牌连续：Trading Safety"],
+      },
+    },
+  ];
+
+  let cur = 0;
+  function render(i) {
+    cur = i;
+    const L = langNow() === "zh" ? "zh" : "en";
+    const c = CH[i];
+    const d = c[L];
+    chapters.querySelectorAll("button").forEach((b, n) => b.classList.toggle("active", n === i));
+    stage.innerHTML = `
+      <div class="field-stage-grid">
+        <button type="button" class="field-shot" data-full="${c.img}">
+          <img src="${c.img}" alt="${d.t}" />
+        </button>
+        <div class="field-copy">
+          <p class="field-k">${d.k}</p>
+          <h3>${d.t}</h3>
+          <p>${d.p}</p>
+          <ul class="field-facts">${d.facts.map((f) => `<li>${f}</li>`).join("")}</ul>
+        </div>
+      </div>`;
+    stage.querySelector(".field-shot")?.addEventListener("click", () => {
+      const lb = document.getElementById("lightbox");
+      const img = document.getElementById("lightbox-img");
+      if (lb && img) {
+        img.src = c.img;
+        lb.hidden = false;
+        document.body.style.overflow = "hidden";
+      }
+    });
+  }
+
+  CH.forEach((c, i) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.role = "tab";
+    b.dataset.i = String(i);
+    b.textContent = langNow() === "zh" ? c.zh.k : c.en.k;
+    if (i === 0) b.classList.add("active");
+    b.addEventListener("click", () => render(i));
+    chapters.appendChild(b);
+  });
+
+  function relabel() {
+    [...chapters.children].forEach((b, i) => {
+      b.textContent = langNow() === "zh" ? CH[i].zh.k : CH[i].en.k;
+    });
+    render(cur);
+  }
+  document.addEventListener("hj:lang", relabel);
+  render(0);
+}
+
+function initStackLab() {
+  const rail = document.getElementById("stack-rail");
+  const stage = document.getElementById("stack-stage");
+  const layersEl = document.getElementById("stack-layers");
+  if (!rail || !stage) return;
+
+  const LAYERS = [
+    { id: "research", en: "Research", zh: "研究", ids: ["boat_factor", "boat_signal", "boat_backtest"] },
+    { id: "risk", en: "Risk & control", zh: "风控", ids: ["boat_risk", "boat_monitor", "boat_bench_harness"] },
+    { id: "exec", en: "Execution", zh: "执行", ids: ["boat_execution", "boat_gateway", "boat_shm"] },
+    { id: "surface", en: "Surfaces", zh: "界面", ids: ["boat_web", "captain", "boat_team", "boat_common"] },
+    { id: "public", en: "Public receipt", zh: "公网收据", ids: ["public"] },
+  ];
+
+  const CRATES = [
+    { id: "boat_factor", layer: "research", en: "Factor research core · LLM agent factory · typed AST DSL · constitution gates · WASM sandbox · llm_agent (~77 .rs)", zh: "因子研究核心 · LLM agent 工厂 · 类型化 AST DSL · 宪章闸门 · WASM 沙箱 · llm_agent（约 77 个 .rs）", deps: "feeds boat_backtest · studied by paper program" },
+    { id: "boat_backtest", layer: "research", en: "Backtest engine for strategies and own-regime overlays", zh: "策略与自状态 overlay 回测引擎", deps: "consumes factor outputs" },
+    { id: "boat_signal", layer: "research", en: "Signal generation and transforms over microstructure inputs", zh: "基于微观结构输入的信号生成与变换", deps: "shared with factor DSL" },
+    { id: "boat_risk", layer: "risk", en: "Risk controls, limits, kill-switches toward live books", zh: "风控、限额、面向实盘账本的熔断", deps: "gates execution" },
+    { id: "boat_monitor", layer: "risk", en: "Monitoring and observability hooks", zh: "监控与可观测性钩子", deps: "ops surface" },
+    { id: "boat_bench_harness", layer: "risk", en: "Benchmark harness for latency / throughput work", zh: "延迟 / 吞吐性能基准架", deps: "CI / perf" },
+    { id: "boat_execution", layer: "exec", en: "Execution path · order routing toward live venues", zh: "执行路径 · 对接实盘下单", deps: "after risk checks" },
+    { id: "boat_gateway", layer: "exec", en: "Gateway / connectivity layer to venues and feeds", zh: "对接交易所与行情的网关层", deps: "IO boundary" },
+    { id: "boat_shm", layer: "exec", en: "Shared-memory / low-latency plumbing", zh: "共享内存 / 低延迟管线", deps: "hot path" },
+    { id: "boat_web", layer: "surface", en: "Internal web surfaces for operators", zh: "操作者内部 Web 面", deps: "UI packages" },
+    { id: "captain", layer: "surface", en: "App shell apps/captain — operator-facing control surface", zh: "应用壳 apps/captain — 操作者控制面", deps: "packages/*" },
+    { id: "boat_team", layer: "surface", en: "Team / collaboration utilities", zh: "团队协作工具", deps: "ops" },
+    { id: "boat_common", layer: "surface", en: "Shared types and utilities across crates", zh: "跨 crate 共享类型与工具", deps: "workspace glue" },
+    { id: "public", layer: "public", en: "Public receipt: boatfx-repro (site · repro.py · reproduce_headline.py · system_showcase · CI Pages)", zh: "公网收据：boatfx-repro（站 · repro · 头条复现 · showcase · CI Pages）", deps: "curated — not a dump" },
+  ];
+
+  let layer = "research";
+  let active = "boat_factor";
+
+  function show(id) {
+    active = id;
+    const c = CRATES.find((x) => x.id === id) || CRATES[0];
+    rail.querySelectorAll("button").forEach((b) => b.classList.toggle("active", b.dataset.id === c.id));
+    const L = langNow() === "zh";
+    const title = L ? "私有栈节点" : "Private stack node";
+    const layerLabel = LAYERS.find((x) => x.id === c.layer);
+    const layerName = layerLabel ? (L ? layerLabel.zh : layerLabel.en) : c.layer;
+    const note = L
+      ? "公开仓不倾倒整树。这里只展示角色分区——可核对、不可泄密。体量见 SCALE.md。"
+      : "The public repo does not dump the tree. Role partition only — inspectable, not leaked. Mass notes in SCALE.md.";
+    stage.innerHTML = `
+      <p class="stack-k">${title} · <span class="stack-layer-tag">${layerName}</span></p>
+      <h3 class="mono">${c.id}</h3>
+      <p>${L ? c.zh : c.en}</p>
+      <p class="stack-deps"><span>${L ? "关系" : "Relation"}</span> ${c.deps}</p>
+      <p class="stack-note">${note}</p>
+      <div class="stack-actions">
+        <a class="btn ghost" href="${c.id === "public" ? "https://github.com/nemo02070118/boatfx-repro" : "#proof"}" ${c.id === "public" ? 'target="_blank" rel="noopener"' : ""}>${c.id === "public" ? (L ? "打开公网仓 →" : "Open public repo →") : (L ? "看证据区 →" : "See proof →")}</a>
+      </div>`;
+  }
+
+  function paintRail() {
+    rail.innerHTML = "";
+    const ids = (LAYERS.find((x) => x.id === layer) || LAYERS[0]).ids;
+    ids.forEach((id, i) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.dataset.id = id;
+      b.textContent = id;
+      if (id === active || (i === 0 && !ids.includes(active))) b.classList.add("active");
+      b.addEventListener("click", () => show(id));
+      rail.appendChild(b);
+    });
+    const first = ids.includes(active) ? active : ids[0];
+    show(first);
+  }
+
+  if (layersEl) {
+    LAYERS.forEach((L0, i) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.dataset.layer = L0.id;
+      b.textContent = langNow() === "zh" ? L0.zh : L0.en;
+      if (i === 0) b.classList.add("active");
+      b.addEventListener("click", () => {
+        layer = L0.id;
+        layersEl.querySelectorAll("button").forEach((x) => x.classList.toggle("active", x.dataset.layer === layer));
+        paintRail();
+      });
+      layersEl.appendChild(b);
+    });
+  }
+
+  function relabelLayers() {
+    if (!layersEl) return;
+    [...layersEl.children].forEach((b, i) => {
+      b.textContent = langNow() === "zh" ? LAYERS[i].zh : LAYERS[i].en;
+    });
+    paintRail();
+  }
+
+  paintRail();
+  document.addEventListener("hj:lang", relabelLayers);
+}
+
+function initArgumentTour() {
+  const stepsEl = document.getElementById("tour-steps");
+  const stage = document.getElementById("tour-stage");
+  const idxEl = document.getElementById("tour-index");
+  const prev = document.getElementById("tour-prev");
+  const next = document.getElementById("tour-next");
+  if (!stepsEl || !stage) return;
+
+  const STEPS = [
+    {
+      k: { en: "Claim", zh: "主张" },
+      title: { en: "The screen asks the wrong question", zh: "筛选在问错问题" },
+      body: {
+        en: "Unconditional screens ask whether a factor pays on average. A state-confined premium can average near zero and still be real inside its paying state.",
+        zh: "无条件筛选问的是因子平均是否兑现。被困在状态里的溢价可以全局接近零，却在兑现状态内真实存在。",
+      },
+      jump: "idea",
+      metric: "Proposition 2",
+    },
+    {
+      k: { en: "Mechanism", zh: "机制" },
+      title: { en: "tg ≈ tstate √π", zh: "tg ≈ tstate √π" },
+      body: {
+        en: "As the paying state grows rare, global t vanishes even if conditional strength stays large. Hard gates delete legs; continuous tilt keeps breadth.",
+        zh: "兑现状态越稀有，全局 t 越消失——即便条件强度仍大。硬闸门删腿；连续倾斜保留广度。",
+      },
+      jump: "math",
+      metric: { en: "Blind-spot identity", zh: "盲区恒等式" },
+    },
+    {
+      k: { en: "Machines", zh: "机器" },
+      title: { en: "6,881 proposals · 0 clear the global screen", zh: "6,881 提案 · 0 通过全局筛选" },
+      body: {
+        en: "10.0% flagged regime-local → 3.15% survive block-shuffle → 1.08% clear BH one-at-a-time. Anchor: 6.4× falsification excess.",
+        zh: "10.0% 标为状态局部 → 3.15% 通过块重排证伪 → 1.08% 通过 BH 逐因子。锚点：6.4× 证伪超额。",
+      },
+      jump: "machine",
+      metric: "6.4×",
+    },
+    {
+      k: { en: "Economics", zh: "经济" },
+      title: { en: "Deployable overlay on public panels", zh: "公网面板上的可部署 overlay" },
+      body: {
+        en: "24/24 same-base increments positive. VW ~172 bps/yr · IR ≈ 1.99. Public check: shipped tilt OUTPUT + python reproduce_headline.py.",
+        zh: "24/24 同基增量为正。VW ~172 bps/年 · IR ≈ 1.99。公网核对：已交付 tilt 输出 + python reproduce_headline.py。",
+      },
+      jump: "results",
+      metric: "172 bps",
+    },
+    {
+      k: { en: "Factory", zh: "工厂" },
+      title: { en: "AI proposes · quant admits", zh: "AI 提案 · 量化准入" },
+      body: {
+        en: "Typed AST → sandbox → rationale → constitution gates. Study discards — that is where the blind spot bites.",
+        zh: "类型化 AST → 沙箱 → 经济理由 → 宪章闸门。研究被丢弃者——盲区正咬在这里。",
+      },
+      jump: "factory",
+      metric: { en: "Gated loop", zh: "闸门回路" },
+    },
+    {
+      k: { en: "Field", zh: "现场" },
+      title: { en: "Wiki Finance 2026 · VIP · already in rooms", zh: "Wiki Finance 2026 · VIP · 已在现场" },
+      body: {
+        en: "VIP invite · Hopewell Hotel Wan Chai · panels + after party. Research that survives contact with live fintech discourse.",
+        zh: "VIP 邀请 · 湾仔合和酒店 · 分论坛 + after party。能经得起真实 fintech 话语摩擦的研究。",
+      },
+      jump: "field",
+      metric: "VIP",
+    },
+    {
+      k: { en: "Agency", zh: "行动力" },
+      title: { en: "Already in motion · on leave to go deeper", zh: "已在行动 · 休学以走得更深" },
+      body: {
+        en: "JF external review · EFA submitted · leave of absence · ≤1 year college · Academy-eligible · SF-ready.",
+        zh: "JF 外部审稿 · EFA 已投 · 休学 · 大学未满一年 · 符合 Academy · 准备赴 SF。",
+      },
+      jump: "agency",
+      metric: { en: "Proof of work", zh: "工作证据" },
+    },
+  ];
+
+  let i = 0;
+  function pick(v) {
+    if (typeof v === "string") return v;
+    return langNow() === "zh" ? v.zh : v.en;
+  }
+
+  function buildSteps() {
+    stepsEl.innerHTML = "";
+    STEPS.forEach((s, n) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "tour-step" + (n === i ? " active" : "");
+      b.innerHTML = `<span>${String(n + 1).padStart(2, "0")}</span><b>${pick(s.k)}</b>`;
+      b.addEventListener("click", () => show(n));
+      stepsEl.appendChild(b);
+    });
+  }
+
+  function show(n) {
+    i = (n + STEPS.length) % STEPS.length;
+    const s = STEPS[i];
+    buildSteps();
+    stage.innerHTML = `
+      <div class="tour-metric">${pick(s.metric)}</div>
+      <h3>${pick(s.title)}</h3>
+      <p>${pick(s.body)}</p>
+      <button type="button" class="tour-jump" data-jump="${s.jump}">${langNow() === "zh" ? "打开对应区块 →" : "Open section →"}</button>
+    `;
+    if (idxEl) idxEl.textContent = `${i + 1} / ${STEPS.length}`;
+    stage.querySelector(".tour-jump")?.addEventListener("click", (e) => {
+      document.getElementById(e.currentTarget.dataset.jump)?.scrollIntoView({ behavior: "smooth" });
+    });
+  }
+
+  prev?.addEventListener("click", () => show(i - 1));
+  next?.addEventListener("click", () => show(i + 1));
+  window.addEventListener("keydown", (e) => {
+    if (document.activeElement?.tagName === "INPUT") return;
+    const sec = document.getElementById("tour");
+    if (!sec) return;
+    const r = sec.getBoundingClientRect();
+    const visible = r.top < window.innerHeight * 0.7 && r.bottom > 80;
+    if (!visible) return;
+    if (e.key === "ArrowRight") show(i + 1);
+    if (e.key === "ArrowLeft") show(i - 1);
+  });
+  document.addEventListener("hj:lang", () => show(i));
+  show(0);
+}
+
+function initPaperLab() {
+  const stage = document.getElementById("paper-stage");
+  const tabs = document.querySelectorAll(".paper-tab");
+  if (!stage || !tabs.length) return;
+
+  const CLAIMS = {
+    load: {
+      en: {
+        title: "Tier I · Load-bearing — deployable overlay",
+        lead: "The claim I lean on: conditioning adds net-of-cost active return on investable books.",
+        bullets: [
+          "Chen–Zimmermann OSAP · seven allocators × four panels → 24/24 same-base increments positive",
+          "Institutionally investable: ~134–172 bps/yr active · IR ≈ 1.7–2.0 (VW headline 172 · IR ≈ 1.99)",
+          "Survives Romano–Wolf / e-BH; Lo (2002) holds on tradeable panels (20/24 familywise)",
+          "Public check: shipped tilt OUTPUT + python reproduce_headline.py — router estimation code withheld",
+        ],
+        badge: "Recomputable from public pack",
+      },
+      zh: {
+        title: "层级 I · 承重——可部署 overlay",
+        lead: "我倚重的主张：条件化在可投资账本上增加净成本后主动收益。",
+        bullets: [
+          "Chen–Zimmermann OSAP · 七种配置 × 四个面板 → 24/24 同基增量为正",
+          "机构可投：约 134–172 bps/年主动 · IR ≈ 1.7–2.0（VW 头条 172 · IR ≈ 1.99）",
+          "通过 Romano–Wolf / e-BH；Lo (2002) 在可交易面板成立（20/24）",
+          "公网核对：已交付 tilt 输出 + python reproduce_headline.py — 路由估计代码保留",
+        ],
+        badge: "可从公网包重算",
+      },
+      formula: "\\text{active bps}_{\\mathrm{VW}} \\approx 172 \\quad \\mathrm{IR}\\approx 1.99",
+    },
+    id: {
+      en: {
+        title: "Tier II · Identification — the blind spot is structural",
+        lead: "Rescued factors carry genuine state-dependent structure — verified by falsification, not vibes.",
+        bullets: [
+          "Cross-fit: state labels ⊥ conditional alpha on purged month halves · increment positive in 100% of splits",
+          "Own-regime beats placebo regime borrowed from another factor by ~3–5×",
+          "States persist ~8.6 months on average — tradeable, not monthly noise",
+          "Funding scarcity (HKM / Baa–Aaa) steepens local strength; vol placebos fail",
+        ],
+        badge: "Scientific claim · checkable on Alpha191/101",
+      },
+      zh: {
+        title: "层级 II · 识别——盲区是结构性的",
+        lead: "被救回的因子携带真实状态依赖结构——靠证伪，不靠感觉。",
+        bullets: [
+          "交叉拟合：状态标签 ⊥ 条件 alpha（清洗半月）· 100% 分割增量为正",
+          "自状态相对借用他因子安慰剂状态约强 3–5×",
+          "状态平均持续约 8.6 个月——可交易，不是月度噪声",
+          "融资稀缺（HKM / Baa–Aaa）使局部强度变陡；波动安慰剂失败",
+        ],
+        badge: "科学主张 · 可在 Alpha191/101 核对",
+      },
+      formula: "t_g \\approx t_{\\mathrm{state}}\\sqrt{\\pi}",
+    },
+    machine: {
+      en: {
+        title: "Tier II·b · Machine population — where the blind spot bites",
+        lead: "6,881 genuinely machine-generated factors; none clears the global screen — yet structure remains.",
+        bullets: [
+          "10.0% flagged regime-local (bootstrap 95% · 9.3–10.7%)",
+          "3.15% survive block-shuffle falsification · 1.08% clear BH one-at-a-time",
+          "Assumption-free anchor: 6.4× falsification passes vs global-null allowance (219 vs 34)",
+          "Same order of magnitude on human libraries: Alpha191 13.8% · Alpha101 11.6%",
+        ],
+        badge: "Correction cost made visible on purpose",
+      },
+      zh: {
+        title: "层级 II·b · 机器总体——盲区咬合处",
+        lead: "6,881 个真实机器生成因子；无一通过全局筛选——结构仍在。",
+        bullets: [
+          "10.0% 标为状态局部（bootstrap 95% · 9.3–10.7%）",
+          "3.15% 通过块重排证伪 · 1.08% 通过 BH 逐因子",
+          "无假设锚点：证伪通过数相对全局零假设额度 6.4×（219 vs 34）",
+          "人类库同量级：Alpha191 13.8% · Alpha101 11.6%",
+        ],
+        badge: "刻意展示校正成本",
+      },
+      formula: "6{,}881 \\rightarrow 10.0\\% \\rightarrow 3.15\\% \\rightarrow 1.08\\%",
+    },
+    prop2: {
+      en: {
+        title: "Proposition 2 · State blind spot",
+        lead: "A state-confined premium’s global t-statistic vanishes as the paying state grows rare.",
+        bullets: [
+          "Unconditional mean dilutes local strength by state frequency π",
+          "First-order identity: tg ≈ tstate √π — rare paying states look globally weak",
+          "Hard gates delete legs; continuous tilt keeps breadth and reweights",
+          "Interactive lab below: drag π, tstate, and the screen threshold",
+        ],
+        badge: "Mechanism — not a backtest slogan",
+      },
+      zh: {
+        title: "命题 2 · 状态盲区",
+        lead: "被困在状态中的溢价，其全局 t 统计量随兑现状态变稀有而消失。",
+        bullets: [
+          "无条件均值按状态频率 π 稀释局部强度",
+          "一阶恒等式：tg ≈ tstate √π — 稀有兑现状态看起来全局很弱",
+          "硬闸门删腿；连续倾斜保留广度并重加权",
+          "下方实验室：拖动 π、tstate 与筛选阈值",
+        ],
+        badge: "机制——不是回测口号",
+      },
+      formula: "t_g \\approx t_{\\mathrm{state}}\\sqrt{\\pi}",
+    },
+    suggest: {
+      en: {
+        title: "Tier III · Suggestive — reported, not leaned on",
+        lead: "I show these for completeness. They are not load-bearing for the paper’s central claim.",
+        bullets: [
+          "Shorting-cost natural experiments and short cross-asset panels",
+          "Observational funding interactions — I stop short of a causal claim",
+          "OOS corroboration vs matched placebos can be directional rather than decisive",
+          "Honesty rule: raw rescue rates always appear beside FDR-controlled floors",
+        ],
+        badge: "Explicitly down-weighted",
+      },
+      zh: {
+        title: "层级 III · 提示性——报告但不倚重",
+        lead: "为完整性展示。它们不是论文中心主张的承重柱。",
+        bullets: [
+          "做空成本自然实验与短截面跨资产面板",
+          "观测性融资互动——我停在因果主张之前",
+          "相对匹配安慰剂的 OOS 印证可能是方向性而非决定性",
+          "诚实规则：原始救回率始终与 FDR 控制下界并排出现",
+        ],
+        badge: "明确降权",
+      },
+      formula: "\\text{do not lean}",
+    },
+  };
+
+  let cur = "load";
+  function show(key) {
+    cur = key;
+    const pack = CLAIMS[key];
+    if (!pack) return;
+    const c = langNow() === "zh" ? pack.zh : pack.en;
+    stage.innerHTML = `
+      <div class="paper-badge">${c.badge}</div>
+      <h3>${c.title}</h3>
+      <p class="paper-lead">${c.lead}</p>
+      <div class="paper-tex" data-tex="${pack.formula}"></div>
+      <ul>${c.bullets.map((b) => `<li>${b}</li>`).join("")}</ul>
+      <button type="button" class="paper-jump" data-jump="${key === "prop2" ? "math" : key === "machine" ? "machine" : key === "load" ? "results" : "math"}">${langNow() === "zh" ? "打开相关实验室 →" : "Open related lab →"}</button>
+    `;
+    if (window.katex) {
+      stage.querySelectorAll(".paper-tex").forEach((el) => {
+        window.katex.render(el.dataset.tex, el, { throwOnError: false, displayMode: true });
+      });
+    }
+    stage.querySelector(".paper-jump")?.addEventListener("click", (e) => {
+      document.getElementById(e.currentTarget.dataset.jump)?.scrollIntoView({ behavior: "smooth" });
+    });
+  }
+
+  tabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      tabs.forEach((t) => {
+        t.classList.toggle("active", t === tab);
+        t.setAttribute("aria-selected", t === tab ? "true" : "false");
+      });
+      show(tab.dataset.claim);
+    });
+  });
+  document.addEventListener("hj:lang", () => show(cur));
+  show("load");
+}
+
+function initFunnelLab() {
+  const detail = document.getElementById("funnel-detail");
+  const steps = document.querySelectorAll("#funnel [data-funnel]");
+  if (!detail || !steps.length) return;
+  const COPY = [
+    {
+      en: { title: "Pool · 6,881 machine factors", body: "Genuinely machine-generated — not a human shortlist. None clears the unconditional global screen. The question is what the discards still contain." },
+      zh: { title: "总体 · 6,881 机器因子", body: "真实机器生成——不是人类短名单。无一通过无条件全局筛选。问题是被丢弃者里还剩什么。" },
+    },
+    {
+      en: { title: "Flagged regime-local · 10.0%", body: "Bootstrap 95% interval 9.3–10.7%. Same order of magnitude on Alpha191 (13.8%) and Alpha101 (11.6%)." },
+      zh: { title: "标为状态局部 · 10.0%", body: "Bootstrap 95% 区间 9.3–10.7%。Alpha191（13.8%）与 Alpha101（11.6%）同量级。" },
+    },
+    {
+      en: { title: "Block-shuffle falsification · 3.15%", body: "Induced-null pipeline: shuffle regime labels in blocks and re-run. Global-pass factors produce no false rescues on the same test." },
+      zh: { title: "块重排证伪 · 3.15%", body: "诱导零假设流水线：按块打乱状态标签并重跑。全局通过的因子在同一检验上不产生假救回。" },
+    },
+    {
+      en: { title: "BH one-factor-at-a-time · 1.08%", body: "Correction cost made visible on purpose. Raw rescue rates sit beside FDR-controlled floors." },
+      zh: { title: "BH 逐因子 · 1.08%", body: "刻意展示校正成本。原始救回率与 FDR 控制下界并排。" },
+    },
+    {
+      en: { title: "Assumption-free anchor · 6.4×", body: "Flagged set produces 219 falsification passes versus 34 allowed under a global null." },
+      zh: { title: "无假设锚点 · 6.4×", body: "标记集合产生 219 次证伪通过，相对全局零假设额度 34。" },
+    },
+  ];
+  let cur = 0;
+  function show(i) {
+    cur = Number(i);
+    const c = (COPY[cur] || COPY[0])[langNow() === "zh" ? "zh" : "en"];
+    steps.forEach((s) => s.classList.toggle("active", String(s.dataset.funnel) === String(cur)));
+    detail.innerHTML = `<h4>${c.title}</h4><p>${c.body}</p>`;
+  }
+  steps.forEach((s) => s.addEventListener("click", () => show(s.dataset.funnel)));
+  document.addEventListener("hj:lang", () => show(cur));
+  show(0);
+}
+
 function initAgencyLab() {
   const panel = document.getElementById("agency-panel");
   const tabs = document.querySelectorAll(".agency-tab");
@@ -1175,33 +1486,69 @@ function initAgencyLab() {
 
   const COPY = {
     motion: {
-      title: "Already in motion",
-      body: "22 months on this system — not a prompt-weekend. JF MS 2026-0738: passed desk, now in external review under Antoinette Schoar. EFA submitted. I took academic leave to pursue this research full-time. Public site + repro + CI + walkthrough shipped. Zheshang production systems from Aug 2025. The work predates the application form.",
+      en: { title: "Already in motion", body: "22 months on this system — not a prompt-weekend. JF MS 2026-0738: passed desk, now in external review under Antoinette Schoar. EFA submitted. Academic leave for full-time research. Public site + repro + CI + walkthrough. Wiki Finance Expo HK 2026 VIP. Zheshang production systems from Aug 2025." },
+      zh: { title: "已在行动", body: "这个系统做了 22 个月——不是周末提示词。JF MS 2026-0738：已过 desk，现由 Antoinette Schoar 主持外部审稿。EFA 已投。休学全职研究。公网站 + repro + CI + 讲解视频。Wiki Finance Expo 香港 2026 VIP。2025 年 8 月起浙商生产系统。" },
     },
     agency: {
-      title: "Agency",
-      body: "When AI-scale factor proposal captured my attention, I did not write a thread — I built a factory with gates, derived the blind-spot identity, falsified my own rescues, and made the load-bearing numbers regenerable by strangers. Agency here means: notice the structural mistake → instrument it → publish a receipt.",
+      en: { title: "Agency", body: "When AI-scale factor proposal captured my attention, I built a factory with gates, derived the blind-spot identity, falsified my own rescues, showed up when invited to industry rooms, and made load-bearing numbers regenerable by strangers." },
+      zh: { title: "行动力", body: "当 AI 规模因子提案抓住我的注意力，我建造带闸门的工厂，推导盲区恒等式，证伪自己的救回，受邀后出现在行业现场，并让承重数字可被陌生人重算。" },
     },
     proof: {
-      title: "Proof of work",
-      body: "Original research counts. Live portfolio. python repro.py (60/60). python reproduce_headline.py (~172 bps · IR ≈ 2). system_showcase Rust excerpts. SCALE.md mass notes. MD letter: 56 modules · ~64k LoC · >95%. Video: youtu.be/tVHLUQy93rg. Chat logs are not the artifact — the repo is.",
+      en: { title: "Proof of work", body: "Original research counts. Live portfolio. python repro.py (60/60). python reproduce_headline.py (~172 bps · IR ≈ 2). system_showcase. SCALE.md. Zheshang letter. VIP field photos. Video: youtu.be/tVHLUQy93rg." },
+      zh: { title: "工作证据", body: "原创研究算数。公网作品集。python repro.py（60/60）。python reproduce_headline.py（~172 bps · IR ≈ 2）。system_showcase。SCALE.md。浙商推荐信。VIP 现场照片。视频：youtu.be/tVHLUQy93rg。" },
     },
     elig: {
-      title: "Leave of absence · eligibility",
-      body: "I took an academic leave from Shanghai Lixin University of Accounting and Finance to pursue this research full-time. I remain Academy-eligible: I have not completed more than one year of full-time college after high school by August 2027. International applicant. Ready to live in San Francisco full-time for the Founding Class Fellowship (Sep 2027).",
+      en: { title: "Leave of absence · eligibility", body: "Academic leave from Shanghai Lixin University of Accounting and Finance. Academy-eligible: not more than one year of full-time college after high school by August 2027. International. Ready for San Francisco Founding Class (Sep 2027)." },
+      zh: { title: "休学 · 资格", body: "自上海立信会计金融学院休学。符合 Academy：截至 2027 年 8 月高中后全职大学未满一年。国际申请人。准备赴旧金山 Founding Class（2027 年 9 月）。" },
     },
     why: {
-      title: "Why The Academy · why now",
-      body: "I want harder peers and external tests than I can create alone. SF for a year is where I push AI×quant screening science into a sharper product surface without abandoning falsification discipline. Peers will ship apps and robots — I bring a research system already under JF external review. Different instrument. Same bar: proof.",
+      en: { title: "Why The Academy · why now", body: "Harder peers and external tests. SF for a year to push AI×quant screening science into a sharper product surface without abandoning falsification. Peers ship apps and robots — I bring a research system under JF external review plus field presence." },
+      zh: { title: "为什么是 Academy · 为什么是现在", body: "更硬的同侪与外部检验。在旧金山一年，把 AI×量化筛选科学推到更锋利的产品面，同时不放弃证伪纪律。同侪交付应用与机器人——我带来处于 JF 外部审稿中的研究系统 + 现场在场。" },
     },
   };
 
+  let cur = "motion";
   function show(key) {
-    const c = COPY[key] || COPY.motion;
+    cur = key;
+    const c = (COPY[key] || COPY.motion)[langNow() === "zh" ? "zh" : "en"];
     tabs.forEach((t) => t.classList.toggle("active", t.dataset.agency === key));
     panel.innerHTML = `<h3>${c.title}</h3><p>${c.body}</p>`;
   }
-
   tabs.forEach((t) => t.addEventListener("click", () => show(t.dataset.agency)));
+  document.addEventListener("hj:lang", () => show(cur));
   show("motion");
 }
+
+
+function initPiScenarios() {
+  const host = document.getElementById("pi-scenarios");
+  if (!host) return;
+  const SC = [
+    { id: "rare", en: "Rare state π=0.10", zh: "稀有状态 π=0.10", pi: 0.10, t: 3.0, thr: 2.0 },
+    { id: "base", en: "Baseline π=0.25", zh: "基线 π=0.25", pi: 0.25, t: 3.0, thr: 2.0 },
+    { id: "common", en: "Common π=0.50", zh: "常见 π=0.50", pi: 0.50, t: 3.0, thr: 2.0 },
+    { id: "strong", en: "Strong local t=4.5", zh: "强局部 t=4.5", pi: 0.15, t: 4.5, thr: 2.0 },
+    { id: "harsh", en: "Harsh screen |t|=3", zh: "苛刻阈值 |t|=3", pi: 0.25, t: 3.0, thr: 3.0 },
+  ];
+  function paint() {
+    const zh = (localStorage.getItem("hj-lang") || "en") === "zh";
+    host.innerHTML = SC.map((s, i) =>
+      `<button type="button" data-i="${i}" class="${i === 1 ? "active" : ""}">${zh ? s.zh : s.en}</button>`
+    ).join("");
+    host.querySelectorAll("button").forEach((b) => {
+      b.addEventListener("click", () => {
+        const s = SC[Number(b.dataset.i)];
+        const pi = document.getElementById("pi-range");
+        const ts = document.getElementById("tstate-range");
+        const th = document.getElementById("thresh-range");
+        if (pi) { pi.value = String(s.pi); pi.dispatchEvent(new Event("input")); }
+        if (ts) { ts.value = String(s.t); ts.dispatchEvent(new Event("input")); }
+        if (th) { th.value = String(s.thr); th.dispatchEvent(new Event("input")); }
+        host.querySelectorAll("button").forEach((x) => x.classList.toggle("active", x === b));
+      });
+    });
+  }
+  paint();
+  document.addEventListener("hj:lang", paint);
+}
+

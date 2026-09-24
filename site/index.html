@@ -7,7 +7,7 @@
   <meta name="description" content="Global Weakness, Local Strength — submitted to Journal of Finance; submitted to Eastern Finance Association (EFA). AI factor factory · Zheshang systems · public repro pack." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <link rel="stylesheet" href="styles.css" />
@@ -21,23 +21,23 @@
   <header class="top">
     <a class="mark" href="#top" data-magnetic>HJ</a>
     <nav id="spy-nav">
-      <a href="#idea" data-spy="idea">Idea</a>
-      <a href="#tour" data-spy="tour">Tour</a>
-      <a href="#venues" data-spy="venues">Venues</a>
-      <a href="#paper" data-spy="paper">Paper</a>
-      <a href="#math" data-spy="math">Math</a>
-      <a href="#results" data-spy="results">Results</a>
-      <a href="#machine" data-spy="machine">Machine</a>
-      <a href="#factory" data-spy="factory">Factory</a>
-      <a href="#letter" data-spy="letter">Letter</a>
-      <a href="#edge" data-spy="edge">Edge</a>
-      <a href="#fusion" data-spy="fusion">AI×Quant</a>
-      <a href="#craft" data-spy="craft">Craft</a>
-      <a href="#scale" data-spy="scale">Scale</a>
+      <a href="#idea" data-spy="idea" data-i18n="nav.idea">Idea</a>
+      <a href="#tour" data-spy="tour" data-i18n="nav.tour">Tour</a>
+      <a href="#venues" data-spy="venues" data-i18n="nav.venues">Venues</a>
+      <a href="#paper" data-spy="paper" data-i18n="nav.paper">Paper</a>
+      <a href="#math" data-spy="math" data-i18n="nav.math">Math</a>
+      <a href="#results" data-spy="results" data-i18n="nav.results">Results</a>
+      <a href="#machine" data-spy="machine" data-i18n="nav.machine">Machine</a>
+      <a href="#factory" data-spy="factory" data-i18n="nav.factory">Factory</a>
+      <a href="#letter" data-spy="letter" data-i18n="nav.letter">Letter</a>
+      <a href="#edge" data-spy="edge" data-i18n="nav.edge">Edge</a>
+      <a href="#fusion" data-spy="fusion" data-i18n="nav.fusion">AI×Quant</a>
+      <a href="#craft" data-spy="craft" data-i18n="nav.craft">Craft</a>
+      <a href="#scale" data-spy="scale" data-i18n="nav.scale">Scale</a>
       <a href="#field" data-spy="field" data-i18n="nav.field">Field</a>
       <a href="#stack" data-spy="stack" data-i18n="nav.stack">Stack</a>
-      <a href="#agency" data-spy="agency">Agency</a>
-      <a href="#proof" data-spy="proof">Proof</a>
+      <a href="#agency" data-spy="agency" data-i18n="nav.agency">Agency</a>
+      <a href="#proof" data-spy="proof" data-i18n="nav.proof">Proof</a>
     </nav>
     <div class="header-tools">
       <button type="button" class="lang-toggle" id="lang-toggle" aria-label="Language">中文</button>
@@ -50,50 +50,40 @@
     <section class="hero">
       <div class="hero-meta">
         <span class="pulse"></span>
-        <span class="chip">JF external review</span>
-        <span class="chip chip-alt">EFA submitted</span>
+        <span class="chip" data-i18n="hero.chip.jf">JF external review</span>
+        <span class="chip chip-alt" data-i18n="hero.chip.efa">EFA submitted</span>
         <span class="chip chip-alt" data-i18n="hero.leave">Leave of absence · full-time research</span>
         <span class="sep">·</span>
         <span data-i18n="hero.role">Independent researcher · builder · already in motion</span>
       </div>
       <h1 class="brand">Huannian Jin</h1>
-      <p class="lede">
-        I build an <em>AI agent factory</em> that proposes return factors by the thousand—
-        then prove that <strong>unconditional screens have a structural blind spot</strong>
-        for factors that only pay inside a market state.
-      </p>
-      <p class="lede-sub">
-        Flagship paper: <em>Global Weakness, Local Strength</em> —
-        at the <strong>Journal of Finance</strong> (MS 2026-0738):
-        <strong>passed desk review · in external review</strong> with editor
-        <strong>Antoinette Schoar</strong>;
-        also submitted to the <strong>Eastern Finance Association (EFA)</strong>.
-      </p>
+      <p class="lede" data-i18n="hero.lede">I build an AI agent factory that proposes return factors by the thousand— then prove that unconditional screens have a structural blind spot for factors that only pay inside a market state.</p>
+      <p class="lede-sub" data-i18n="hero.sub">Flagship paper: Global Weakness, Local Strength — at the Journal of Finance (MS 2026-0738): passed desk review · in external review with editor Antoinette Schoar; also submitted to the Eastern Finance Association (EFA).</p>
       <div class="cta-row">
         <a class="btn primary" data-magnetic href="#idea" data-i18n="hero.cta1">Enter the argument</a>
-        <a class="btn ghost" data-magnetic id="github-link" href="https://github.com/" target="_blank" rel="noopener">Repro pack</a>
-        <a class="btn ghost" data-magnetic href="#venues">JF · EFA</a>
-        <a class="btn ghost" data-magnetic href="#letter">Zheshang letter</a>
+        <a class="btn ghost" data-magnetic id="github-link" href="https://github.com/" target="_blank" rel="noopener" data-i18n="hero.cta.repro">Repro pack</a>
+        <a class="btn ghost" data-magnetic href="#venues" data-i18n="hero.cta.venues">JF · EFA</a>
+        <a class="btn ghost" data-magnetic href="#letter" data-i18n="hero.cta.letter">Zheshang letter</a>
         <a class="btn ghost" data-magnetic href="#tour" data-i18n="hero.cta2">Argument tour</a>
         <a class="btn ghost" data-magnetic href="#agency" data-i18n="hero.cta3">Academy fit</a>
       </div>
 
       <div class="hero-stats" id="hero-stats">
-        <div><b data-count="172" data-suffix="">0</b><span>bps/yr VW active</span></div>
-        <div><b data-count="1.99" data-decimals="2">0</b><span>information ratio</span></div>
-        <div><b data-count="6881">0</b><span>machine factors</span></div>
-        <div><b data-count="6.4" data-decimals="1" data-suffix="×">0</b><span>falsification excess</span></div>
-        <div><b data-count="56">0</b><span>modules @ Zheshang</span></div>
-        <div><b data-count="64" data-suffix="k">0</b><span>LoC shipped</span></div>
+        <div><b data-count="172" data-suffix="">0</b><span data-i18n="hero.stat1">bps/yr VW active</span></div>
+        <div><b data-count="1.99" data-decimals="2">0</b><span data-i18n="hero.stat2">information ratio</span></div>
+        <div><b data-count="6881">0</b><span data-i18n="hero.stat3">machine factors</span></div>
+        <div><b data-count="6.4" data-decimals="1" data-suffix="×">0</b><span data-i18n="hero.stat4">falsification excess</span></div>
+        <div><b data-count="56">0</b><span data-i18n="hero.stat5">modules @ Zheshang</span></div>
+        <div><b data-count="64" data-suffix="k">0</b><span data-i18n="hero.stat6">LoC shipped</span></div>
       </div>
 
       <div class="hero-stage">
         <canvas id="regime-canvas" width="1400" height="480"></canvas>
         <div class="stage-ui">
-          <span>UNCONDITIONAL SCREEN</span>
-          <span>OWN-REGIME TILT</span>
+          <span data-i18n="hero.stage.l">UNCONDITIONAL SCREEN</span>
+          <span data-i18n="hero.stage.r">OWN-REGIME TILT</span>
         </div>
-        <p class="stage-caption">Interactive sketch — hard gates discard legs; continuous tilt keeps breadth. Move mouse to perturb states.</p>
+        <p class="stage-caption" data-i18n="hero.stage.cap">Interactive sketch — hard gates discard legs; continuous tilt keeps breadth. Move mouse to perturb states.</p>
       </div>
     </section>
 
@@ -128,12 +118,10 @@
 
     <!-- IDEA -->
     <section id="idea" class="section reveal">
-      <p class="section-kicker">01 · The thesis</p>
-      <h2>Global Weakness, Local Strength</h2>
+      <p class="section-kicker" data-i18n="idea.kicker">01 · The thesis</p>
+      <h2 data-i18n="idea.title">Global Weakness, Local Strength</h2>
       <p class="section-lede">
-        <strong>Core claim:</strong> unconditional factor screens have a <em>structural blind spot</em>
-        for state-dependent premia. Machines make the supply cheap; the filter still asks the wrong question.
-        This is not a weekend demo — it is a <strong>multi-year research program</strong> I am on leave to pursue full-time.
+        <span data-i18n="idea.lede">Core claim: unconditional factor screens have a structural blind spot for state-dependent premia. Machines make the supply cheap; the filter still asks the wrong question. This is not a weekend demo — it is a multi-year research program I am on leave to pursue full-time.</span>
       </p>
 
       <div class="thesis-banner">
@@ -199,12 +187,9 @@
 
     <!-- ARGUMENT TOUR -->
     <section id="tour" class="section reveal">
-      <p class="section-kicker">01a · Interactive argument tour</p>
-      <h2>Referee-speed walkthrough</h2>
-      <p class="section-lede">
-        Step through the paper the way an editor skims: claim → mechanism → machine pool → economics → gates.
-        Use the buttons or keyboard <span class="mono">← →</span>.
-      </p>
+      <p class="section-kicker" data-i18n="tour.kicker">01a · Interactive argument tour</p>
+      <h2 data-i18n="tour.title">Referee-speed walkthrough</h2>
+      <p class="section-lede"><span data-i18n="tour.lede">Step through the paper the way an editor skims: claim → mechanism → machine pool → economics → gates. Use the buttons or keyboard ← →.</span></p>
       <div class="tour-shell">
         <div class="tour-steps" id="tour-steps" role="tablist"></div>
         <div class="tour-stage" id="tour-stage" role="tabpanel"></div>
@@ -218,12 +203,9 @@
 
     <!-- VENUES -->
     <section id="venues" class="section reveal">
-      <p class="section-kicker">01b · Submission track</p>
-      <h2>Where the paper is in flight</h2>
-      <p class="section-lede">
-        Not “published.” Not vapor. A dual academic track with honest status labels—
-        the Academy cares about motion; journals care about priority and process.
-      </p>
+      <p class="section-kicker" data-i18n="venues.kicker">01b · Submission track</p>
+      <h2 data-i18n="venues.title">Where the paper is in flight</h2>
+      <p class="section-lede"><span data-i18n="venues.lede">Not “published.” Not vapor. A dual academic track with honest status labels— the Academy cares about motion; journals care about priority and process.</span></p>
       <div class="venue-grid">
         <article class="venue jf">
           <header>
@@ -259,12 +241,9 @@
 
     <!-- PAPER LAB -->
     <section id="paper" class="section reveal">
-      <p class="section-kicker">01c · Interactive paper map</p>
-      <h2>Walk the argument like a referee</h2>
-      <p class="section-lede">
-        Click a claim tier. The right pane opens the mechanism, the number that carries weight,
-        and what a third party can recompute from the public pack.
-      </p>
+      <p class="section-kicker" data-i18n="paper.kicker">01c · Interactive paper map</p>
+      <h2 data-i18n="paper.title">Walk the argument like a referee</h2>
+      <p class="section-lede"><span data-i18n="paper.lede">Click a claim tier. The right pane opens the mechanism, the number that carries weight, and what a third party can recompute from the public pack.</span></p>
 
       <div class="paper-lab" id="paper-lab">
         <div class="paper-rail" role="tablist" aria-label="Claim tiers">
@@ -309,13 +288,9 @@
 
     <!-- MATH -->
     <section id="math" class="section reveal">
-      <p class="section-kicker">02 · Mechanism lab</p>
-      <h2>Why the global <span class="mono">t</span> goes blind</h2>
-      <p class="section-lede">
-        A premium confined to a paying state of frequency <span class="mono">π</span>
-        is diluted in the unconditional mean. Drag the controls — watch the screen discard
-        a factor whose conditional edge never changed.
-      </p>
+      <p class="section-kicker" data-i18n="math.kicker">02 · Mechanism lab</p>
+      <h2 data-i18n="math.title">Why the global t goes blind</h2>
+      <p class="section-lede"><span data-i18n="math.lede">A premium confined to a paying state of frequency π is diluted in the unconditional mean. Drag the controls — watch the screen discard a factor whose conditional edge never changed.</span></p>
 
       <div class="math-grid">
         <div class="math-card" data-magnetic>
@@ -337,10 +312,11 @@
 
       <div class="pi-lab deluxe">
         <div class="pi-lab-head">
-          <h3>Live mechanism lab</h3>
-          <p>Illustrative first-order lab for Proposition 2. Not a trading simulator — a screen-discard visualizer.</p>
+          <h3 data-i18n="math.lab.h">Live mechanism lab</h3>
+          <p data-i18n="math.lab.p">Illustrative first-order lab for Proposition 2. Not a trading simulator — a screen-discard visualizer.</p>
         </div>
 
+        <div class="pi-scenarios" id="pi-scenarios" role="group" aria-label="Proposition 2 scenarios"></div>
         <div class="pi-controls deluxe">
           <label>
             Paying-state frequency π
@@ -368,16 +344,16 @@
           <canvas id="pi-canvas" width="1100" height="280"></canvas>
           <div class="gate-vs-tilt" id="gate-vs-tilt" aria-label="Hard gate versus continuous tilt">
             <div class="gvt-col">
-              <h4>Hard gate</h4>
+              <h4 data-i18n="math.gate.h">Hard gate</h4>
               <p class="gvt-status" id="gate-status">CUT</p>
               <div class="gvt-meter"><i id="gate-meter"></i></div>
-              <p class="gvt-note">Binary: keep if |t<sub>g</sub>| ≥ threshold, else discard the entire leg.</p>
+              <p class="gvt-note"><span data-i18n="math.gate.n">Binary: keep if |tg| ≥ threshold, else discard the entire leg.</span></p>
             </div>
             <div class="gvt-col accent">
-              <h4>Continuous tilt</h4>
+              <h4 data-i18n="math.tilt.h">Continuous tilt</h4>
               <p class="gvt-status" id="tilt-status">WEIGHTED</p>
               <div class="gvt-meter"><i id="tilt-meter"></i></div>
-              <p class="gvt-note">Keep the leg; scale exposure by state-dispersion / local strength. Rare states shrink weight — they do not delete breadth.</p>
+              <p class="gvt-note"><span data-i18n="math.tilt.n">Keep the leg; scale exposure by state-dispersion / local strength. Rare states shrink weight — they do not delete breadth.</span></p>
             </div>
           </div>
         </div>
@@ -387,13 +363,9 @@
 
     <!-- RESULTS -->
     <section id="results" class="section reveal">
-      <p class="section-kicker">03 · Deployable economics</p>
-      <h2>Numbers that survive baselines</h2>
-      <p class="section-lede">
-        Overlay on Chen–Zimmermann OSAP panels. Against seven allocators × four panels,
-        <strong>24/24</strong> same-base active increments stay positive.
-        Click a panel row — the chart locks onto that book.
-      </p>
+      <p class="section-kicker" data-i18n="results.kicker">03 · Deployable economics</p>
+      <h2 data-i18n="results.title">Numbers that survive baselines</h2>
+      <p class="section-lede"><span data-i18n="results.lede">Overlay on Chen–Zimmermann OSAP panels. Against seven allocators × four panels, 24/24 same-base active increments stay positive. Click a panel row — the chart locks onto that book.</span></p>
 
       <div class="results-lab">
         <div class="table-wrap">
@@ -487,12 +459,9 @@
 
     <!-- MACHINE -->
     <section id="machine" class="section reveal">
-      <p class="section-kicker">04 · Machine population</p>
-      <h2>What screens throw away when agents propose</h2>
-      <p class="section-lede">
-        6,881 genuinely machine-generated factors. <strong>None</strong> clears the global screen.
-        Click each funnel step — see the standard tighten and what survives.
-      </p>
+      <p class="section-kicker" data-i18n="machine.kicker">04 · Machine population</p>
+      <h2 data-i18n="machine.title">What screens throw away when agents propose</h2>
+      <p class="section-lede"><span data-i18n="machine.lede">6,881 genuinely machine-generated factors. None clears the global screen. Click each funnel step — see the standard tighten and what survives.</span></p>
 
       <div class="funnel interactive" id="funnel">
         <button type="button" class="funnel-step active" style="--w:100%" data-funnel="0">
@@ -542,8 +511,8 @@
 
     <!-- FACTORY -->
     <section id="factory" class="section reveal factory">
-      <p class="section-kicker">05 · AI agent factory</p>
-      <h2>Visible traces — not chatbot cosplay</h2>
+      <p class="section-kicker" data-i18n="factory.kicker">05 · AI agent factory</p>
+      <h2 data-i18n="factory.title">Visible traces — not chatbot cosplay</h2>
       <p class="section-lede">
         Agents emit typed ASTs over nine microstructure signals. Admission requires
         executability, non-constancy, dispersion, and an economic rationale.
@@ -806,83 +775,84 @@
       </ul>
     </section>
 
-
-    <!-- FIELD · Wiki Finance VIP -->
-    <section id="field" class="section reveal">
+    <!-- FIELD · Wiki Finance VIP (deep) -->
+    <section id="field" class="section reveal field-deluxe">
       <p class="section-kicker" data-i18n="field.kicker">09 · Field presence</p>
       <h2 data-i18n="field.title">Wiki Finance Expo Hong Kong 2026 · VIP</h2>
       <p class="section-lede" data-i18n="field.lede">
-        Invited as a VIP guest to Wiki Finance Expo Hong Kong 2026 (Hopewell Hotel, Wan Chai · 23–24 July).
-        Not a spectator hobby — industry rooms where tokenization, trading safety, and fintech infrastructure are debated in public.
-        I show up because the research has to survive contact with the real market conversation.
+        Invited as a VIP guest to Wiki Finance Expo Hong Kong 2026 — Hopewell Hotel, 15 Kennedy Road, Wan Chai · 23–24 July 2026.
       </p>
 
       <div class="field-meta">
-        <div><span data-i18n="field.m1s">Status</span><b data-i18n="field.m1b">VIP invite</b></div>
-        <div><span data-i18n="field.m2s">Event</span><b>Wiki Finance Expo HK 2026</b></div>
-        <div><span data-i18n="field.m3s">Theme</span><b data-i18n="field.m3b">Sparking opportunity · trading safety</b></div>
-        <div><span data-i18n="field.m4s">Why it matters</span><b data-i18n="field.m4b">Agency outside the notebook</b></div>
+        <div><span data-i18n="field.m1s">Status</span><b data-i18n="field.m1b">VIP invite · TRADEHALL</b></div>
+        <div><span data-i18n="field.m2s">Dates</span><b data-i18n="field.m2b">23–24 July 2026 · 09:00–18:00</b></div>
+        <div><span data-i18n="field.m3s">Venue</span><b data-i18n="field.m3b">Hopewell Hotel · Wan Chai</b></div>
+        <div><span data-i18n="field.m4s">Theme</span><b data-i18n="field.m4b">Trading safety · fintech future</b></div>
+      </div>
+
+      <div class="field-lab" id="field-lab">
+        <div class="field-chapters" id="field-chapters" role="tablist" aria-label="Field chapters"></div>
+        <div class="field-stage" id="field-stage" role="tabpanel"></div>
       </div>
 
       <div class="wiki-gallery" id="wiki-gallery">
-        <figure class="wiki-hero">
+        <figure class="wiki-hero" data-wiki="badge">
           <img src="assets/wiki/wiki-5.jpg" alt="VIP badge — Wiki Finance Expo Hong Kong 2026" data-full="assets/wiki/wiki-5.jpg" />
-          <figcaption data-i18n="field.cap1">VIP badge · TRADEHALL sponsor strip · 23–24 July 2026</figcaption>
+          <figcaption data-i18n="field.cap.badge">VIP badge · TRADEHALL · 23–24 July 2026</figcaption>
         </figure>
         <div class="wiki-grid">
-          <button type="button" class="wiki-thumb" data-full="assets/wiki/wiki-1.jpg"><img src="assets/wiki/wiki-1.jpg" alt="Expo floor · WikiGold" /></button>
-          <button type="button" class="wiki-thumb" data-full="assets/wiki/wiki-2.jpg"><img src="assets/wiki/wiki-2.jpg" alt="After party screen" /></button>
-          <button type="button" class="wiki-thumb" data-full="assets/wiki/wiki-3.jpg"><img src="assets/wiki/wiki-3.jpg" alt="VIP guest on expo floor" /></button>
-          <button type="button" class="wiki-thumb" data-full="assets/wiki/wiki-4.jpg"><img src="assets/wiki/wiki-4.jpg" alt="Panel hall · RWA / tokenization" /></button>
+          <button type="button" class="wiki-thumb" data-wiki="floor" data-full="assets/wiki/wiki-1.jpg"><img src="assets/wiki/wiki-1.jpg" alt="Expo floor" /><span data-i18n="field.cap.floor">Expo floor</span></button>
+          <button type="button" class="wiki-thumb" data-wiki="after" data-full="assets/wiki/wiki-2.jpg"><img src="assets/wiki/wiki-2.jpg" alt="After party" /><span data-i18n="field.cap.after">After party</span></button>
+          <button type="button" class="wiki-thumb" data-wiki="pose" data-full="assets/wiki/wiki-3.jpg"><img src="assets/wiki/wiki-3.jpg" alt="VIP on floor" /><span data-i18n="field.cap.pose">VIP guest</span></button>
+          <button type="button" class="wiki-thumb" data-wiki="panel" data-full="assets/wiki/wiki-4.jpg"><img src="assets/wiki/wiki-4.jpg" alt="Panel hall" /><span data-i18n="field.cap.panel">Panel hall</span></button>
         </div>
       </div>
 
       <div class="field-notes">
         <article>
-          <h3 data-i18n="field.n1t">What I did there</h3>
-          <p data-i18n="field.n1p">Entered as VIP, walked the floor, sat the rooms, and treated the expo as a stress test for whether my screening-science agenda still sounds real next to live fintech product talk.</p>
+          <h3 data-i18n="field.n1t">Why VIP matters (to me)</h3>
+          <p data-i18n="field.n1p">VIP was not a sticker for LinkedIn.</p>
         </article>
         <article>
-          <h3 data-i18n="field.n2t">How it connects</h3>
-          <p data-i18n="field.n2p">RWA / tokenization panels and “trading safety” branding sit next to my work: AI proposes factors fast; unconditional screens still miss state-dependent structure. Field presence keeps the research honest.</p>
+          <h3 data-i18n="field.n2t">What I actually did</h3>
+          <p data-i18n="field.n2p">Walked the branded floor.</p>
         </article>
         <article>
-          <h3 data-i18n="field.n3t">Academy signal</h3>
-          <p data-i18n="field.n3p">Already in motion — not only code and a paper track, but showing up where the industry gathers when invited.</p>
+          <h3 data-i18n="field.n3t">Bridge back to the paper</h3>
+          <p data-i18n="field.n3p">The expo’s public language maps onto my research tension.</p>
         </article>
       </div>
     </section>
 
-    <!-- STACK · boat monorepo -->
-    <section id="stack" class="section reveal">
+    <!-- STACK · boat monorepo (deep) -->
+    <section id="stack" class="section reveal stack-deluxe">
       <p class="section-kicker" data-i18n="stack.kicker">10 · Private boatfx stack</p>
       <h2 data-i18n="stack.title">The body behind the thin public receipt</h2>
       <p class="section-lede" data-i18n="stack.lede">
         Public GitHub is curated on purpose. The private monorepo is a multi-crate trading / research system.
-        Click a crate — see what it owns. Numbers measured locally (build artifacts excluded).
       </p>
+
+      <div class="stack-layers" id="stack-layers" role="tablist" aria-label="Architecture layers"></div>
+
       <div class="stack-lab">
         <div class="stack-rail" id="stack-rail" role="tablist"></div>
         <div class="stack-stage" id="stack-stage" role="tabpanel"></div>
       </div>
+
       <div class="stack-strip">
         <div><span data-i18n="stack.s1">Crates</span><b>12</b></div>
         <div><span data-i18n="stack.s2">App</span><b>captain</b></div>
-        <div><span data-i18n="stack.s3">UI packages</span><b>charts · tokens · ui</b></div>
-        <div><span data-i18n="stack.s4">Public surface</span><b>boatfx-repro</b></div>
+        <div><span data-i18n="stack.s3">UI packages</span><b>charts · tokens · ui · icons · shared</b></div>
+        <div><span data-i18n="stack.s4">Rust mass</span><b data-i18n="stack.s4b">~2.3k files · ~670k LoC</b></div>
       </div>
+      <p class="stack-public" data-i18n="stack.public">Public surface stays thin: boatfx-repro = site · repro · showcase · CI.</p>
     </section>
 
     <!-- ACADEMY / AGENCY -->
     <section id="agency" class="section about reveal academy-fit">
-      <p class="section-kicker">08 · The Horowitz Andreessen Academy</p>
-      <h2>Already in motion</h2>
-      <p class="section-lede academy-lede">
-        “We’re looking for people who are already in motion… What we care about is agency:
-        when something captures your attention, you do something about it.”
-        Admission is heavily weighted on <strong>proof of work</strong>.
-        Original research counts.
-      </p>
+      <p class="section-kicker" data-i18n="agency.kicker">08 · The Horowitz Andreessen Academy</p>
+      <h2 data-i18n="agency.title">Already in motion</h2>
+      <p class="section-lede academy-lede"><span data-i18n="agency.lede">We’re looking for people who are already in motion…</span></p>
 
       <div class="agency-map" id="agency-map">
         <button type="button" class="agency-tab active" data-agency="motion">Already in motion</button>
@@ -894,21 +864,15 @@
       <div class="agency-panel" id="agency-panel"></div>
 
       <div class="agency-foot">
-        <p>
-          I am on an <strong>academic leave of absence</strong> from
-          <strong>Shanghai Lixin University of Accounting and Finance</strong>
-          to pursue this research full-time. I remain within Academy eligibility:
-          I have <strong>not completed more than one year</strong> of full-time college after high school
-          (through August 2027). International applicant. Willing to live in San Francisco full-time.
-        </p>
-        <p class="note">Essay and video are mine. AI helps me code and edit — not invent the story.</p>
+        <p><span data-i18n="agency.foot">I am on an academic leave of absence from Shanghai Lixin University of Accounting and Finance to pursue this research full-time. I remain within Academy eligibility: I have not completed more than one year of full-time college after high school (through August 2027). International applicant. Willing to live in San Francisco full-time.</span></p>
+        <p class="note"><span data-i18n="agency.note">Essay and video are mine. AI helps me code and edit — not invent the story.</span></p>
       </div>
     </section>
 
     <!-- LINKS -->
     <section id="links" class="section links reveal">
-      <p class="section-kicker">Artifacts</p>
-      <h2>For reviewers</h2>
+      <p class="section-kicker" data-i18n="links.kicker">Artifacts</p>
+      <h2 data-i18n="links.title">For reviewers</h2>
       <ul class="link-rows">
         <li><span>Live site (public)</span><a id="live-link" href="https://nemo02070118.github.io/boatfx-repro/">nemo02070118.github.io/boatfx-repro →</a></li>
         <li><span>Reproducibility pack</span><a id="github-link-2" href="https://github.com/nemo02070118/boatfx-repro" target="_blank" rel="noopener">GitHub boatfx-repro →</a></li>
