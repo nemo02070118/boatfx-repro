@@ -129,7 +129,7 @@ function initCursor() {
     requestAnimationFrame(loop);
   }
   loop();
-  document.querySelectorAll("a, button, .factor-btn, input").forEach((el) => {
+  document.querySelectorAll("a, button, .factor-btn, input, .funnel-step, .pipe-step, .paper-tab, .data-table tbody tr").forEach((el) => {
     el.addEventListener("mouseenter", () => ring.classList.add("on-link"));
     el.addEventListener("mouseleave", () => ring.classList.remove("on-link"));
   });
@@ -250,45 +250,78 @@ function initTex() {
   }
 }
 
-/* ---------- pi lab ---------- */
+/* ---------- pi lab (deluxe) ---------- */
 function initPiLab() {
   const range = document.getElementById("pi-range");
+  const tStateRange = document.getElementById("tstate-range");
+  const threshRange = document.getElementById("thresh-range");
   const piVal = document.getElementById("pi-val");
+  const tStateVal = document.getElementById("tstate-val");
   const tgVal = document.getElementById("tg-val");
+  const threshVal = document.getElementById("thresh-val");
   const verdict = document.getElementById("verdict");
+  const dilutionVal = document.getElementById("dilution-val");
   const canvas = document.getElementById("pi-canvas");
+  const gateStatus = document.getElementById("gate-status");
+  const tiltStatus = document.getElementById("tilt-status");
+  const gateMeter = document.getElementById("gate-meter");
+  const tiltMeter = document.getElementById("tilt-meter");
   if (!range || !canvas) return;
   const ctx = canvas.getContext("2d");
-  const T_STATE = 3;
-  const THRESH = 2;
 
-  function draw(pi) {
+  function draw(pi, tState, thresh) {
     const dpr = Math.min(devicePixelRatio || 1, 2);
     const w = canvas.clientWidth || 1100;
-    const h = 220;
+    const h = 280;
     canvas.width = w * dpr;
     canvas.height = h * dpr;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
-    ctx.fillStyle = "#0a1018";
+
+    const grad = ctx.createLinearGradient(0, 0, 0, h);
+    grad.addColorStop(0, "#0c121a");
+    grad.addColorStop(1, "#0a1018");
+    ctx.fillStyle = grad;
     ctx.fillRect(0, 0, w, h);
 
-    const pad = 48;
+    const pad = 52;
     const plotW = w - pad * 2;
-    const plotH = h - 56;
+    const plotH = h - 64;
+    const tmax = 5.2;
 
-    // axes
-    ctx.strokeStyle = "rgba(215,224,234,0.2)";
+    ctx.strokeStyle = "rgba(215,224,234,0.18)";
     ctx.beginPath();
-    ctx.moveTo(pad, 20);
-    ctx.lineTo(pad, 20 + plotH);
-    ctx.lineTo(pad + plotW, 20 + plotH);
+    ctx.moveTo(pad, 24);
+    ctx.lineTo(pad, 24 + plotH);
+    ctx.lineTo(pad + plotW, 24 + plotH);
     ctx.stroke();
 
-    // threshold
-    const yThresh = 20 + plotH - (THRESH / 4) * plotH;
-    ctx.strokeStyle = "rgba(196,92,38,0.7)";
-    ctx.setLineDash([4, 4]);
+    // soft fill under curve above threshold = survive region
+    ctx.fillStyle = "rgba(109,206,168,0.06)";
+    ctx.beginPath();
+    let started = false;
+    for (let i = 0; i <= 120; i++) {
+      const p = 0.05 + (0.85 * i) / 120;
+      const tg = tState * Math.sqrt(p);
+      const x = pad + ((p - 0.05) / 0.85) * plotW;
+      const y = 24 + plotH - (Math.min(tg, tmax) / tmax) * plotH;
+      if (tg >= thresh) {
+        if (!started) {
+          ctx.moveTo(x, 24 + plotH - (thresh / tmax) * plotH);
+          started = true;
+        }
+        ctx.lineTo(x, y);
+      }
+    }
+    if (started) {
+      ctx.lineTo(pad + plotW, 24 + plotH - (thresh / tmax) * plotH);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    const yThresh = 24 + plotH - (thresh / tmax) * plotH;
+    ctx.strokeStyle = "rgba(196,92,38,0.75)";
+    ctx.setLineDash([5, 5]);
     ctx.beginPath();
     ctx.moveTo(pad, yThresh);
     ctx.lineTo(pad + plotW, yThresh);
@@ -296,50 +329,82 @@ function initPiLab() {
     ctx.setLineDash([]);
     ctx.fillStyle = "#c45c26";
     ctx.font = "11px IBM Plex Mono";
-    ctx.fillText("|t|=2 threshold", pad + 8, yThresh - 6);
+    ctx.fillText(`|t|=${thresh.toFixed(1)} threshold`, pad + 8, yThresh - 8);
 
-    // curve tg = 3 * sqrt(pi)
     ctx.strokeStyle = "#6dcea8";
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 2.25;
     ctx.beginPath();
-    for (let i = 0; i <= 100; i++) {
-      const p = 0.05 + (0.85 * i) / 100;
-      const tg = T_STATE * Math.sqrt(p);
+    for (let i = 0; i <= 120; i++) {
+      const p = 0.05 + (0.85 * i) / 120;
+      const tg = tState * Math.sqrt(p);
       const x = pad + ((p - 0.05) / 0.85) * plotW;
-      const y = 20 + plotH - (tg / 4) * plotH;
+      const y = 24 + plotH - (Math.min(tg, tmax) / tmax) * plotH;
       if (i === 0) ctx.moveTo(x, y);
       else ctx.lineTo(x, y);
     }
     ctx.stroke();
 
-    // current point
-    const tg = T_STATE * Math.sqrt(pi);
+    const tg = tState * Math.sqrt(pi);
     const x = pad + ((pi - 0.05) / 0.85) * plotW;
-    const y = 20 + plotH - (tg / 4) * plotH;
-    ctx.fillStyle = tg >= THRESH ? "#6dcea8" : "#c45c26";
+    const y = 24 + plotH - (Math.min(tg, tmax) / tmax) * plotH;
+    ctx.strokeStyle = "rgba(215,224,234,0.25)";
     ctx.beginPath();
-    ctx.arc(x, y, 7, 0, Math.PI * 2);
+    ctx.moveTo(x, 24);
+    ctx.lineTo(x, 24 + plotH);
+    ctx.stroke();
+
+    ctx.fillStyle = tg >= thresh ? "#6dcea8" : "#c45c26";
+    ctx.beginPath();
+    ctx.arc(x, y, 8, 0, Math.PI * 2);
     ctx.fill();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "rgba(255,255,255,0.35)";
+    ctx.stroke();
+
     ctx.fillStyle = "#d7e0ea";
     ctx.font = "12px IBM Plex Mono";
-    ctx.fillText(`π=${pi.toFixed(2)}  tg=${tg.toFixed(2)}`, x + 12, y - 8);
-
+    ctx.fillText(`π=${pi.toFixed(2)}   tg=${tg.toFixed(2)}`, Math.min(x + 14, w - 160), Math.max(y - 10, 36));
     ctx.fillStyle = "#8a93a3";
-    ctx.fillText("π →", pad + plotW - 28, 20 + plotH + 22);
-    ctx.fillText("t", 18, 28);
+    ctx.fillText("π →", pad + plotW - 28, 24 + plotH + 26);
+    ctx.fillText("t_g", 14, 32);
   }
 
   function update() {
     const pi = parseFloat(range.value);
-    const tg = T_STATE * Math.sqrt(pi);
-    piVal.textContent = pi.toFixed(2);
-    tgVal.textContent = tg.toFixed(2);
-    const pass = tg >= THRESH;
-    verdict.textContent = pass ? "survives" : "discarded";
-    verdict.style.color = pass ? "#0d5c4b" : "#c45c26";
-    draw(pi);
+    const tState = parseFloat((tStateRange && tStateRange.value) || "3");
+    const thresh = parseFloat((threshRange && threshRange.value) || "2");
+    const tg = tState * Math.sqrt(pi);
+    const dil = Math.sqrt(pi);
+    if (piVal) piVal.textContent = pi.toFixed(2);
+    if (tStateVal) tStateVal.textContent = tState.toFixed(2);
+    if (tgVal) tgVal.textContent = tg.toFixed(2);
+    if (threshVal) threshVal.textContent = thresh.toFixed(1);
+    if (dilutionVal) dilutionVal.textContent = `√π = ${dil.toFixed(2)}`;
+    const pass = tg >= thresh;
+    if (verdict) {
+      verdict.textContent = pass ? "survives" : "discarded";
+      verdict.style.color = pass ? "#0d5c4b" : "#c45c26";
+    }
+    if (gateStatus) {
+      gateStatus.textContent = pass ? "KEEP" : "CUT";
+      gateStatus.style.color = pass ? "#0d5c4b" : "#c45c26";
+    }
+    if (tiltStatus) {
+      tiltStatus.textContent = "WEIGHTED";
+      tiltStatus.style.color = "#0d5c4b";
+    }
+    if (gateMeter) gateMeter.style.width = pass ? "100%" : "8%";
+    if (tiltMeter) {
+      // tilt keeps exposure proportional to local strength proxy
+      const w = Math.min(100, Math.max(18, (tg / Math.max(thresh, 0.01)) * 55 + dil * 40));
+      tiltMeter.style.width = `${w}%`;
+    }
+    draw(pi, tState, thresh);
   }
+
   range.addEventListener("input", update);
+  tStateRange?.addEventListener("input", update);
+  threshRange?.addEventListener("input", update);
   update();
   window.addEventListener("resize", update);
 }
@@ -508,8 +573,9 @@ function initPalette() {
   const items = [
     { id: "idea", label: "01 Idea — Global Weakness" },
     { id: "venues", label: "01b Venues — JF · EFA" },
-    { id: "math", label: "02 Math — blind-spot identity" },
-    { id: "results", label: "03 Results — panel table" },
+    { id: "paper", label: "01c Paper map — claim tiers" },
+    { id: "math", label: "02 Math — blind-spot lab" },
+    { id: "results", label: "03 Results — panel inspector" },
     { id: "machine", label: "04 Machine population funnel" },
     { id: "factory", label: "05 AI factor factory" },
     { id: "letter", label: "06 Zheshang recommendation" },
@@ -601,6 +667,10 @@ initTerminal();
 initPalette();
 initSpyNav();
 initCredBars();
+initPaperLab();
+initPanelLab();
+initFunnelLab();
+initPipeLab();
 
 function initSpyNav() {
   const links = [...document.querySelectorAll("#spy-nav a[data-spy]")];
@@ -631,4 +701,253 @@ function initCredBars() {
     { threshold: 0.4 }
   );
   rows.forEach((r) => io.observe(r));
+}
+
+/* ---------- paper claim map ---------- */
+function initPaperLab() {
+  const stage = document.getElementById("paper-stage");
+  const tabs = document.querySelectorAll(".paper-tab");
+  if (!stage || !tabs.length) return;
+
+  const CLAIMS = {
+    load: {
+      title: "Tier I · Load-bearing — deployable overlay",
+      lead: "The claim I lean on: conditioning adds net-of-cost active return on investable books.",
+      bullets: [
+        "Chen–Zimmermann OSAP · seven allocators × four panels → 24/24 same-base increments positive",
+        "Institutionally investable: ~134–172 bps/yr active · IR ≈ 1.7–2.0 (VW headline 172 · IR ≈ 1.99)",
+        "Survives Romano–Wolf / e-BH; Lo (2002) holds on tradeable panels (20/24 familywise)",
+        "Public check: shipped tilt OUTPUT + python reproduce_headline.py — router estimation code withheld",
+      ],
+      formula: "\\text{active bps}_{\\mathrm{VW}} \\approx 172 \\quad \\mathrm{IR}\\approx 1.99",
+      badge: "Recomputable from public pack",
+    },
+    id: {
+      title: "Tier II · Identification — the blind spot is structural",
+      lead: "Rescued factors carry genuine state-dependent structure — verified by falsification, not vibes.",
+      bullets: [
+        "Cross-fit: state labels ⊥ conditional alpha on purged month halves · increment positive in 100% of splits",
+        "Own-regime beats placebo regime borrowed from another factor by ~3–5×",
+        "States persist ~8.6 months on average — tradeable, not monthly noise",
+        "Deflated Sharpe ≈ 1 across panels · funding scarcity (HKM / Baa–Aaa) steepens local strength; vol placebos fail",
+      ],
+      formula: "t_g \\approx t_{\\mathrm{state}}\\sqrt{\\pi}",
+      badge: "Scientific claim · independently checkable on Alpha191/101",
+    },
+    machine: {
+      title: "Tier II·b · Machine population — where the blind spot bites",
+      lead: "6,881 genuinely machine-generated factors; none clears the global screen — yet structure remains.",
+      bullets: [
+        "10.0% flagged regime-local (bootstrap 95% · 9.3–10.7%)",
+        "3.15% survive block-shuffle falsification · 1.08% clear BH one-at-a-time",
+        "Assumption-free anchor: flagged set yields 6.4× falsification passes vs global-null allowance (219 vs 34)",
+        "Same order of magnitude on human libraries: Alpha191 13.8% · Alpha101 11.6%",
+      ],
+      formula: "6{,}881 \\rightarrow 10.0\\% \\rightarrow 3.15\\% \\rightarrow 1.08\\%",
+      badge: "Correction cost made visible on purpose",
+    },
+    prop2: {
+      title: "Proposition 2 · State blind spot",
+      lead: "A state-confined premium’s global t-statistic vanishes as the paying state grows rare.",
+      bullets: [
+        "Unconditional mean dilutes local strength by state frequency π",
+        "First-order identity: t_g ≈ t_state √π — rare paying states look globally weak",
+        "Hard gates delete legs; continuous tilt keeps breadth and reweights",
+        "Interactive lab below: drag π, t_state, and the screen threshold",
+      ],
+      formula: "t_g \\approx t_{\\mathrm{state}}\\sqrt{\\pi}",
+      badge: "Mechanism — not a backtest slogan",
+    },
+    suggest: {
+      title: "Tier III · Suggestive — reported, not leaned on",
+      lead: "I show these for completeness. They are not load-bearing for the paper’s central claim.",
+      bullets: [
+        "Shorting-cost natural experiments and short cross-asset panels",
+        "Observational funding interactions — I stop short of a causal claim",
+        "OOS corroboration vs matched placebos can be directional rather than decisive",
+        "Honesty rule: raw rescue rates always appear beside FDR-controlled floors",
+      ],
+      formula: "\\text{do not lean}",
+      badge: "Explicitly down-weighted",
+    },
+  };
+
+  function show(key) {
+    const c = CLAIMS[key];
+    if (!c) return;
+    stage.innerHTML = `
+      <div class="paper-badge">${c.badge}</div>
+      <h3>${c.title}</h3>
+      <p class="paper-lead">${c.lead}</p>
+      <div class="paper-tex" data-tex="${c.formula}"></div>
+      <ul>${c.bullets.map((b) => `<li>${b}</li>`).join("")}</ul>
+      <button type="button" class="paper-jump" data-jump="${key === "prop2" ? "math" : key === "machine" ? "machine" : key === "load" ? "results" : "math"}">Open related lab →</button>
+    `;
+    if (window.katex) {
+      stage.querySelectorAll(".paper-tex").forEach((el) => {
+        window.katex.render(el.dataset.tex, el, { throwOnError: false, displayMode: true });
+      });
+    }
+    stage.querySelector(".paper-jump")?.addEventListener("click", (e) => {
+      document.getElementById(e.currentTarget.dataset.jump)?.scrollIntoView({ behavior: "smooth" });
+    });
+  }
+
+  tabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      tabs.forEach((t) => {
+        t.classList.toggle("active", t === tab);
+        t.setAttribute("aria-selected", t === tab ? "true" : "false");
+      });
+      show(tab.dataset.claim);
+    });
+  });
+  show("load");
+}
+
+/* ---------- results panel inspector ---------- */
+function initPanelLab() {
+  const table = document.getElementById("panel-table");
+  const canvas = document.getElementById("panel-canvas");
+  const nameEl = document.getElementById("inspect-name");
+  const factsEl = document.getElementById("inspect-facts");
+  if (!table || !canvas) return;
+
+  const DATA = {
+    ew: { name: "Equal-weight", min: 2.79, over: 3.01, bps: 128, ir: 1.73, t: 1.49, oos: 101, oosIr: 1.72, note: "Near-frontier book · Lo exceptions concentrate here" },
+    vw: { name: "Value-weight ★", min: 1.37, over: 1.91, bps: 172, ir: 1.99, t: 6.81, oos: 134, oosIr: 2.05, note: "Headline investable panel · primary public receipt" },
+    nyse: { name: "NYSE breakpoint", min: 1.73, over: 2.15, bps: 134, ir: 1.68, t: 4.11, oos: 116, oosIr: 1.52, note: "Institutionally familiar breakpoint construction" },
+    me20: { name: "Large-cap (ME20)", min: 1.77, over: 2.05, bps: 109, ir: 1.66, t: 2.79, oos: 75, oosIr: 1.60, note: "Large-cap stress · still positive active increment" },
+  };
+
+  const ctx = canvas.getContext("2d");
+
+  function draw(d) {
+    const dpr = Math.min(devicePixelRatio || 1, 2);
+    const w = canvas.clientWidth || 480;
+    const h = 260;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = "#0a1018";
+    ctx.fillRect(0, 0, w, h);
+
+    const metrics = [
+      { label: "bps", v: d.bps, max: 200, color: "#6dcea8" },
+      { label: "IR×100", v: d.ir * 100, max: 220, color: "#7eb6ff" },
+      { label: "dep t×10", v: d.t * 10, max: 80, color: "#e0b15a" },
+      { label: "OOS bps", v: d.oos, max: 200, color: "#c9a0ff" },
+    ];
+    const pad = 36;
+    const barW = (w - pad * 2) / metrics.length - 12;
+    metrics.forEach((m, i) => {
+      const x = pad + i * (barW + 12);
+      const bh = ((m.v / m.max) * (h - 80));
+      const y = h - 40 - bh;
+      ctx.fillStyle = m.color;
+      ctx.globalAlpha = 0.85;
+      ctx.fillRect(x, y, barW, bh);
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = "#d7e0ea";
+      ctx.font = "11px IBM Plex Mono";
+      const shown = m.label.startsWith("IR") ? d.ir.toFixed(2) : m.label.startsWith("dep") ? d.t.toFixed(2) : String(Math.round(m.v));
+      ctx.fillText(shown, x, y - 8);
+      ctx.fillStyle = "#8a93a3";
+      ctx.fillText(m.label.replace("×100", "").replace("×10", ""), x, h - 18);
+    });
+  }
+
+  function select(key) {
+    const d = DATA[key];
+    if (!d) return;
+    table.querySelectorAll("tbody tr").forEach((tr) => tr.classList.toggle("active", tr.dataset.panel === key));
+    if (nameEl) nameEl.textContent = d.name;
+    if (factsEl) {
+      factsEl.innerHTML = `
+        <li><span>MinVar → Overlay SR</span><b>${d.min.toFixed(2)} → ${d.over.toFixed(2)}</b></li>
+        <li><span>Active bps / IR</span><b>${d.bps} · ${d.ir.toFixed(2)}</b></li>
+        <li><span>Deployable t</span><b>${d.t.toFixed(2)}</b></li>
+        <li><span>OOS bps / IR</span><b>${d.oos} · ${d.oosIr.toFixed(2)}</b></li>
+        <li class="note">${d.note}</li>
+      `;
+    }
+    draw(d);
+  }
+
+  table.querySelectorAll("tbody tr").forEach((tr) => {
+    const activate = () => select(tr.dataset.panel);
+    tr.addEventListener("click", activate);
+    tr.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        activate();
+      }
+    });
+  });
+  select("vw");
+  window.addEventListener("resize", () => {
+    const active = table.querySelector("tr.active")?.dataset.panel || "vw";
+    select(active);
+  });
+}
+
+/* ---------- funnel lab ---------- */
+function initFunnelLab() {
+  const detail = document.getElementById("funnel-detail");
+  const steps = document.querySelectorAll("#funnel [data-funnel]");
+  if (!detail || !steps.length) return;
+  const COPY = [
+    {
+      title: "Pool · 6,881 machine factors",
+      body: "Genuinely machine-generated — not a human shortlist. None clears the unconditional global screen. The question is what the discards still contain.",
+    },
+    {
+      title: "Flagged regime-local · 10.0%",
+      body: "Bootstrap 95% interval 9.3–10.7%. A minority — but well above chance. Same order of magnitude reappears on Alpha191 (13.8%) and Alpha101 (11.6%).",
+    },
+    {
+      title: "Block-shuffle falsification · 3.15%",
+      body: "Induced-null pipeline: shuffle regime labels in blocks and re-run. The router does not manufacture signal from noise; global-pass factors produce no false rescues on the same test.",
+    },
+    {
+      title: "BH one-factor-at-a-time · 1.08%",
+      body: "Correction cost made visible on purpose. Raw rescue rates always sit beside FDR-controlled floors so readers see the conservative figure.",
+    },
+    {
+      title: "Assumption-free anchor · 6.4×",
+      body: "Flagged set produces 219 falsification passes versus 34 allowed under a global null — the load-bearing machine-pool fact without leaning on a single cutoff.",
+    },
+  ];
+  function show(i) {
+    const c = COPY[i] || COPY[0];
+    steps.forEach((s) => s.classList.toggle("active", String(s.dataset.funnel) === String(i)));
+    detail.innerHTML = `<h4>${c.title}</h4><p>${c.body}</p>`;
+  }
+  steps.forEach((s) => {
+    s.addEventListener("click", () => show(s.dataset.funnel));
+  });
+  show(0);
+}
+
+/* ---------- pipeline lab ---------- */
+function initPipeLab() {
+  const detail = document.getElementById("pipe-detail");
+  const steps = document.querySelectorAll("#pipeline [data-pipe]");
+  if (!detail || !steps.length) return;
+  const COPY = [
+    { title: "01 · LLM propose", body: "DeepSeek breadth + Claude/GPT depth. Models propose typed factor programs — never arbitrary shell code. Keys only from environment variables." },
+    { title: "02 · Type-check", body: "Typed AST over nine microstructure signals. Ill-typed expressions die here before any expensive evaluation." },
+    { title: "03 · Sandbox", body: "WASM / fuel / wall-clock / memory hard limits. A proposal that loops forever does not get to waste the research budget." },
+    { title: "04 · Rationale", body: "Economic rationale required — not a bare expression. The paper studies the admitted population without performance pre-screening." },
+    { title: "05 · Admit", body: "Front gates G1–G4 + constitution checks. Admission is expensive on purpose; proposals are cheap." },
+    { title: "06 · Study discards", body: "The scientific object includes what the global screen throws away. Discards are where Proposition 2 bites — not a trash folder." },
+  ];
+  function show(i) {
+    const c = COPY[i] || COPY[0];
+    steps.forEach((s) => s.classList.toggle("active", String(s.dataset.pipe) === String(i)));
+    detail.innerHTML = `<h4>${c.title}</h4><p>${c.body}</p>`;
+  }
+  steps.forEach((s) => s.addEventListener("click", () => show(s.dataset.pipe)));
+  show(0);
 }

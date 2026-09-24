@@ -23,6 +23,7 @@
     <nav id="spy-nav">
       <a href="#idea" data-spy="idea">Idea</a>
       <a href="#venues" data-spy="venues">Venues</a>
+      <a href="#paper" data-spy="paper">Paper</a>
       <a href="#math" data-spy="math">Math</a>
       <a href="#results" data-spy="results">Results</a>
       <a href="#machine" data-spy="machine">Machine</a>
@@ -204,52 +205,131 @@
       </p>
     </section>
 
+    <!-- PAPER LAB -->
+    <section id="paper" class="section reveal">
+      <p class="section-kicker">01c · Interactive paper map</p>
+      <h2>Walk the argument like a referee</h2>
+      <p class="section-lede">
+        Click a claim tier. The right pane opens the mechanism, the number that carries weight,
+        and what a third party can recompute from the public pack.
+      </p>
+
+      <div class="paper-lab" id="paper-lab">
+        <div class="paper-rail" role="tablist" aria-label="Claim tiers">
+          <button type="button" class="paper-tab active" data-claim="load" role="tab" aria-selected="true">
+            <span class="tier">Tier I</span>
+            <b>Load-bearing</b>
+            <em>Deployable overlay</em>
+          </button>
+          <button type="button" class="paper-tab" data-claim="id" role="tab" aria-selected="false">
+            <span class="tier">Tier II</span>
+            <b>Identification</b>
+            <em>Blind spot is real</em>
+          </button>
+          <button type="button" class="paper-tab" data-claim="machine" role="tab" aria-selected="false">
+            <span class="tier">Tier II·b</span>
+            <b>Machine pool</b>
+            <em>6,881 discards</em>
+          </button>
+          <button type="button" class="paper-tab" data-claim="prop2" role="tab" aria-selected="false">
+            <span class="tier">Core</span>
+            <b>Proposition 2</b>
+            <em>State blind spot</em>
+          </button>
+          <button type="button" class="paper-tab" data-claim="suggest" role="tab" aria-selected="false">
+            <span class="tier">Tier III</span>
+            <b>Suggestive</b>
+            <em>Reported, not leaned on</em>
+          </button>
+        </div>
+        <div class="paper-stage" id="paper-stage" role="tabpanel">
+          <!-- filled by app.js -->
+        </div>
+      </div>
+
+      <div class="paper-strip" aria-hidden="false">
+        <div><span>MS</span><b>2026-0738</b></div>
+        <div><span>Status</span><b>Passed desk · external review</b></div>
+        <div><span>Editor</span><b>Antoinette Schoar</b></div>
+        <div><span>Public check</span><b>python reproduce_headline.py</b></div>
+      </div>
+    </section>
+
     <!-- MATH -->
     <section id="math" class="section reveal">
-      <p class="section-kicker">02 · Mechanism</p>
+      <p class="section-kicker">02 · Mechanism lab</p>
       <h2>Why the global <span class="mono">t</span> goes blind</h2>
       <p class="section-lede">
         A premium confined to a paying state of frequency <span class="mono">π</span>
-        is diluted in the unconditional mean. The screen sees weakness; the state sees strength.
+        is diluted in the unconditional mean. Drag the controls — watch the screen discard
+        a factor whose conditional edge never changed.
       </p>
 
       <div class="math-grid">
-        <div class="math-card">
+        <div class="math-card" data-magnetic>
           <h3>Unconditional mean</h3>
           <div class="tex" data-tex="\bar r_i = \sum_r \pi_r \mu_{ir}"></div>
           <p>State-frequency-weighted average. Local strength is averaged away by construction.</p>
         </div>
-        <div class="math-card">
+        <div class="math-card" data-magnetic>
           <h3>Blind-spot identity</h3>
           <div class="tex" data-tex="t_g \;\approx\; t_{\mathrm{state}}\sqrt{\pi}"></div>
-          <p>Proposition (blind spot): global <span class="mono">t</span> vanishes as the paying state grows rare—even when conditional <span class="mono">t</span> stays large.</p>
+          <p>Proposition 2: global <span class="mono">t</span> vanishes as the paying state grows rare—even when conditional <span class="mono">t</span> stays large.</p>
         </div>
-        <div class="math-card">
+        <div class="math-card" data-magnetic>
           <h3>Breadth, not leverage</h3>
           <div class="tex" data-tex="\mathrm{SR}\;\approx\;\overline{\mathrm{SR}}_{\mathrm{bet}}\times\sqrt{\mathrm{BR}}"></div>
           <p>Hard gates raise per-bet skill but destroy effective breadth. Continuous tilt keeps legs and scales weights.</p>
         </div>
       </div>
 
-      <div class="pi-lab">
+      <div class="pi-lab deluxe">
         <div class="pi-lab-head">
-          <h3>Live lab · drag π</h3>
-          <p>Fix <span class="mono">t<sub>state</sub> = 3</span>. Watch the unconditional screen lose the factor as the paying state becomes rare.</p>
+          <h3>Live mechanism lab</h3>
+          <p>Illustrative first-order lab for Proposition 2. Not a trading simulator — a screen-discard visualizer.</p>
         </div>
-        <div class="pi-controls">
+
+        <div class="pi-controls deluxe">
           <label>
             Paying-state frequency π
             <input type="range" id="pi-range" min="0.05" max="0.9" step="0.01" value="0.25" />
           </label>
+          <label>
+            Conditional strength t<sub>state</sub>
+            <input type="range" id="tstate-range" min="1.5" max="5" step="0.05" value="3" />
+          </label>
+          <label>
+            Screen threshold |t|
+            <input type="range" id="thresh-range" min="1" max="3.5" step="0.1" value="2" />
+          </label>
           <div class="pi-readout">
             <div><span>π</span><b id="pi-val">0.25</b></div>
-            <div><span>t<sub>state</sub></span><b>3.00</b></div>
+            <div><span>t<sub>state</sub></span><b id="tstate-val">3.00</b></div>
             <div><span>t<sub>g</sub></span><b id="tg-val">1.50</b></div>
+            <div><span>threshold</span><b id="thresh-val">2.00</b></div>
             <div><span>verdict</span><b id="verdict">discarded</b></div>
+            <div><span>dilution</span><b id="dilution-val">√π = 0.50</b></div>
           </div>
         </div>
-        <canvas id="pi-canvas" width="1100" height="220"></canvas>
-        <p class="stage-caption">Threshold line at |t|=2.0 (illustrative). Same factor, same conditional edge—only π changes.</p>
+
+        <div class="lab-split">
+          <canvas id="pi-canvas" width="1100" height="280"></canvas>
+          <div class="gate-vs-tilt" id="gate-vs-tilt" aria-label="Hard gate versus continuous tilt">
+            <div class="gvt-col">
+              <h4>Hard gate</h4>
+              <p class="gvt-status" id="gate-status">CUT</p>
+              <div class="gvt-meter"><i id="gate-meter"></i></div>
+              <p class="gvt-note">Binary: keep if |t<sub>g</sub>| ≥ threshold, else discard the entire leg.</p>
+            </div>
+            <div class="gvt-col accent">
+              <h4>Continuous tilt</h4>
+              <p class="gvt-status" id="tilt-status">WEIGHTED</p>
+              <div class="gvt-meter"><i id="tilt-meter"></i></div>
+              <p class="gvt-note">Keep the leg; scale exposure by state-dispersion / local strength. Rare states shrink weight — they do not delete breadth.</p>
+            </div>
+          </div>
+        </div>
+        <p class="stage-caption">Curve: t<sub>g</sub> ≈ t<sub>state</sub>√π. Same conditional edge — only π / threshold change. Move mouse on the hero canvas for the same intuition in particle form.</p>
       </div>
     </section>
 
@@ -260,65 +340,74 @@
       <p class="section-lede">
         Overlay on Chen–Zimmermann OSAP panels. Against seven allocators × four panels,
         <strong>24/24</strong> same-base active increments stay positive.
+        Click a panel row — the chart locks onto that book.
       </p>
 
-      <div class="table-wrap">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Panel</th>
-              <th>MinVar SR</th>
-              <th>Overlay SR</th>
-              <th>Active bps/yr</th>
-              <th>IR</th>
-              <th>Deployable t</th>
-              <th>OOS bps</th>
-              <th>OOS IR</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Equal-weight</td>
-              <td>2.79</td>
-              <td>3.01</td>
-              <td>128</td>
-              <td>1.73</td>
-              <td>1.49</td>
-              <td>101</td>
-              <td>1.72</td>
-            </tr>
-            <tr class="hl">
-              <td>Value-weight ★</td>
-              <td>1.37</td>
-              <td>1.91</td>
-              <td><b>172</b></td>
-              <td><b>1.99</b></td>
-              <td><b>6.81</b></td>
-              <td>134</td>
-              <td>2.05</td>
-            </tr>
-            <tr>
-              <td>NYSE breakpoint</td>
-              <td>1.73</td>
-              <td>2.15</td>
-              <td>134</td>
-              <td>1.68</td>
-              <td>4.11</td>
-              <td>116</td>
-              <td>1.52</td>
-            </tr>
-            <tr>
-              <td>Large-cap (ME20)</td>
-              <td>1.77</td>
-              <td>2.05</td>
-              <td>109</td>
-              <td>1.66</td>
-              <td>2.79</td>
-              <td>75</td>
-              <td>1.60</td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="results-lab">
+        <div class="table-wrap">
+          <table class="data-table interactive" id="panel-table">
+            <thead>
+              <tr>
+                <th>Panel</th>
+                <th>MinVar SR</th>
+                <th>Overlay SR</th>
+                <th>Active bps/yr</th>
+                <th>IR</th>
+                <th>Deployable t</th>
+                <th>OOS bps</th>
+                <th>OOS IR</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr data-panel="ew" tabindex="0">
+                <td>Equal-weight</td>
+                <td>2.79</td>
+                <td>3.01</td>
+                <td>128</td>
+                <td>1.73</td>
+                <td>1.49</td>
+                <td>101</td>
+                <td>1.72</td>
+              </tr>
+              <tr class="hl active" data-panel="vw" tabindex="0">
+                <td>Value-weight ★</td>
+                <td>1.37</td>
+                <td>1.91</td>
+                <td><b>172</b></td>
+                <td><b>1.99</b></td>
+                <td><b>6.81</b></td>
+                <td>134</td>
+                <td>2.05</td>
+              </tr>
+              <tr data-panel="nyse" tabindex="0">
+                <td>NYSE breakpoint</td>
+                <td>1.73</td>
+                <td>2.15</td>
+                <td>134</td>
+                <td>1.68</td>
+                <td>4.11</td>
+                <td>116</td>
+                <td>1.52</td>
+              </tr>
+              <tr data-panel="me20" tabindex="0">
+                <td>Large-cap (ME20)</td>
+                <td>1.77</td>
+                <td>2.05</td>
+                <td>109</td>
+                <td>1.66</td>
+                <td>2.79</td>
+                <td>75</td>
+                <td>1.60</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <aside class="panel-inspect" id="panel-inspect">
+          <p class="inspect-kicker" id="inspect-name">Value-weight ★</p>
+          <canvas id="panel-canvas" width="480" height="260"></canvas>
+          <ul class="inspect-facts" id="inspect-facts"></ul>
+          <p class="inspect-note">Regenerate with <span class="mono">python reproduce_headline.py</span> · tilt OUTPUT shipped · router code withheld.</p>
+        </aside>
       </div>
 
       <div class="result-notes">
@@ -350,35 +439,36 @@
       <h2>What screens throw away when agents propose</h2>
       <p class="section-lede">
         6,881 genuinely machine-generated factors. <strong>None</strong> clears the global screen.
-        The question is whether the discards hide recoverable structure.
+        Click each funnel step — see the standard tighten and what survives.
       </p>
 
-      <div class="funnel" id="funnel">
-        <div class="funnel-step" style="--w:100%">
+      <div class="funnel interactive" id="funnel">
+        <button type="button" class="funnel-step active" style="--w:100%" data-funnel="0">
           <b>6,881</b>
           <span>Machine factors in analysis pool</span>
           <i>0 clear global screen</i>
-        </div>
-        <div class="funnel-step" style="--w:72%">
+        </button>
+        <button type="button" class="funnel-step" style="--w:72%" data-funnel="1">
           <b>10.0%</b>
           <span>Flagged regime-local</span>
           <i>bootstrap 95% · 9.3–10.7%</i>
-        </div>
-        <div class="funnel-step" style="--w:48%">
+        </button>
+        <button type="button" class="funnel-step" style="--w:48%" data-funnel="2">
           <b>3.15%</b>
           <span>Survive block-shuffle falsification</span>
           <i>induced-null pipeline re-run</i>
-        </div>
-        <div class="funnel-step" style="--w:28%">
+        </button>
+        <button type="button" class="funnel-step" style="--w:28%" data-funnel="3">
           <b>1.08%</b>
           <span>Clear BH one-factor-at-a-time</span>
           <i>correction cost made visible</i>
-        </div>
-        <div class="funnel-anchor">
+        </button>
+        <div class="funnel-anchor" data-funnel="4">
           <b>6.4×</b>
           <span>Flagged set’s falsification passes vs global-null allowance (219 vs 34)</span>
         </div>
       </div>
+      <div class="funnel-detail" id="funnel-detail"></div>
 
       <div class="expert-row">
         <div class="expert">
@@ -405,17 +495,18 @@
       <p class="section-lede">
         Agents emit typed ASTs over nine microstructure signals. Admission requires
         executability, non-constancy, dispersion, and an economic rationale.
-        The paper evaluates the population <em>without</em> performance pre-screening.
+        Click a pipeline gate — see what the model is allowed to do.
       </p>
 
-      <div class="pipeline" aria-label="Agent pipeline">
-        <div class="pipe-step"><span>01</span>LLM propose</div>
-        <div class="pipe-step"><span>02</span>Type-check</div>
-        <div class="pipe-step"><span>03</span>Sandbox</div>
-        <div class="pipe-step"><span>04</span>Rationale</div>
-        <div class="pipe-step"><span>05</span>Admit</div>
-        <div class="pipe-step accent"><span>06</span>Study discards</div>
+      <div class="pipeline interactive" id="pipeline" aria-label="Agent pipeline">
+        <button type="button" class="pipe-step active" data-pipe="0"><span>01</span>LLM propose</button>
+        <button type="button" class="pipe-step" data-pipe="1"><span>02</span>Type-check</button>
+        <button type="button" class="pipe-step" data-pipe="2"><span>03</span>Sandbox</button>
+        <button type="button" class="pipe-step" data-pipe="3"><span>04</span>Rationale</button>
+        <button type="button" class="pipe-step" data-pipe="4"><span>05</span>Admit</button>
+        <button type="button" class="pipe-step accent" data-pipe="5"><span>06</span>Study discards</button>
       </div>
+      <div class="pipe-detail" id="pipe-detail"></div>
 
       <div class="factor-panel">
         <div class="factor-list" id="factor-list"></div>
