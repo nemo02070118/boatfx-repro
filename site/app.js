@@ -584,6 +584,8 @@ function initPalette() {
     { id: "fusion", label: "06e AI × quant fusion" },
     { id: "craft", label: "06c Engineering discipline" },
     { id: "scale", label: "06d Engineering mass" },
+    { id: "field", label: "09 Field · Wiki Finance VIP" },
+    { id: "stack", label: "10 Private boatfx stack" },
     { id: "proof", label: "07 Proof / repro commands" },
     { id: "agency", label: "08 Academy · already in motion" },
     { id: "links", label: "Artifacts / links" },
@@ -677,6 +679,93 @@ initPipeLab();
 initAgencyLab();
 initArgumentTour();
 initFusionFocus();
+initWikiGallery();
+initStackLab();
+if (window.initLangToggle) window.initLangToggle();
+
+function initWikiGallery() {
+  const lb = document.getElementById("lightbox");
+  const img = document.getElementById("lightbox-img");
+  const close = document.getElementById("lightbox-close");
+  if (!lb || !img) return;
+  function open(src) {
+    img.src = src;
+    lb.hidden = false;
+    document.body.style.overflow = "hidden";
+  }
+  function shut() {
+    lb.hidden = true;
+    img.src = "";
+    document.body.style.overflow = "";
+  }
+  document.querySelectorAll("#wiki-gallery img, #wiki-gallery .wiki-thumb").forEach((el) => {
+    el.addEventListener("click", () => {
+      const src = el.dataset.full || el.getAttribute("src") || el.querySelector("img")?.src;
+      if (src) open(src);
+    });
+  });
+  close?.addEventListener("click", shut);
+  lb.addEventListener("click", (e) => {
+    if (e.target === lb) shut();
+  });
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") shut();
+  });
+}
+
+function initStackLab() {
+  const rail = document.getElementById("stack-rail");
+  const stage = document.getElementById("stack-stage");
+  if (!rail || !stage) return;
+
+  const CRATES = [
+    { id: "boat_factor", en: "Factor research core · LLM agent factory · DSL / gates / constitution / WASM sandbox", zh: "因子研究核心 · LLM agent 工厂 · DSL / 闸门 / 宪章 / WASM 沙箱" },
+    { id: "boat_backtest", en: "Backtest engine for strategies and overlays", zh: "策略与 overlay 回测引擎" },
+    { id: "boat_execution", en: "Execution path · order routing toward live venues", zh: "执行路径 · 对接实盘下单" },
+    { id: "boat_risk", en: "Risk controls and limits", zh: "风控与限额" },
+    { id: "boat_signal", en: "Signal generation and transforms", zh: "信号生成与变换" },
+    { id: "boat_gateway", en: "Gateway / connectivity layer", zh: "网关与连接层" },
+    { id: "boat_monitor", en: "Monitoring and observability hooks", zh: "监控与可观测性" },
+    { id: "boat_shm", en: "Shared-memory / low-latency plumbing", zh: "共享内存 / 低延迟管线" },
+    { id: "boat_web", en: "Web surfaces for internal tools", zh: "内部工具 Web 面" },
+    { id: "boat_common", en: "Shared types and utilities", zh: "共享类型与工具" },
+    { id: "boat_team", en: "Team / collaboration utilities", zh: "团队协作工具" },
+    { id: "boat_bench_harness", en: "Benchmark harness for performance work", zh: "性能基准测试架" },
+    { id: "captain", en: "App shell (apps/captain) — operator-facing surface", zh: "应用壳 apps/captain — 操作者界面" },
+    { id: "public", en: "Public receipt: boatfx-repro (site · repro · showcase · CI)", zh: "公网收据：boatfx-repro（站 · repro · showcase · CI）" },
+  ];
+
+  function lang() {
+    return localStorage.getItem("hj-lang") || "en";
+  }
+
+  function show(id) {
+    const c = CRATES.find((x) => x.id === id) || CRATES[0];
+    rail.querySelectorAll("button").forEach((b) => b.classList.toggle("active", b.dataset.id === c.id));
+    const blurb = lang() === "zh" ? c.zh : c.en;
+    const title = lang() === "zh" ? "私有栈节点" : "Private stack node";
+    const note =
+      lang() === "zh"
+        ? "公开仓不倾倒整树。这里只展示角色分区——可核对、不可泄密。"
+        : "The public repo does not dump the tree. This map shows role partition — inspectable, not leaked.";
+    stage.innerHTML = `<p class="stack-k">${title}</p><h3>${c.id}</h3><p>${blurb}</p><p class="stack-note">${note}</p>`;
+  }
+
+  CRATES.forEach((c, i) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.dataset.id = c.id;
+    b.textContent = c.id;
+    if (i === 0) b.classList.add("active");
+    b.addEventListener("click", () => show(c.id));
+    rail.appendChild(b);
+  });
+  show("boat_factor");
+  document.addEventListener("hj:lang", () => {
+    const active = rail.querySelector("button.active")?.dataset.id || "boat_factor";
+    show(active);
+  });
+}
 
 function initArgumentTour() {
   const stepsEl = document.getElementById("tour-steps");

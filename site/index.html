@@ -34,10 +34,15 @@
       <a href="#fusion" data-spy="fusion">AI×Quant</a>
       <a href="#craft" data-spy="craft">Craft</a>
       <a href="#scale" data-spy="scale">Scale</a>
+      <a href="#field" data-spy="field" data-i18n="nav.field">Field</a>
+      <a href="#stack" data-spy="stack" data-i18n="nav.stack">Stack</a>
       <a href="#agency" data-spy="agency">Agency</a>
       <a href="#proof" data-spy="proof">Proof</a>
     </nav>
-    <button class="cmd-hint" type="button" id="cmd-hint" title="Press /">/</button>
+    <div class="header-tools">
+      <button type="button" class="lang-toggle" id="lang-toggle" aria-label="Language">中文</button>
+      <button class="cmd-hint" type="button" id="cmd-hint" title="Press /">/</button>
+    </div>
   </header>
 
   <main id="top">
@@ -801,6 +806,73 @@
       </ul>
     </section>
 
+
+    <!-- FIELD · Wiki Finance VIP -->
+    <section id="field" class="section reveal">
+      <p class="section-kicker" data-i18n="field.kicker">09 · Field presence</p>
+      <h2 data-i18n="field.title">Wiki Finance Expo Hong Kong 2026 · VIP</h2>
+      <p class="section-lede" data-i18n="field.lede">
+        Invited as a VIP guest to Wiki Finance Expo Hong Kong 2026 (Hopewell Hotel, Wan Chai · 23–24 July).
+        Not a spectator hobby — industry rooms where tokenization, trading safety, and fintech infrastructure are debated in public.
+        I show up because the research has to survive contact with the real market conversation.
+      </p>
+
+      <div class="field-meta">
+        <div><span data-i18n="field.m1s">Status</span><b data-i18n="field.m1b">VIP invite</b></div>
+        <div><span data-i18n="field.m2s">Event</span><b>Wiki Finance Expo HK 2026</b></div>
+        <div><span data-i18n="field.m3s">Theme</span><b data-i18n="field.m3b">Sparking opportunity · trading safety</b></div>
+        <div><span data-i18n="field.m4s">Why it matters</span><b data-i18n="field.m4b">Agency outside the notebook</b></div>
+      </div>
+
+      <div class="wiki-gallery" id="wiki-gallery">
+        <figure class="wiki-hero">
+          <img src="assets/wiki/wiki-5.jpg" alt="VIP badge — Wiki Finance Expo Hong Kong 2026" data-full="assets/wiki/wiki-5.jpg" />
+          <figcaption data-i18n="field.cap1">VIP badge · TRADEHALL sponsor strip · 23–24 July 2026</figcaption>
+        </figure>
+        <div class="wiki-grid">
+          <button type="button" class="wiki-thumb" data-full="assets/wiki/wiki-1.jpg"><img src="assets/wiki/wiki-1.jpg" alt="Expo floor · WikiGold" /></button>
+          <button type="button" class="wiki-thumb" data-full="assets/wiki/wiki-2.jpg"><img src="assets/wiki/wiki-2.jpg" alt="After party screen" /></button>
+          <button type="button" class="wiki-thumb" data-full="assets/wiki/wiki-3.jpg"><img src="assets/wiki/wiki-3.jpg" alt="VIP guest on expo floor" /></button>
+          <button type="button" class="wiki-thumb" data-full="assets/wiki/wiki-4.jpg"><img src="assets/wiki/wiki-4.jpg" alt="Panel hall · RWA / tokenization" /></button>
+        </div>
+      </div>
+
+      <div class="field-notes">
+        <article>
+          <h3 data-i18n="field.n1t">What I did there</h3>
+          <p data-i18n="field.n1p">Entered as VIP, walked the floor, sat the rooms, and treated the expo as a stress test for whether my screening-science agenda still sounds real next to live fintech product talk.</p>
+        </article>
+        <article>
+          <h3 data-i18n="field.n2t">How it connects</h3>
+          <p data-i18n="field.n2p">RWA / tokenization panels and “trading safety” branding sit next to my work: AI proposes factors fast; unconditional screens still miss state-dependent structure. Field presence keeps the research honest.</p>
+        </article>
+        <article>
+          <h3 data-i18n="field.n3t">Academy signal</h3>
+          <p data-i18n="field.n3p">Already in motion — not only code and a paper track, but showing up where the industry gathers when invited.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- STACK · boat monorepo -->
+    <section id="stack" class="section reveal">
+      <p class="section-kicker" data-i18n="stack.kicker">10 · Private boatfx stack</p>
+      <h2 data-i18n="stack.title">The body behind the thin public receipt</h2>
+      <p class="section-lede" data-i18n="stack.lede">
+        Public GitHub is curated on purpose. The private monorepo is a multi-crate trading / research system.
+        Click a crate — see what it owns. Numbers measured locally (build artifacts excluded).
+      </p>
+      <div class="stack-lab">
+        <div class="stack-rail" id="stack-rail" role="tablist"></div>
+        <div class="stack-stage" id="stack-stage" role="tabpanel"></div>
+      </div>
+      <div class="stack-strip">
+        <div><span data-i18n="stack.s1">Crates</span><b>12</b></div>
+        <div><span data-i18n="stack.s2">App</span><b>captain</b></div>
+        <div><span data-i18n="stack.s3">UI packages</span><b>charts · tokens · ui</b></div>
+        <div><span data-i18n="stack.s4">Public surface</span><b>boatfx-repro</b></div>
+      </div>
+    </section>
+
     <!-- ACADEMY / AGENCY -->
     <section id="agency" class="section about reveal academy-fit">
       <p class="section-kicker">08 · The Horowitz Andreessen Academy</p>
@@ -858,6 +930,11 @@
     <ul id="palette-list"></ul>
   </div>
 
+  <div class="lightbox" id="lightbox" hidden>
+    <button type="button" class="lightbox-close" id="lightbox-close" aria-label="Close">×</button>
+    <img id="lightbox-img" alt="" />
+  </div>
+  <script src="i18n.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
