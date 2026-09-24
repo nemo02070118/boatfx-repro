@@ -2312,3 +2312,12 @@ body.lang-zh .section-kicker {
     animation: none !important;
   }
 }
+
+
+/* --- hkex camp --- */
+#hkex-gallery .wiki-hero,
+#camp-gallery .wiki-hero { max-width: 720px; }
+#camp-gallery .wiki-grid { grid-template-columns: repeat(3, 1fr); }
+@media (max-width: 720px) {
+  #camp-gallery .wiki-grid { grid-template-columns: 1fr; }
+}

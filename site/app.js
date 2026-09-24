@@ -690,6 +690,8 @@ initFusionFocus();
 initWikiGallery();
 initHeroPortraits();
 initFieldLab();
+initHkexLab();
+initCampLab();
 initStackLab();
 if (window.initLangToggle) window.initLangToggle();
 
@@ -905,7 +907,7 @@ function initWikiGallery() {
     img.src = "";
     document.body.style.overflow = "";
   }
-  document.querySelectorAll("#wiki-gallery img, #wiki-gallery .wiki-thumb").forEach((el) => {
+  document.querySelectorAll("#wiki-gallery img, #wiki-gallery .wiki-thumb, #hkex-gallery img, #hkex-gallery .wiki-thumb, #camp-gallery img, #camp-gallery .wiki-thumb").forEach((el) => {
     el.addEventListener("click", (ev) => {
       ev.stopPropagation();
       const src = el.dataset.full || el.getAttribute("src") || el.querySelector("img")?.getAttribute("src");
@@ -1511,8 +1513,8 @@ function initAgencyLab() {
 
   const COPY = {
     motion: {
-      en: { title: "Already in motion", body: "22 months on this system — not a prompt-weekend. JF MS 2026-0738: passed desk, now in external review under Antoinette Schoar. EFA submitted. Academic leave for full-time research. Public site + repro + CI + walkthrough. Wiki Finance Expo HK 2026 VIP. Zheshang production systems from Aug 2025." },
-      zh: { title: "已在行动", body: "这个系统做了 22 个月——不是周末提示词。JF MS 2026-0738：已过 desk，现由 Antoinette Schoar 主持外部审稿。EFA 已投。休学全职研究。公网站 + repro + CI + 讲解视频。Wiki Finance Expo 香港 2026 VIP。2025 年 8 月起浙商生产系统。" },
+      en: { title: "Already in motion", body: "22 months on this system — not a prompt-weekend. JF MS 2026-0738: passed desk, now in external review under Antoinette Schoar. EFA submitted. Academic leave for full-time research. Public site + repro + CI + walkthrough. Wiki Finance Expo HK 2026 VIP. HKEX invited learning visit. Zheshang Houlang Elite Class VII instructor. Zheshang production systems from Aug 2025." },
+      zh: { title: "已在行动", body: "这个系统做了 22 个月——不是周末提示词。JF MS 2026-0738：已过 desk，现由 Antoinette Schoar 主持外部审稿。EFA 已投。休学全职研究。公网站 + repro + CI + 讲解视频。Wiki Finance Expo 香港 2026 VIP。港交所受邀学习交流。浙商后浪投研精英班第七期指导员。2025 年 8 月起浙商生产系统。" },
     },
     agency: {
       en: { title: "Agency", body: "When AI-scale factor proposal captured my attention, I built a factory with gates, derived the blind-spot identity, falsified my own rescues, showed up when invited to industry rooms, and made load-bearing numbers regenerable by strangers." },
@@ -1700,3 +1702,149 @@ function initHeroPortraits() {
     });
   });
 }
+
+
+function initPresenceLab(prefix, chapters) {
+  const chaptersEl = document.getElementById(prefix + "-chapters");
+  const stage = document.getElementById(prefix + "-stage");
+  if (!chaptersEl || !stage) return;
+  let cur = 0;
+  function paint() {
+    const L = langNow() === "zh" ? "zh" : "en";
+    chaptersEl.innerHTML = "";
+    chapters.forEach((c, i) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = i === cur ? "active" : "";
+      b.textContent = c[L].k;
+      b.addEventListener("click", () => { cur = i; paint(); });
+      chaptersEl.appendChild(b);
+    });
+    const c = chapters[cur];
+    const d = c[L];
+    stage.innerHTML = `
+      <div class="field-stage-grid">
+        <button type="button" class="field-shot" data-full="${c.img}">
+          <img src="${c.img}" alt="${d.t}" loading="lazy" />
+        </button>
+        <div class="field-copy">
+          <p class="field-k">${d.k}</p>
+          <h3>${d.t}</h3>
+          <p>${d.p}</p>
+          <ul class="field-facts">${d.facts.map((f) => `<li>${f}</li>`).join("")}</ul>
+        </div>
+      </div>`;
+    stage.querySelector(".field-shot")?.addEventListener("click", () => {
+      const lb = document.getElementById("lightbox");
+      const img = document.getElementById("lightbox-img");
+      if (lb && img) {
+        img.src = c.img;
+        lb.hidden = false;
+        document.body.style.overflow = "hidden";
+      }
+    });
+  }
+  document.addEventListener("hj:lang", paint);
+  paint();
+}
+
+function initHkexLab() {
+  initPresenceLab("hkex", [
+    {
+      img: "assets/hkex/hkex-1.webp",
+      en: {
+        k: "01 · Invite",
+        t: "Visitor pass at the exchange wall",
+        p: "Invited learning & exchange at Hong Kong Exchanges (HKEX / 香港交易所). Formal attire, visitor badge on the lapel, standing at the blue brand wall. This is the receipt: invitation status at the exchange — not a hallway selfie and not the Wiki expo floor.",
+        facts: ["Mode: learning & exchange", "Badge: visitor / invited", "Distinct from Wiki VIP"],
+      },
+      zh: {
+        k: "01 · 受邀",
+        t: "交易所墙前的访客证",
+        p: "受邀在香港交易所（HKEX / 香港交易所）学习与交流。正装、胸前访客证、蓝色品牌墙。这是收据：在交易所本体的邀请身份——不是走廊自拍，也不是 Wiki 展厅。",
+        facts: ["方式：学习与交流", "证件：访客 / 受邀", "有别于 Wiki VIP"],
+      },
+    },
+    {
+      img: "assets/hkex/hkex-1.webp",
+      en: {
+        k: "02 · Why HKEX",
+        t: "Infrastructure language, not booth chatter",
+        p: "Exchanges define listing, clearing, and market structure. I went to hear that language in situ and ask whether my blind-spot agenda still holds when the room is the institution that operates the tape — complementary to industry expo talk, not a substitute.",
+        facts: ["Object: market infrastructure", "Test: agenda vs institution"],
+      },
+      zh: {
+        k: "02 · 为何港交所",
+        t: "基础设施话语，不是展位闲谈",
+        p: "交易所定义上市、清算与市场结构。我去现场听这种话语，并问：当房间就是运营行情的机构时，盲区议程是否仍然成立——与行业博览会互补，而不是替代。",
+        facts: ["对象：市场基础设施", "检验：议程 vs 机构"],
+      },
+    },
+    {
+      img: "assets/hkex/hkex-1.webp",
+      en: {
+        k: "03 · Separation",
+        t: "Three field tracks, three roles",
+        p: "Wiki Finance Expo = VIP guest in fintech expo rooms. HKEX = invited learner/exchanger at the exchange. Zheshang camp = instructor. Keep the labels honest so Academy reviewers can map each receipt to a role.",
+        facts: ["Wiki ≠ HKEX ≠ Camp", "Honest role labels"],
+      },
+      zh: {
+        k: "03 · 分开写清",
+        t: "三条现场轨道，三种角色",
+        p: "Wiki Finance Expo = fintech 博览会 VIP。港交所 = 在交易所受邀学习交流。浙商营 = 指导员。标签写诚实，方便 Academy 审阅者把每份收据对应到角色。",
+        facts: ["Wiki ≠ 港交所 ≠ 精英班", "诚实角色标签"],
+      },
+    },
+  ]);
+}
+
+function initCampLab() {
+  initPresenceLab("camp", [
+    {
+      img: "assets/camp/camp-1.webp",
+      en: {
+        k: "01 · Program",
+        t: "Houlang · Elite Class VII · summer camp",
+        p: "浙商证券研究所「后浪计划」投研精英班第七期暨暑期考察营. Signed red wall = cohort was real. I was not just passing through — I served as 指导员 (instructor) for the class and summer inspection camp.",
+        facts: ["Host: Zheshang Research Institute", "Role: instructor", "Form: elite class + summer camp"],
+      },
+      zh: {
+        k: "01 · 项目",
+        t: "后浪 · 精英班第七期 · 暑期考察营",
+        p: "浙商证券研究所「后浪计划」投研精英班第七期暨暑期考察营。红色签名墙 = 同期真实存在。我不是路过——担任本期班级与暑期考察营的指导员。",
+        facts: ["主办：浙商证券研究所", "角色：指导员", "形态：精英班 + 暑期营"],
+      },
+    },
+    {
+      img: "assets/camp/camp-2.webp",
+      en: {
+        k: "02 · Room",
+        t: "Full hall under the program LED",
+        p: "Classroom / banquet hall with the program title on the LED wall, laptops open, nameplates on black tables. Instructor work happens here: keep the cohort oriented, answer research and systems questions, move sessions from slides to practice.",
+        facts: ["Branded stage visible", "Working cohort", "Instruction in the room"],
+      },
+      zh: {
+        k: "02 · 会场",
+        t: "品牌 LED 下的满堂",
+        p: "课堂/宴会厅，LED 打着项目全称，笔记本打开，黑桌红名牌。指导员工作发生在这里：稳住队列、回答研究与系统问题，把环节从幻灯片推到练习。",
+        facts: ["品牌舞台可见", "在工作的同期", "指导在房间里"],
+      },
+    },
+    {
+      img: "assets/camp/camp-3.webp",
+      en: {
+        k: "03 · Code on site",
+        t: "Quant debugging during the camp",
+        p: "First-person desk: IDE open on quant / data issues during the camp window (July 2025). Instruction that includes runnable engineering — Wind/data and strategy logic problems — not only podium talk. Same spirit as the systems letter: ship, don’t cosplay.",
+        facts: ["Timestamp window: Jul 2025", "Quant + data practice", "Code as instruction"],
+      },
+      zh: {
+        k: "03 · 现场代码",
+        t: "营期中的量化排障",
+        p: "第一人称工位：营期中（2025年7月）IDE 打开在量化/数据问题上。指导包含可运行工程——数据与策略逻辑——不只是讲台话术。与系统推荐信同一精神：交付，不扮演。",
+        facts: ["时间窗：2025年7月", "量化 + 数据实践", "代码即指导"],
+      },
+    },
+  ]);
+}
+
