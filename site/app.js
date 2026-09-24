@@ -675,13 +675,16 @@ initSpyNav();
 initCredBars();
 initPaperLab();
 initPaperTabI18n();
+initPaperAtlas();
 initPanelLab();
 initFunnelLab();
 initPipeLab();
 initAgencyLab();
+initAgencyTabI18n();
 initArgumentTour();
 initFusionFocus();
 initWikiGallery();
+initHeroPortraits();
 initFieldLab();
 initStackLab();
 if (window.initLangToggle) window.initLangToggle();
@@ -848,19 +851,30 @@ function initPipeLab() {
   const steps = document.querySelectorAll("#pipeline [data-pipe]");
   if (!detail || !steps.length) return;
   const COPY = [
-    { title: "01 · LLM propose", body: "DeepSeek breadth + Claude/GPT depth. Models propose typed factor programs — never arbitrary shell code. Keys only from environment variables." },
-    { title: "02 · Type-check", body: "Typed AST over nine microstructure signals. Ill-typed expressions die here before any expensive evaluation." },
-    { title: "03 · Sandbox", body: "WASM / fuel / wall-clock / memory hard limits. A proposal that loops forever does not get to waste the research budget." },
-    { title: "04 · Rationale", body: "Economic rationale required — not a bare expression. The paper studies the admitted population without performance pre-screening." },
-    { title: "05 · Admit", body: "Front gates G1–G4 + constitution checks. Admission is expensive on purpose; proposals are cheap." },
-    { title: "06 · Study discards", body: "The scientific object includes what the global screen throws away. Discards are where Proposition 2 bites — not a trash folder." },
+    { en: { title: "01 · LLM propose", body: "DeepSeek breadth + Claude/GPT depth. Models propose typed factor programs — never arbitrary shell code. Keys only from environment variables." }, zh: { title: "01 · LLM 提案", body: "DeepSeek 广度 + Claude/GPT 深度。模型提案类型化因子程序——绝非任意 shell。密钥只来自环境变量。" } },
+    { en: { title: "02 · Type-check", body: "Typed AST over nine microstructure signals. Ill-typed expressions die here before any expensive evaluation." }, zh: { title: "02 · 类型检查", body: "九个微观结构信号上的类型化 AST。类型错误的表达式在昂贵求值前死亡。" } },
+    { en: { title: "03 · Sandbox", body: "WASM / fuel / wall-clock / memory hard limits. A proposal that loops forever does not get to waste the research budget." }, zh: { title: "03 · 沙箱", body: "WASM / 燃料 / 墙钟 / 内存硬限制。死循环提案浪费不了研究预算。" } },
+    { en: { title: "04 · Rationale", body: "Economic rationale required — not a bare expression. The paper studies the admitted population without performance pre-screening." }, zh: { title: "04 · 经济理由", body: "必须有经济理由——不是裸表达式。论文研究准入总体，不做业绩预筛。" } },
+    { en: { title: "05 · Admit", body: "Front gates G1–G4 + constitution checks. Admission is expensive on purpose; proposals are cheap." }, zh: { title: "05 · 准入", body: "前门闸 G1–G4 + 宪章检查。准入故意昂贵；提案便宜。" } },
+    { en: { title: "06 · Study discards", body: "The scientific object includes what the global screen throws away. Discards are where Proposition 2 bites — not a trash folder." }, zh: { title: "06 · 研究被丢弃者", body: "科学对象包括全局筛选扔掉的东西。被丢弃者才是命题 2 咬合处——不是垃圾桶。" } },
   ];
+  let cur = 0;
   function show(i) {
-    const c = COPY[i] || COPY[0];
-    steps.forEach((s) => s.classList.toggle("active", String(s.dataset.pipe) === String(i)));
+    cur = Number(i);
+    const pack = COPY[cur] || COPY[0];
+    const c = langNow() === "zh" ? pack.zh : pack.en;
+    steps.forEach((s) => s.classList.toggle("active", String(s.dataset.pipe) === String(cur)));
+    const labels = langNow() === "zh"
+      ? ["LLM 提案","类型检查","沙箱","经济理由","准入","研究丢弃"]
+      : ["LLM propose","Type-check","Sandbox","Rationale","Admit","Study discards"];
+    steps.forEach((s, idx) => {
+      const n = String(idx + 1).padStart(2, "0");
+      s.innerHTML = `<span>${n}</span>${labels[idx] || ""}`;
+    });
     detail.innerHTML = `<h4>${c.title}</h4><p>${c.body}</p>`;
   }
   steps.forEach((s) => s.addEventListener("click", () => show(s.dataset.pipe)));
+  document.addEventListener("hj:lang", () => show(cur));
   show(0);
 }
 
@@ -914,13 +928,13 @@ function initFieldLab() {
       en: {
         k: "01 · Invite",
         t: "VIP credential — not a hallway pass",
-        p: "Physical badge: WIKI FINANCE EXPO HONG KONG 2026 · Sparking Opportunity, Trading Safety · VIP in orange · 23–24 July · TRADEHALL sponsor strip. This is the receipt I keep: invitation status, dates, venue brand — inspectable without a LinkedIn caption.",
+        p: "Physical badge: WIKI FINANCE EXPO HONG KONG 2026 · Sparking Opportunity, Trading Safety · VIP stamped in orange · 23–24 July 2026 · 09:00–18:00 · TRADEHALL sponsor strip · wikiexpo.com. I photographed the card on purpose: invitation status, dates, venue brand — an inspectable receipt, not a LinkedIn caption. VIP was the credential that opened denser rooms.",
         facts: ["Status: VIP", "Site: wikiexpo.com", "Sponsor strip: TRADEHALL", "Hours: 09:00–18:00"],
       },
       zh: {
         k: "01 · 邀请",
         t: "VIP 凭证——不是走廊通行证",
-        p: "实体胸卡：WIKI FINANCE EXPO HONG KONG 2026 · Sparking Opportunity, Trading Safety · 橙色 VIP · 7月23–24日 · TRADEHALL 赞助条。这是我留下的收据：邀请身份、日期、场地品牌——无需 LinkedIn 文案也能核对。",
+        p: "实体胸卡：WIKI FINANCE EXPO HONG KONG 2026 · Sparking Opportunity, Trading Safety · 橙色 VIP 戳记 · 2026年7月23–24日 · 09:00–18:00 · TRADEHALL 赞助条 · wikiexpo.com。我特意拍下胸卡：邀请身份、日期、场地品牌——可核对的收据，不是 LinkedIn 文案。VIP 是打开更密房间的凭证。",
         facts: ["身份：VIP", "站点：wikiexpo.com", "赞助条：TRADEHALL", "时段：09:00–18:00"],
       },
     },
@@ -1584,3 +1598,100 @@ function initPaperTabI18n() {
   document.addEventListener("hj:lang", paint);
 }
 
+
+function initPaperAtlas() {
+  const graph = document.getElementById("atlas-graph");
+  const panel = document.getElementById("atlas-panel");
+  const meters = document.getElementById("atlas-meters");
+  if (!graph || !panel) return;
+
+  const NODES = [
+    {
+      id: "blind",
+      en: { k: "Blind spot", t: "Unconditional screens ask the wrong question", p: "A factor that pays only inside a market state can look globally weak. The manuscript’s Proposition 2 makes the dilution precise: the unconditional t scales with √π and vanishes as the paying state grows rare — so a genuine conditional predictor is discarded as weak on average." },
+      zh: { k: "盲区", t: "无条件筛选在问错问题", p: "只在市场状态内兑现的因子，全局可看起来很弱。手稿命题 2 把稀释写精确：无条件 t 随 √π 缩放，兑现状态越稀有越消失——真实的条件预测器会被当作平均很弱而丢弃。" },
+    },
+    {
+      id: "machine",
+      en: { k: "Machine pool", t: "6,881 proposals · correction cost visible", p: "None clears the global screen. 10.0% flagged regime-local (9.3–10.7% bootstrap). Tightening standards: 3.15% survive block-shuffle; 1.08% clear BH one-at-a-time. Assumption-free anchor: 6.4× falsification passes vs global-null allowance (219 vs 34)." },
+      zh: { k: "机器池", t: "6,881 提案 · 校正成本可见", p: "无一通过全局筛选。10.0% 标为状态局部（bootstrap 9.3–10.7%）。收紧标准：3.15% 通过块重排；1.08% 通过 BH 逐因子。无假设锚点：证伪通过数相对全局零假设额度 6.4×（219 vs 34）。" },
+    },
+    {
+      id: "econ",
+      en: { k: "Economics", t: "Deployable overlay · 24/24", p: "Own-regime hierarchical tilt on Chen–Zimmermann OSAP. All 24 same-base comparisons earn positive active return (RW + e-BH). Institutionally investable band ~134–172 bps/yr · IR ≈ 1.7–2.0 (VW headline 172 · IR 1.99). Public check: shipped tilt OUTPUT + reproduce_headline.py." },
+      zh: { k: "经济含义", t: "可部署 overlay · 24/24", p: "在 Chen–Zimmermann OSAP 上做自状态分层倾斜。24 个同基比较全部主动收益为正（RW + e-BH）。机构可投大约 134–172 bps/年 · IR ≈ 1.7–2.0（VW 头条 172 · IR 1.99）。公网核对：已交付 tilt 输出 + reproduce_headline.py。" },
+    },
+    {
+      id: "cred",
+      en: { k: "Credibility", t: "Cross-fit · placebos · funding gradient", p: "Cross-fit: labels ⊥ alpha on purged halves · increment positive in 100% of splits. Own-regime beats borrowed placebo ~3–5×. States persist ~8.6 months. Funding scarcity (HKM / Baa–Aaa) steepens local strength (t = 3.62 / 2.81); vol placebos fail. Suggestive tiers are reported, not leaned on." },
+      zh: { k: "可信度", t: "交叉拟合 · 安慰剂 · 融资梯度", p: "交叉拟合：清洗半月上标签 ⊥ alpha · 100% 分割增量为正。自状态相对借用安慰剂约强 3–5×。状态平均持续约 8.6 个月。融资稀缺（HKM / Baa–Aaa）使局部强度变陡（t = 3.62 / 2.81）；波动安慰剂失败。提示性层级只报告、不倚重。" },
+    },
+    {
+      id: "expert",
+      en: { k: "Expert libraries", t: "Not one generator’s artifact", p: "Same order of magnitude on human libraries: Alpha191 13.8% · Alpha101 11.6% regime-local. The blind spot is a property of unconditional screening, not of a single machine search engine." },
+      zh: { k: "专家库", t: "不是单一生成器的产物", p: "人类库同量级：Alpha191 13.8% · Alpha101 11.6% 状态局部。盲区是无条件筛选的性质，不是某个机器搜索引擎的产物。" },
+    },
+  ];
+
+  let cur = 0;
+  function paint() {
+    const L = langNow() === "zh" ? "zh" : "en";
+    graph.innerHTML = "";
+    NODES.forEach((n, i) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "atlas-node" + (i === cur ? " active" : "");
+      b.innerHTML = `<span>${String(i + 1).padStart(2, "0")}</span><b>${n[L].k}</b>`;
+      b.addEventListener("click", () => { cur = i; paint(); });
+      graph.appendChild(b);
+    });
+    const d = NODES[cur][L];
+    panel.innerHTML = `<p class="atlas-k">${d.k}</p><h3>${d.t}</h3><p>${d.p}</p>`;
+    if (meters) {
+      const M = [
+        { en: "Machine pool", zh: "机器池", v: "6,881 → 10.0% → 3.15% → 1.08%" },
+        { en: "Falsification", zh: "证伪", v: "6.4× (219 vs 34)" },
+        { en: "Deployable VW", zh: "可部署 VW", v: "172 bps · IR 1.99" },
+        { en: "Same-base", zh: "同基", v: "24/24 positive" },
+      ];
+      meters.innerHTML = M.map((m) => `<div><span>${L === "zh" ? m.zh : m.en}</span><b>${m.v}</b></div>`).join("");
+    }
+  }
+  document.addEventListener("hj:lang", paint);
+  paint();
+}
+
+
+function initAgencyTabI18n() {
+  const MAP = {
+    motion: { en: "Already in motion", zh: "已在行动" },
+    agency: { en: "Agency", zh: "行动力" },
+    proof: { en: "Proof of work", zh: "工作证据" },
+    elig: { en: "Leave · eligibility", zh: "休学 · 资格" },
+    why: { en: "Why SF / why now", zh: "为何 SF / 为何现在" },
+  };
+  function paint() {
+    const L = langNow() === "zh" ? "zh" : "en";
+    document.querySelectorAll(".agency-tab").forEach((t) => {
+      const m = MAP[t.dataset.agency];
+      if (m) t.textContent = m[L];
+    });
+  }
+  paint();
+  document.addEventListener("hj:lang", paint);
+}
+
+function initHeroPortraits() {
+  const lb = document.getElementById("lightbox");
+  const img = document.getElementById("lightbox-img");
+  if (!lb || !img) return;
+  document.querySelectorAll(".hero-portrait [data-full]").forEach((el) => {
+    el.addEventListener("click", () => {
+      const src = el.dataset.full || el.querySelector("img")?.src;
+      if (!src) return;
+      img.src = src;
+      lb.hidden = false;
+      document.body.style.overflow = "hidden";
+    });
+  });
+}

@@ -1,11 +1,56 @@
 /* EN / ZH — full site · edit only via UTF-8 tools */
 window.I18N = {
   en: {
+    "lang.en": "EN",
+    "lang.zh": "中文",
+    "idea.beat1.t": "Machines flood the zoo",
+    "idea.beat1.p": "LLMs + search propose predictors faster than humans can vet. Screens become the bottleneck.",
+    "idea.beat2.t": "Unconditional filter",
+    "idea.beat2.p": "Keep if average premium clears multiple-testing. State-confined premia look like zeros.",
+    "idea.beat3.t": "Structural blind spot",
+    "idea.beat3.p": "Global t dilutes with √π. Locally strong factors are discarded as globally weak.",
+    "idea.beat4.t": "Own-regime tilt",
+    "idea.beat4.p": "Per-factor states + hierarchical pooling. Continuous tilt—no hard gate that kills breadth.",
+    "idea.beat5.t": "Falsify, then trade",
+    "idea.beat5.p": "Block-shuffle nulls, placebos, cross-fit. Then show deployable bps on public panels.",
+    "idea.beat6.t": "Honest tiers",
+    "idea.beat6.p": "Load-bearing vs identification vs suggestive—said upfront. Science over storytelling.",
+    "idea.t1.h": "Tier I · Load-bearing",
+    "idea.t1.p": "Regime overlay adds deployable, net-of-cost alpha to every implementable baseline.",
+    "idea.t2.h": "Tier II · Identification",
+    "idea.t2.p": "Discarded & machine factors carry genuine state-dependent structure.",
+    "idea.t3.h": "Tier III · Suggestive",
+    "idea.t3.p": "Reported, not leaned on—honest science.",
+    "venues.jf.badge": "External review",
+    "venues.jf.meta": "MS 2026-0738 · received Sep 21, 2026 · editor: Antoinette Schoar",
+    "venues.efa.badge": "Submitted",
+    "venues.efa.meta": "U.S. academic conference · EFA annual meeting track",
+    "venues.note": "Both tracks are submissions. Acceptance is not claimed. The proof of work is the paper + repro pack + systems letter—not the journal logo.",
+    "letter.kicker": "06 · Industry proof",
+    "letter.title": "Zheshang Securities · recommendation",
+    "letter.lede": "Quantitative System Development Intern (from Aug 2025) at Zheshang Securities Co., Ltd. (Hangzhou). Letter by Liao Jingchi, Managing Director — highest recommendation for graduate study and research/engineering practice.",
+    "edge.kicker": "06b · Proof of work · different shape",
+    "edge.title": "Same Academy bar · different instrument",
+    "edge.lede": "The Founding Class includes apps, hardware, nonprofits, ARR. Official language also counts original research as built. My instrument is inspectable judgment under AI-scale factor supply.",
+    "atlas.kicker": "01d · Paper atlas",
+    "atlas.title": "Argument graph from the manuscript",
+    "atlas.lede": "Click a node to open the load-bearing sentence from Global Weakness, Local Strength — mechanism, machine pool, economics, credibility. Numbers match the JF manuscript macros.",
+    "field.dossier.h": "VIP field dossier",
+    "field.dossier.sub": "Not a photo dump — a structured record of invitation, rooms, discourse, and how it pressure-tests the paper.",
+    "field.day1.t": "Day 1 · Floor + rooms",
+    "field.day1.p": "Morning: VIP badge scan at Hopewell Hotel (15 Kennedy Road, Wan Chai). Walked marble hall under the Hong Kong skyline backdrop — WikiGold standing mark, RS Finance floor graphic, partner strip along the top rail. Midday: sat RWA / tokenization rooms where institutional adoption was the public language. Afternoon: denser VIP-side conversations — product claims meet capital. I kept asking the same question: if AI makes predictors cheap, does your screen still ask only the unconditional average?",
+    "field.day2.t": "Day 2 · Continuity + night",
+    "field.day2.p": "Returned to the floor with the same lanyard. Revisited partner booths and the TRADEHALL strip. Evening: AFTER PARTY — LED harbour skyline, WikiFX / WikiBit / WikiGold brand continuity, slogan still Sparking Opportunity, Trading Safety. Stayed because introductions and deal talk happen in the social layer, not only on stage.",
+    "field.learn.t": "What I took back to the notebook",
+    "field.learn.p": "Three frictions: (1) industry sells “safety” as product; my paper shows screening can discard real conditional edge — different kind of safety failure. (2) Tokenization / RWA panels make state-dependence feel less abstract — markets have regimes. (3) VIP access is agency: showing up when invited is part of proof of work for The Academy, next to JF external review and the public repro.",
+    "field.bridge.t": "Paper ↔ field bridge",
+    "field.bridge.p": "Proposition 2: tg ≈ tstate√π. Field slogan: trading safety. Bridge: if the paying state is rare, unconditional screens call strength “weak.” Industry rooms debate rails and risk language; I debate whether the filter itself is mis-specified. Same city, complementary instruments.",
     "lang.btn": "中文",
     "nav.idea": "Idea",
     "nav.tour": "Tour",
     "nav.venues": "Venues",
     "nav.paper": "Paper",
+    "nav.atlas": "Atlas",
     "nav.math": "Math",
     "nav.results": "Results",
     "nav.machine": "Machine",
@@ -40,6 +85,7 @@ window.I18N = {
     "hero.stat6": "LoC shipped",
     "hero.stage.l": "UNCONDITIONAL SCREEN",
     "hero.stage.r": "OWN-REGIME TILT",
+    "hero.portrait.cap": "Huannian Jin · independent researcher",
     "hero.stage.cap": "Interactive sketch — hard gates discard legs; continuous tilt keeps breadth. Move mouse to perturb states.",
 
     "idea.kicker": "01 · The thesis",
@@ -138,11 +184,56 @@ window.I18N = {
     "footer": "Proof over polish · Press / for jump menu",
   },
   zh: {
+    "lang.en": "EN",
+    "lang.zh": "中文",
+    "idea.beat1.t": "机器淹没因子动物园",
+    "idea.beat1.p": "LLM + 搜索比人类审核更快地提案预测器。筛选变成瓶颈。",
+    "idea.beat2.t": "无条件过滤器",
+    "idea.beat2.p": "平均溢价过多重检验才保留。困在状态里的溢价看起来像零。",
+    "idea.beat3.t": "结构性盲区",
+    "idea.beat3.p": "全局 t 被 √π 稀释。局部强的因子被当作全局弱而丢弃。",
+    "idea.beat4.t": "自状态倾斜",
+    "idea.beat4.p": "逐因子状态 + 分层收缩。连续倾斜——没有扼杀广度的硬闸门。",
+    "idea.beat5.t": "先证伪，再交易",
+    "idea.beat5.p": "块重排零假设、安慰剂、交叉拟合。再在公网面板上展示可部署 bps。",
+    "idea.beat6.t": "诚实分层",
+    "idea.beat6.p": "承重 / 识别 / 提示性——事先说清。科学优先于叙事。",
+    "idea.t1.h": "层级 I · 承重",
+    "idea.t1.p": "状态 overlay 在每个可实施基准上增加净成本后可部署 alpha。",
+    "idea.t2.h": "层级 II · 识别",
+    "idea.t2.p": "被丢弃与机器因子携带真实状态依赖结构。",
+    "idea.t3.h": "层级 III · 提示性",
+    "idea.t3.p": "报告但不倚重——诚实科学。",
+    "venues.jf.badge": "外部审稿中",
+    "venues.jf.meta": "MS 2026-0738 · 2026-09-21 收稿 · 责编 Antoinette Schoar",
+    "venues.efa.badge": "已投稿",
+    "venues.efa.meta": "美国学术会议 · EFA 年会轨道",
+    "venues.note": "两条都是投稿。不声称已录用。工作证据是论文 + 可复现包 + 系统推荐信——不是期刊 logo。",
+    "letter.kicker": "06 · 行业证据",
+    "letter.title": "浙商证券 · 推荐信",
+    "letter.lede": "2025 年 8 月起于浙商证券（杭州）量化系统开发实习。推荐人廖景池（董事总经理）——对研究生学习与研究/工程实践给予最高推荐。",
+    "edge.kicker": "06b · 工作证据 · 不同形状",
+    "edge.title": "同一 Academy 标准 · 不同乐器",
+    "edge.lede": "Founding Class 有应用、硬件、非营利、ARR。官方语言也把原创研究算作「建造」。我的乐器是在 AI 规模因子供给下可检验的判断力。",
+    "atlas.kicker": "01d · 论文图谱",
+    "atlas.title": "来自手稿的论证图",
+    "atlas.lede": "点一个节点，打开《Global Weakness, Local Strength》中的承重句子——机制、机器池、经济含义、可信度。数字与 JF 手稿宏绑定。",
+    "field.dossier.h": "VIP 现场卷宗",
+    "field.dossier.sub": "不是照片堆——是邀请、会场、话语、以及如何压力测试论文的结构化记录。",
+    "field.day1.t": "第一天 · 展厅 + 会场",
+    "field.day1.p": "上午：湾仔合和酒店（坚尼地道 15 号）VIP 胸卡入场。走过大理石厅与香港天际线背板——WikiGold 立牌、RS Finance 地面图形、顶部合作方条带。中午：坐进 RWA / 代币化会场，公开语言是机构采纳。下午：更密的 VIP 侧对话——产品主张与资本相撞。我反复问同一问题：若 AI 让预测器变便宜，你的筛选是否仍只问无条件平均？",
+    "field.day2.t": "第二天 · 连续在场 + 夜场",
+    "field.day2.p": "同一胸卡再回展厅。重访合作展位与 TRADEHALL 条带。晚间 AFTER PARTY——LED 海港天际线，WikiFX / WikiBit / WikiGold 品牌连续，口号仍是 Sparking Opportunity, Trading Safety。留下是因为引荐与交易话语发生在社交层，而不只在台上。",
+    "field.learn.t": "我带回笔记本的东西",
+    "field.learn.p": "三处摩擦：(1) 行业把「安全」当产品卖；我的论文显示筛选可能丢掉真实条件优势——另一种安全失败。(2) 代币化 / RWA 会场让状态依赖不那么抽象——市场有 regime。(3) VIP 通道是行动力：受邀后到场，是 Academy「工作证据」的一部分，与 JF 外部审稿、公网可复现并列。",
+    "field.bridge.t": "论文 ↔ 现场桥",
+    "field.bridge.p": "命题 2：tg ≈ tstate√π。现场口号：交易安全。桥：若兑现状态稀有，无条件筛选会把强度叫作「弱」。行业房间讨论通道与风险话术；我讨论过滤器本身是否设错。同一座城市，互补的乐器。",
     "lang.btn": "EN",
     "nav.idea": "论点",
     "nav.tour": "导览",
     "nav.venues": "投稿",
     "nav.paper": "论文",
+    "nav.atlas": "图谱",
     "nav.math": "机制",
     "nav.results": "结果",
     "nav.machine": "机器池",
@@ -177,6 +268,7 @@ window.I18N = {
     "hero.stat6": "已交付代码行",
     "hero.stage.l": "无条件筛选",
     "hero.stage.r": "自状态倾斜",
+    "hero.portrait.cap": "金焕年 · 独立研究者",
     "hero.stage.cap": "交互示意——硬闸门砍掉整条腿；连续倾斜保留广度。移动鼠标扰动状态。",
 
     "idea.kicker": "01 · 核心论点",
@@ -304,12 +396,43 @@ window.applyI18n = function applyI18n(lang) {
 };
 
 window.initLangToggle = function initLangToggle() {
+  const root = document.getElementById("lang-switch");
   const btn = document.getElementById("lang-toggle");
-  if (!btn) return;
   let lang = localStorage.getItem("hj-lang") || "en";
+
+  function syncSwitch(L) {
+    if (root) {
+      root.querySelectorAll("[data-lang]").forEach((el) => {
+        el.classList.toggle("active", el.dataset.lang === L);
+        el.setAttribute("aria-pressed", el.dataset.lang === L ? "true" : "false");
+      });
+    }
+    if (btn) {
+      btn.textContent = L === "zh" ? "EN" : "中文";
+      btn.setAttribute("aria-pressed", L === "zh" ? "true" : "false");
+    }
+  }
+
+  const _apply = window.applyI18n;
+  window.applyI18n = function (L) {
+    _apply(L);
+    syncSwitch(L);
+  };
+
   window.applyI18n(lang);
-  btn.addEventListener("click", () => {
-    lang = lang === "en" ? "zh" : "en";
-    window.applyI18n(lang);
-  });
+  syncSwitch(lang);
+
+  if (root) {
+    root.querySelectorAll("[data-lang]").forEach((el) => {
+      el.addEventListener("click", () => {
+        lang = el.dataset.lang;
+        window.applyI18n(lang);
+      });
+    });
+  } else if (btn) {
+    btn.addEventListener("click", () => {
+      lang = lang === "en" ? "zh" : "en";
+      window.applyI18n(lang);
+    });
+  }
 };

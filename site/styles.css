@@ -2028,3 +2028,233 @@ body.lang-zh .section-kicker {
   background: rgba(13,92,75,0.12);
   color: var(--accent);
 }
+
+
+/* --- v3 deluxe --- */
+.lang-switch {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  background: rgba(246,248,250,0.9);
+  overflow: hidden;
+}
+.lang-switch button {
+  border: 0;
+  background: transparent;
+  padding: 0.35rem 0.7rem;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  color: var(--muted);
+}
+.lang-switch button.active {
+  background: var(--accent);
+  color: #f4f7f5;
+}
+.lang-toggle[hidden] { display: none !important; }
+
+.field-dossier {
+  margin: 1.75rem 0 1.5rem;
+  padding: 1.25rem 1.35rem;
+  border: 1px solid var(--line);
+  background:
+    linear-gradient(135deg, rgba(13,92,75,0.07), transparent 42%),
+    var(--paper);
+}
+.field-dossier header h3 {
+  margin: 0 0 0.35rem;
+  font-family: var(--display);
+  font-size: 1.25rem;
+}
+.field-dossier header p {
+  margin: 0 0 1rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.dossier-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+.dossier-grid article {
+  border-top: 1px solid var(--line);
+  padding-top: 0.75rem;
+}
+.dossier-grid h4 {
+  margin: 0 0 0.4rem;
+  font-family: var(--display);
+  font-size: 1.02rem;
+}
+.dossier-grid p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+
+.atlas-shell {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 1.1rem;
+  margin-top: 1rem;
+}
+.atlas-graph {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.atlas-node {
+  text-align: left;
+  border: 1px solid var(--line);
+  background: rgba(246,248,250,0.75);
+  padding: 0.65rem 0.75rem;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  transition: all 0.15s;
+}
+.atlas-node span { color: var(--muted); margin-right: 0.45rem; }
+.atlas-node.active,
+.atlas-node:hover {
+  border-color: var(--accent);
+  background: rgba(13,92,75,0.12);
+  color: var(--accent);
+}
+.atlas-panel {
+  border: 1px solid var(--line);
+  background: var(--paper);
+  padding: 1.1rem 1.2rem;
+  min-height: 220px;
+  box-shadow: 0 18px 50px rgba(10,16,24,0.06);
+}
+.atlas-k {
+  margin: 0 0 0.35rem;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.atlas-panel h3 {
+  margin: 0 0 0.55rem;
+  font-family: var(--display);
+  font-size: 1.35rem;
+}
+.atlas-panel p {
+  margin: 0;
+  color: var(--ink-soft);
+  line-height: 1.65;
+  font-size: 0.95rem;
+}
+.atlas-meters {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+.atlas-meters div {
+  border-top: 1px solid var(--line);
+  padding-top: 0.55rem;
+}
+.atlas-meters span {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.atlas-meters b {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 900px) {
+  .dossier-grid, .atlas-shell, .atlas-meters { grid-template-columns: 1fr 1fr; }
+  .atlas-shell { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .dossier-grid, .atlas-meters { grid-template-columns: 1fr; }
+}
+
+
+/* --- hero portraits --- */
+.hero-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(220px, 0.72fr);
+  gap: 2rem 2.5rem;
+  align-items: end;
+  margin-bottom: 0.5rem;
+}
+.hero-portrait {
+  position: relative;
+  justify-self: end;
+  width: min(100%, 340px);
+  aspect-ratio: 4 / 5;
+  margin: 0;
+}
+.portrait-main,
+.portrait-alt {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: zoom-in;
+  display: block;
+  overflow: hidden;
+}
+.portrait-main {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+.portrait-main img,
+.portrait-alt img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+  filter: contrast(1.03) saturate(0.92);
+  transition: transform 0.55s ease, filter 0.35s ease;
+}
+.portrait-main:hover img,
+.portrait-alt:hover img {
+  transform: scale(1.03);
+  filter: contrast(1.06) saturate(1);
+}
+.portrait-alt {
+  position: absolute;
+  width: 42%;
+  aspect-ratio: 4 / 5;
+  right: -8%;
+  bottom: -6%;
+  z-index: 2;
+  box-shadow: 0 18px 40px rgba(10, 16, 24, 0.22);
+  outline: 3px solid var(--bg);
+}
+.portrait-cap {
+  position: absolute;
+  left: 0;
+  right: 18%;
+  bottom: -1.85rem;
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  z-index: 3;
+}
+@media (max-width: 900px) {
+  .hero-top {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  .hero-portrait {
+    width: min(280px, 70vw);
+    justify-self: start;
+    margin-bottom: 1.5rem;
+  }
+}

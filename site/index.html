@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v3b1" />
 </head>
 <body>
   <div class="progress" id="progress" aria-hidden="true"></div>
@@ -25,6 +25,7 @@
       <a href="#tour" data-spy="tour" data-i18n="nav.tour">Tour</a>
       <a href="#venues" data-spy="venues" data-i18n="nav.venues">Venues</a>
       <a href="#paper" data-spy="paper" data-i18n="nav.paper">Paper</a>
+      <a href="#atlas" data-spy="atlas" data-i18n="nav.atlas">Atlas</a>
       <a href="#math" data-spy="math" data-i18n="nav.math">Math</a>
       <a href="#results" data-spy="results" data-i18n="nav.results">Results</a>
       <a href="#machine" data-spy="machine" data-i18n="nav.machine">Machine</a>
@@ -40,7 +41,11 @@
       <a href="#proof" data-spy="proof" data-i18n="nav.proof">Proof</a>
     </nav>
     <div class="header-tools">
-      <button type="button" class="lang-toggle" id="lang-toggle" aria-label="Language">中文</button>
+      <div class="lang-switch" id="lang-switch" role="group" aria-label="Language">
+        <button type="button" data-lang="en" class="active" aria-pressed="true">EN</button>
+        <button type="button" data-lang="zh" aria-pressed="false">中文</button>
+      </div>
+      <button type="button" class="lang-toggle" id="lang-toggle" hidden aria-hidden="true">中文</button>
       <button class="cmd-hint" type="button" id="cmd-hint" title="Press /">/</button>
     </div>
   </header>
@@ -48,6 +53,8 @@
   <main id="top">
     <!-- HERO -->
     <section class="hero">
+      <div class="hero-top">
+        <div class="hero-copy">
       <div class="hero-meta">
         <span class="pulse"></span>
         <span class="chip" data-i18n="hero.chip.jf">JF external review</span>
@@ -66,6 +73,17 @@
         <a class="btn ghost" data-magnetic href="#letter" data-i18n="hero.cta.letter">Zheshang letter</a>
         <a class="btn ghost" data-magnetic href="#tour" data-i18n="hero.cta2">Argument tour</a>
         <a class="btn ghost" data-magnetic href="#agency" data-i18n="hero.cta3">Academy fit</a>
+      </div>
+        </div>
+        <aside class="hero-portrait" aria-label="Portrait">
+          <button type="button" class="portrait-main" data-full="assets/portrait/portrait-1.jpg" aria-label="Portrait 1">
+            <img src="assets/portrait/portrait-1.jpg" alt="Huannian Jin — portrait" width="640" height="800" />
+          </button>
+          <button type="button" class="portrait-alt" data-full="assets/portrait/portrait-2.jpg" aria-label="Portrait 2">
+            <img src="assets/portrait/portrait-2.jpg" alt="Huannian Jin — alternate portrait" width="480" height="600" />
+          </button>
+          <p class="portrait-cap" data-i18n="hero.portrait.cap">Huannian Jin · independent researcher</p>
+        </aside>
       </div>
 
       <div class="hero-stats" id="hero-stats">
@@ -145,18 +163,18 @@
       </div>
 
       <div class="beats">
-        <article><span>01</span><h3>Machines flood the zoo</h3><p>LLMs + search propose predictors faster than humans can vet. Screens become the bottleneck.</p></article>
-        <article><span>02</span><h3>Unconditional filter</h3><p>Keep if average premium clears multiple-testing. State-confined premia look like zeros.</p></article>
-        <article><span>03</span><h3>Structural blind spot</h3><p>Global t dilutes with √π. Locally strong factors are discarded as globally weak.</p></article>
-        <article><span>04</span><h3>Own-regime tilt</h3><p>Per-factor states + hierarchical pooling. Continuous tilt—no hard gate that kills breadth.</p></article>
-        <article><span>05</span><h3>Falsify, then trade</h3><p>Block-shuffle nulls, placebos, cross-fit. Then show deployable bps on public panels.</p></article>
-        <article><span>06</span><h3>Honest tiers</h3><p>Load-bearing vs identification vs suggestive—said upfront. Science over storytelling.</p></article>
+        <article><span>01</span><h3 data-i18n="idea.beat1.t">Machines flood the zoo</h3><p data-i18n="idea.beat1.p">LLMs + search propose predictors faster than humans can vet. Screens become the bottleneck.</p></article>
+        <article><span>02</span><h3 data-i18n="idea.beat2.t">Unconditional filter</h3><p data-i18n="idea.beat2.p">Keep if average premium clears multiple-testing. State-confined premia look like zeros.</p></article>
+        <article><span>03</span><h3 data-i18n="idea.beat3.t">Structural blind spot</h3><p data-i18n="idea.beat3.p">Global t dilutes with √π. Locally strong factors are discarded as globally weak.</p></article>
+        <article><span>04</span><h3 data-i18n="idea.beat4.t">Own-regime tilt</h3><p data-i18n="idea.beat4.p">Per-factor states + hierarchical pooling. Continuous tilt—no hard gate that kills breadth.</p></article>
+        <article><span>05</span><h3 data-i18n="idea.beat5.t">Falsify, then trade</h3><p data-i18n="idea.beat5.p">Block-shuffle nulls, placebos, cross-fit. Then show deployable bps on public panels.</p></article>
+        <article><span>06</span><h3 data-i18n="idea.beat6.t">Honest tiers</h3><p data-i18n="idea.beat6.p">Load-bearing vs identification vs suggestive—said upfront. Science over storytelling.</p></article>
       </div>
 
       <div class="claim-tiers">
         <article class="tier load">
-          <header><span>Tier I</span><strong>Load-bearing</strong></header>
-          <p>Regime overlay adds deployable, net-of-cost alpha to every implementable baseline.</p>
+          <header><span>Tier I</span><strong data-i18n="idea.t1.h">Load-bearing</strong></header>
+          <p data-i18n="idea.t1.p">Regime overlay adds deployable, net-of-cost alpha to every implementable baseline.</p>
           <ul>
             <li>24/24 same-base active increments positive (RW + e-BH)</li>
             <li>VW: <b>172 bps/yr</b> active · IR <b>1.99</b> · deployable t = 6.81</li>
@@ -164,8 +182,8 @@
           </ul>
         </article>
         <article class="tier id">
-          <header><span>Tier II</span><strong>Identification</strong></header>
-          <p>Discarded &amp; machine factors carry genuine state-dependent structure.</p>
+          <header><span>Tier II</span><strong data-i18n="idea.t2.h">Identification</strong></header>
+          <p data-i18n="idea.t2.p">Discarded &amp; machine factors carry genuine state-dependent structure.</p>
           <ul>
             <li>Falsification excess <b>6.4×</b> (219 vs 34 under global null)</li>
             <li>Funding-scarcity interaction t = 3.62 / 2.81</li>
@@ -173,8 +191,8 @@
           </ul>
         </article>
         <article class="tier sug">
-          <header><span>Tier III</span><strong>Suggestive</strong></header>
-          <p>Reported, not leaned on—honest science.</p>
+          <header><span>Tier III</span><strong data-i18n="idea.t3.h">Suggestive</strong></header>
+          <p data-i18n="idea.t3.p">Reported, not leaned on—honest science.</p>
           <ul>
             <li>Cross-asset travel is incomplete</li>
             <li>Reg SHO natural experiment is a null</li>
@@ -209,10 +227,10 @@
       <div class="venue-grid">
         <article class="venue jf">
           <header>
-            <span class="badge live">External review</span>
+            <span class="badge live" data-i18n="venues.jf.badge">External review</span>
             <h3>Journal of Finance</h3>
           </header>
-          <p class="venue-meta">MS 2026-0738 · received Sep 21, 2026 · editor in charge: Antoinette Schoar</p>
+          <p class="venue-meta" data-i18n="venues.jf.meta">MS 2026-0738 · received Sep 21, 2026 · editor: Antoinette Schoar</p>
           <ul>
             <li>Top finance journal · AFA</li>
             <li><strong>Passed desk review</strong> · now in <strong>external / referee review</strong></li>
@@ -222,10 +240,10 @@
         </article>
         <article class="venue efa">
           <header>
-            <span class="badge pending">Submitted</span>
+            <span class="badge pending" data-i18n="venues.efa.badge">Submitted</span>
             <h3>Eastern Finance Association</h3>
           </header>
-          <p class="venue-meta">U.S. academic conference · EFA annual meeting track</p>
+          <p class="venue-meta" data-i18n="venues.efa.meta">U.S. academic conference · EFA annual meeting track</p>
           <ul>
             <li>Conference submission of the same research program</li>
             <li>Signals: peer academic pipeline, not only a private notebook</li>
@@ -233,10 +251,7 @@
           </ul>
         </article>
       </div>
-      <p class="venue-note">
-        Both tracks are <strong>submissions</strong>. Acceptance is not claimed.
-        The proof of work is the paper + repro pack + systems letter—not the journal logo.
-      </p>
+      <p class="venue-note" data-i18n="venues.note">Both tracks are submissions. Acceptance is not claimed. The proof of work is the paper + repro pack + systems letter—not the journal logo.</p>
     </section>
 
     <!-- PAPER LAB -->
@@ -284,6 +299,21 @@
         <div><span>Editor</span><b>Antoinette Schoar</b></div>
         <div><span>Public check</span><b>python reproduce_headline.py</b></div>
       </div>
+    </section>
+
+
+    <!-- PAPER ATLAS -->
+    <section id="atlas" class="section reveal atlas-deluxe">
+      <p class="section-kicker" data-i18n="atlas.kicker">01d · Paper atlas</p>
+      <h2 data-i18n="atlas.title">Argument graph from the manuscript</h2>
+      <p class="section-lede" data-i18n="atlas.lede">
+        Click a node to open the load-bearing sentence from Global Weakness, Local Strength.
+      </p>
+      <div class="atlas-shell">
+        <div class="atlas-graph" id="atlas-graph" role="tablist"></div>
+        <div class="atlas-panel" id="atlas-panel" role="tabpanel"></div>
+      </div>
+      <div class="atlas-meters" id="atlas-meters" aria-label="Manuscript meters"></div>
     </section>
 
     <!-- MATH -->
@@ -537,14 +567,9 @@
 
     <!-- LETTER -->
     <section id="letter" class="section reveal">
-      <p class="section-kicker">06 · Industry proof</p>
-      <h2>Zheshang Securities · recommendation</h2>
-      <p class="section-lede">
-        Quantitative System Development Intern (from Aug 2025) at
-        <strong>Zheshang Securities Co., Ltd.</strong> (Hangzhou).
-        Letter by <strong>Liao Jingchi</strong>, Managing Director —
-        highest recommendation for graduate study and research/engineering practice.
-      </p>
+      <p class="section-kicker" data-i18n="letter.kicker">06 · Industry proof</p>
+      <h2 data-i18n="letter.title">Zheshang Securities · recommendation</h2>
+      <p class="section-lede"><span data-i18n="letter.lede">Quantitative System Development Intern (from Aug 2025) at Zheshang Securities Co., Ltd. (Hangzhou). Letter by Liao Jingchi, Managing Director — highest recommendation for graduate study and research/engineering practice.</span></p>
 
       <div class="letter-layout">
         <div class="letter-metrics">
@@ -609,13 +634,9 @@
 
     <!-- EDGE vs peers -->
     <section id="edge" class="section reveal">
-      <p class="section-kicker">06b · Proof of work · different shape</p>
-      <h2>Same Academy bar · different instrument</h2>
-      <p class="section-lede">
-        The Founding Class includes apps, hardware, nonprofits, ARR.
-        Official language also counts <strong>original research</strong> as built.
-        My instrument is inspectable judgment under AI-scale factor supply.
-      </p>
+      <p class="section-kicker" data-i18n="edge.kicker">06b · Proof of work · different shape</p>
+      <h2 data-i18n="edge.title">Same Academy bar · different instrument</h2>
+      <p class="section-lede"><span data-i18n="edge.lede">The Founding Class includes apps, hardware, nonprofits, ARR. Official language also counts original research as built. My instrument is inspectable judgment under AI-scale factor supply.</span></p>
       <div class="edge-grid">
         <article>
           <h3>Common Stage-1 surfaces</h3>
@@ -808,6 +829,32 @@
         </div>
       </div>
 
+
+      <div class="field-dossier">
+        <header>
+          <h3 data-i18n="field.dossier.h">VIP field dossier</h3>
+          <p data-i18n="field.dossier.sub">Not a photo dump — a structured record.</p>
+        </header>
+        <div class="dossier-grid">
+          <article>
+            <h4 data-i18n="field.day1.t">Day 1 · Floor + rooms</h4>
+            <p data-i18n="field.day1.p">Morning VIP badge…</p>
+          </article>
+          <article>
+            <h4 data-i18n="field.day2.t">Day 2 · Continuity + night</h4>
+            <p data-i18n="field.day2.p">Returned to the floor…</p>
+          </article>
+          <article>
+            <h4 data-i18n="field.learn.t">What I took back to the notebook</h4>
+            <p data-i18n="field.learn.p">Three frictions…</p>
+          </article>
+          <article>
+            <h4 data-i18n="field.bridge.t">Paper ↔ field bridge</h4>
+            <p data-i18n="field.bridge.p">Proposition 2 bridge…</p>
+          </article>
+        </div>
+      </div>
+
       <div class="field-notes">
         <article>
           <h3 data-i18n="field.n1t">Why VIP matters (to me)</h3>
@@ -898,7 +945,7 @@
     <button type="button" class="lightbox-close" id="lightbox-close" aria-label="Close">×</button>
     <img id="lightbox-img" alt="" />
   </div>
-  <script src="i18n.js"></script>
-  <script src="app.js"></script>
+  <script src="i18n.js?v3b1"></script>
+  <script src="app.js?v3b1"></script>
 </body>
 </html>
