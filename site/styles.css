@@ -1400,3 +1400,120 @@ nav a.active {
 @media (max-width: 640px) {
   .paper-strip, .pi-controls.deluxe .pi-readout { grid-template-columns: 1fr; }
 }
+
+/* Thesis + Academy fit */
+.thesis-banner {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 1.1rem;
+  margin: 1.5rem 0 1.75rem;
+}
+.thesis-core, .thesis-agenda {
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.55);
+  padding: 1.15rem 1.25rem;
+}
+.thesis-core {
+  background: linear-gradient(145deg, rgba(13,92,75,0.1), rgba(255,255,255,0.55) 55%);
+}
+.thesis-label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.55rem;
+}
+.thesis-core p {
+  margin: 0;
+  font-size: 1.08rem;
+  line-height: 1.55;
+  max-width: 42ch;
+}
+.thesis-agenda ol {
+  margin: 0;
+  padding-left: 1.15rem;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+.thesis-agenda li { margin: 0.4rem 0; }
+
+.fusion-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.15fr;
+  gap: 0.9rem;
+  margin-top: 1.5rem;
+}
+.fusion-grid article {
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.55);
+  padding: 1.1rem 1.2rem;
+}
+.fusion-grid h3 {
+  margin: 0 0 0.65rem;
+  font-family: var(--display);
+}
+.fusion-grid ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+.fusion-join {
+  background: linear-gradient(160deg, rgba(13,92,75,0.12), rgba(255,255,255,0.55)) !important;
+  border-color: rgba(13,92,75,0.35) !important;
+}
+.fusion-join p { margin: 0 0 0.75rem; color: var(--ink-soft); line-height: 1.55; font-size: 0.95rem; }
+.fusion-cta { margin: 0 !important; font-size: 0.9rem !important; color: var(--accent) !important; }
+
+.academy-fit .academy-lede {
+  max-width: 62ch;
+  font-size: 1.05rem;
+}
+.agency-map {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin: 1.35rem 0 0.85rem;
+}
+.agency-tab {
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.5);
+  font: inherit;
+  padding: 0.55rem 0.85rem;
+  cursor: pointer;
+  color: inherit;
+}
+.agency-tab.active {
+  border-color: rgba(13,92,75,0.55);
+  background: rgba(13,92,75,0.12);
+}
+.agency-panel {
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.6);
+  padding: 1.25rem 1.35rem;
+  min-height: 140px;
+}
+.agency-panel h3 {
+  margin: 0 0 0.5rem;
+  font-family: var(--display);
+}
+.agency-panel p {
+  margin: 0;
+  color: var(--ink-soft);
+  line-height: 1.6;
+  max-width: 68ch;
+}
+.agency-foot {
+  margin-top: 1.15rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+.agency-foot p { margin: 0 0 0.65rem; color: var(--ink-soft); max-width: 70ch; }
+
+@media (max-width: 980px) {
+  .thesis-banner, .fusion-grid { grid-template-columns: 1fr; }
+}

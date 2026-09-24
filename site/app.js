@@ -582,7 +582,9 @@ function initPalette() {
     { id: "edge", label: "06b Edge vs peers" },
     { id: "craft", label: "06c Engineering discipline" },
     { id: "scale", label: "06d Engineering mass" },
+    { id: "fusion", label: "06e AI × quant fusion" },
     { id: "proof", label: "07 Proof / repro commands" },
+    { id: "agency", label: "08 Academy · already in motion" },
     { id: "links", label: "Artifacts / links" },
   ];
 
@@ -671,6 +673,7 @@ initPaperLab();
 initPanelLab();
 initFunnelLab();
 initPipeLab();
+initAgencyLab();
 
 function initSpyNav() {
   const links = [...document.querySelectorAll("#spy-nav a[data-spy]")];
@@ -950,4 +953,43 @@ function initPipeLab() {
   }
   steps.forEach((s) => s.addEventListener("click", () => show(s.dataset.pipe)));
   show(0);
+}
+
+/* ---------- Academy agency map ---------- */
+function initAgencyLab() {
+  const panel = document.getElementById("agency-panel");
+  const tabs = document.querySelectorAll(".agency-tab");
+  if (!panel || !tabs.length) return;
+
+  const COPY = {
+    motion: {
+      title: "Already in motion",
+      body: "22 months on this system — not a prompt-weekend. JF MS 2026-0738 received Sep 21, 2026; passed desk; now in external review under Antoinette Schoar. EFA submitted. Public site + repro + CI + walkthrough shipped. Zheshang production systems interned from Aug 2025. The work predates the application form.",
+    },
+    agency: {
+      title: "Agency",
+      body: "When AI-scale factor proposal captured my attention, I did not write a thread — I built a factory with gates, derived the blind-spot identity, falsified my own rescues, and made the load-bearing numbers regenerable by strangers. Agency here means: notice the structural mistake → instrument it → publish a receipt.",
+    },
+    proof: {
+      title: "Proof of work",
+      body: "Original research counts. Live portfolio. python repro.py (60/60). python reproduce_headline.py (~172 bps · IR ≈ 2). system_showcase Rust excerpts. SCALE.md mass notes. MD letter: 56 modules · ~64k LoC · >95%. Video: youtu.be/tVHLUQy93rg. Chat logs are not the artifact — the repo is.",
+    },
+    elig: {
+      title: "Eligibility",
+      body: "Early first-year at Shanghai Lixin University of Accounting and Finance. Have not completed more than one year of full-time college after high school by August 2027. International applicant. Ready to live in San Francisco full-time for the Founding Class Fellowship (Sep 2027).",
+    },
+    why: {
+      title: "Why The Academy · why now",
+      body: "I want harder peers and external tests than I can create alone in Guizhou / Shanghai. SF for a year is the place to push AI×quant screening science into a sharper product surface without abandoning falsification discipline. Peers will ship apps and robots — I bring a research system already under JF external review. Different instrument. Same bar: proof.",
+    },
+  };
+
+  function show(key) {
+    const c = COPY[key] || COPY.motion;
+    tabs.forEach((t) => t.classList.toggle("active", t.dataset.agency === key));
+    panel.innerHTML = `<h3>${c.title}</h3><p>${c.body}</p>`;
+  }
+
+  tabs.forEach((t) => t.addEventListener("click", () => show(t.dataset.agency)));
+  show("motion");
 }
