@@ -6,7 +6,7 @@
 [![CI pages](https://img.shields.io/github/actions/workflow/status/nemo02070118/boatfx-repro/pages.yml?branch=main&label=pages&style=for-the-badge)](https://github.com/nemo02070118/boatfx-repro/actions/workflows/pages.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-2c5f7c?style=for-the-badge)](LICENSE)
 
-**Author:** Huannian Jin · **Email:** [15761209998@163.com](mailto:15761209998@163.com)  
+**Author:** Huannian Jin · **Email:** [huanian.jin@outlook.com](mailto:huanian.jin@outlook.com)  
 **Paper:** *Misallocated, Not Mispriced: The Resolution Limit of Local Strength in the Factor Zoo* — working paper (companion to the JF submission; acceptance not claimed).  
 **Predecessor:** *Global Weakness, Local Strength* — **Journal of Finance** (MS 2026-0738 · **passed desk · external review** · editor: Antoinette Schoar) · **Eastern Finance Association (submitted)**
 
@@ -167,6 +167,6 @@ Acceptance is **not** claimed. Status labels update as decisions arrive.
 
 ## Contact
 
-- **Email:** [15761209998@163.com](mailto:15761209998@163.com)  
+- **Email:** [huanian.jin@outlook.com](mailto:huanian.jin@outlook.com)  
 - **Live:** https://nemo02070118.github.io/boatfx-repro/  
 - **GitHub:** [@nemo02070118](https://github.com/nemo02070118)
