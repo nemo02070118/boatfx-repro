@@ -11,7 +11,7 @@
 **Predecessor:** *Global Weakness, Local Strength* — **Journal of Finance** (MS 2026-0738 · **passed desk · external review** · editor: Antoinette Schoar) · **Eastern Finance Association (submitted)**
 
 > Machines propose factors faster than humans can vet them.  
-> Unconditional screens have a **structural blind spot** for state-dependent premia — and the fix has a hard floor: a **BBP phase transition** at **m\* ≈ 1.3 factors** (a single coarse reallocation captures **76%** of the hindsight oracle; per-factor routing is information-theoretically impossible).  
+> Unconditional screens have a **structural blind spot** for state-dependent premia. The fix is a discovery and its converse: one coarse reallocation moves Sharpe **0.85 → 1.30** (3/4 of the way to the **1.45** ceiling), and the converse — a **BBP phase transition** at **m\* ≈ 1.3 factors** — proves no router recovers the rest (five frozen routers ≤ 0.05; fine routing −0.18; 6 of 94 factors clear the wall).  
 > This repo is the **public receipt**: live web craft + one-command repro + AI-factory excerpts.
 
 ---
@@ -80,7 +80,7 @@ Measurement notes: [`SCALE.md`](SCALE.md)
 
 Exact yes/no matrix: [`REPRODUCIBILITY.md`](REPRODUCIBILITY.md)
 
-**Reallocation study** (new paper): grave Sharpe **0.85** → coarse **1.30** (gain **+0.45**, 76% of the hindsight oracle), FF6 alpha **+3.8%/yr** (t=8.3), resolution limit **m\* ≈ 1.3**. These are **shipped as paper exhibits, not in this public repro** — a boundary, not an omission. The deployable overlay above is the part you can regenerate today.
+**Reallocation study** (new paper): grave Sharpe **0.85** → coarse **1.30** (gain **+0.45** over current practice, 3/4 of the grave→oracle gap; oracle **1.45**), FF6 alpha **+3.8%/yr** (t=8.3), GRS F(8,594)=5.7. Converse: five frozen out-of-sample routers recover **≤ 0.05** of the 0.14 residual, fine routing **−0.18**, only **6 of 94** factors clear τ_i > 1 — resolution limit **m\* ≈ 1.3**. These are **shipped as paper exhibits, not in this public repro** — a boundary, not an omission. The deployable overlay above is the part you can regenerate today.
 
 ---
 
