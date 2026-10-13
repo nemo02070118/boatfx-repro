@@ -10,9 +10,11 @@ license: MIT
 repository-code: "https://github.com/nemo02070118/boatfx-repro"
 abstract: >-
   Public reproducibility surface for Global Weakness, Local Strength:
-  the blind spot of unconditional factor screening. Ships factor language,
-  a 60-factor sample, and headline tilt outputs so deployable economics
-  can be regenerated without proprietary router source.
+  the blind spot of unconditional factor screening, and its companion working
+  paper Misallocated, Not Mispriced (the resolution limit of local strength,
+  m* approximately 1.3 factors). Ships factor language, a 60-factor sample,
+  and headline tilt outputs so deployable economics can be regenerated
+  without proprietary router source.
 keywords:
   - factor investing
   - regime
@@ -26,4 +28,4 @@ preferred-citation:
     - family-names: Jin
       given-names: Huannian
   year: 2026
-  notes: "Submitted to the Journal of Finance; submitted to Eastern Finance Association (EFA)"
+  notes: "Journal of Finance MS 2026-0738: passed desk review, in external review (editor in charge: Antoinette Schoar); submitted to Eastern Finance Association (EFA). Companion working paper: Misallocated, Not Mispriced — The Resolution Limit of Local Strength in the Factor Zoo (not yet submitted; acceptance not claimed)."

@@ -409,6 +409,118 @@ function initPiLab() {
   window.addEventListener("resize", update);
 }
 
+/* ---------- limit lab (BBP resolution wall) ---------- */
+function initLimitLab() {
+  const mRange = document.getElementById("limit-m");
+  const canvas = document.getElementById("limit-canvas");
+  if (!mRange || !canvas) return;
+  const mVal = document.getElementById("limit-m-val");
+  const tauVal = document.getElementById("limit-tau-val");
+  const qVal = document.getElementById("limit-q-val");
+  const verdict = document.getElementById("limit-verdict");
+  const ctx = canvas.getContext("2d");
+  // Illustrative BBP calibration: per-factor signal tau1 so m=1 -> tau=0.78,
+  // tau scales ~linearly in unit size; overlap q^2 = 0 for tau<=1 else 1-1/tau^2.
+  const TAU1 = 0.78;
+  const tauOf = (m) => TAU1 * m;
+  const qsqOf = (tau) => (tau <= 1 ? 0 : 1 - 1 / (tau * tau));
+  const MSTAR = 1 / TAU1; // ≈ 1.283 factors -> the wall
+
+  function draw(m) {
+    const dpr = Math.min(devicePixelRatio || 1, 2);
+    const w = canvas.clientWidth || 1100;
+    const h = 300;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    const grad = ctx.createLinearGradient(0, 0, 0, h);
+    grad.addColorStop(0, "#0c121a");
+    grad.addColorStop(1, "#0a1018");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
+    const pad = 54;
+    const plotW = w - pad * 2;
+    const plotH = h - 70;
+    const taumax = 3.0;
+    // axes
+    ctx.strokeStyle = "rgba(215,224,234,0.18)";
+    ctx.beginPath();
+    ctx.moveTo(pad, 24);
+    ctx.lineTo(pad, 24 + plotH);
+    ctx.lineTo(pad + plotW, 24 + plotH);
+    ctx.stroke();
+    // BBP threshold at tau=1
+    const xWall = pad + (1 / taumax) * plotW;
+    ctx.strokeStyle = "rgba(196,92,38,0.75)";
+    ctx.setLineDash([5, 5]);
+    ctx.beginPath();
+    ctx.moveTo(xWall, 24);
+    ctx.lineTo(xWall, 24 + plotH);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = "#c45c26";
+    ctx.font = "11px IBM Plex Mono";
+    ctx.fillText("τ = 1 · BBP wall (m* ≈ 1.3)", xWall + 8, 40);
+    // q^2(tau) curve
+    ctx.strokeStyle = "#6dcea8";
+    ctx.lineWidth = 2.25;
+    ctx.beginPath();
+    for (let i = 0; i <= 160; i++) {
+      const tau = (taumax * i) / 160;
+      const q = qsqOf(tau);
+      const x = pad + (tau / taumax) * plotW;
+      const y = 24 + plotH - q * plotH;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    // current point (clamp tau to axis for display)
+    const tau = tauOf(m);
+    const q = qsqOf(tau);
+    const tauShown = Math.min(tau, taumax);
+    const x = pad + (tauShown / taumax) * plotW;
+    const y = 24 + plotH - q * plotH;
+    ctx.strokeStyle = "rgba(215,224,234,0.25)";
+    ctx.beginPath();
+    ctx.moveTo(x, 24);
+    ctx.lineTo(x, 24 + plotH);
+    ctx.stroke();
+    ctx.fillStyle = q > 0 ? "#6dcea8" : "#c45c26";
+    ctx.beginPath();
+    ctx.arc(x, y, 8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "rgba(255,255,255,0.35)";
+    ctx.stroke();
+    ctx.fillStyle = "#d7e0ea";
+    ctx.font = "12px IBM Plex Mono";
+    ctx.fillText(`m=${m}  τ=${tau.toFixed(2)}  q²=${q.toFixed(2)}`, Math.min(x + 14, w - 200), Math.max(y - 10, 36));
+    ctx.fillStyle = "#8a93a3";
+    ctx.fillText("τ (signal) →", pad + plotW - 90, 24 + plotH + 26);
+    ctx.fillText("q²", 16, 32);
+  }
+
+  function update() {
+    const m = parseInt(mRange.value, 10);
+    const tau = tauOf(m);
+    const q = qsqOf(tau);
+    const ok = m >= MSTAR; // τ > 1
+    if (mVal) mVal.textContent = String(m);
+    if (tauVal) tauVal.textContent = tau.toFixed(2);
+    if (qVal) qVal.textContent = q.toFixed(2);
+    if (verdict) {
+      verdict.textContent = ok ? "recoverable" : "unrecoverable";
+      verdict.style.color = ok ? "#0d5c4b" : "#c45c26";
+    }
+    draw(m);
+  }
+
+  mRange.addEventListener("input", update);
+  update();
+  window.addEventListener("resize", update);
+}
+
 /* ---------- regime canvas ---------- */
 function initRegimeCanvas() {
   const canvas = document.getElementById("regime-canvas");
@@ -581,6 +693,7 @@ function initPalette() {
     { id: "venues", label: "01b Venues — JF · EFA" },
     { id: "paper", label: "01c Paper map — claim tiers" },
     { id: "math", label: "02 Math — blind-spot lab" },
+    { id: "limit", label: "02b Limit — resolution wall (m* ≈ 1.3)" },
     { id: "results", label: "03 Results — panel inspector" },
     { id: "machine", label: "04 Machine population funnel" },
     { id: "factory", label: "05 AI factor factory" },
@@ -672,6 +785,7 @@ initCounters();
 initTex();
 initPiLab();
 initPiScenarios();
+initLimitLab();
 initRegimeCanvas();
 initFactors();
 initTerminal();

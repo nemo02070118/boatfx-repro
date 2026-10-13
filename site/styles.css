@@ -582,6 +582,70 @@ nav a.active {
 }
 .math-card p { margin: 0; font-size: 0.9rem; color: var(--ink-soft); }
 
+/* research-arc / results-arc connective lines */
+.research-arc, .results-arc {
+  margin: 0.6rem 0 0;
+  padding: 0.7rem 0.9rem;
+  border-left: 2px solid var(--accent, #0d5c4b);
+  background: rgba(13,92,75,0.05);
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+/* LIMIT · resolution wall */
+.limit-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1.75rem;
+}
+.limit-card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  padding: 1.1rem;
+}
+.limit-card .limit-tag {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.5rem;
+}
+.limit-card h3 { margin: 0 0 0.7rem; font-family: var(--display); font-size: 1rem; }
+.limit-card .tex { min-height: 2.2rem; margin-bottom: 0.7rem; overflow-x: auto; }
+.limit-card p { margin: 0; font-size: 0.9rem; color: var(--ink-soft); line-height: 1.5; }
+.limit-lab {
+  margin-top: 2rem;
+  padding: 1.25rem;
+  background: rgba(255,255,255,0.5);
+  border: 1px solid var(--line);
+}
+.limit-lab-head h3 { margin: 0 0 0.35rem; font-family: var(--display); }
+.limit-lab-head p { margin: 0 0 1rem; color: var(--ink-soft); font-size: 0.95rem; }
+.limit-controls label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-bottom: 0.6rem;
+}
+.limit-controls input[type="range"] { width: 100%; margin-top: 0.3rem; }
+.limit-readout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  margin: 0.4rem 0 0.9rem;
+}
+.limit-readout div { display: flex; flex-direction: column; }
+.limit-readout span { color: var(--muted); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; }
+.limit-readout b { font-size: 1.05rem; }
+#limit-canvas { width: 100%; height: auto; display: block; border: 1px solid var(--line); border-radius: 4px; }
+
 .pi-lab {
   margin-top: 2rem;
   padding: 1.25rem;
@@ -1029,6 +1093,7 @@ kbd {
   .hero-stats,
   .claim-tiers,
   .math-grid,
+  .limit-grid,
   .result-notes,
   .expert-row,
   .pipeline,
@@ -1045,6 +1110,7 @@ kbd {
   .hero-stats,
   .claim-tiers,
   .math-grid,
+  .limit-grid,
   .result-notes,
   .expert-row,
   .factor-panel,
@@ -3037,6 +3103,8 @@ html[data-theme="dark"] .stack-stage,
 html[data-theme="dark"] .field-stage,
 html[data-theme="dark"] .tour-shell,
 html[data-theme="dark"] .pi-lab.deluxe,
+html[data-theme="dark"] .limit-lab,
+html[data-theme="dark"] .limit-card,
 html[data-theme="dark"] .panel-inspect,
 html[data-theme="dark"] .agency-panel,
 html[data-theme="dark"] .field-dossier {

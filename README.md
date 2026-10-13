@@ -7,10 +7,11 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-2c5f7c?style=for-the-badge)](LICENSE)
 
 **Author:** Huannian Jin · **Email:** [15761209998@163.com](mailto:15761209998@163.com)  
-**Paper:** *Global Weakness, Local Strength* — **Journal of Finance** (MS 2026-0738 · **passed desk · external review** · editor: Antoinette Schoar) · **Eastern Finance Association (submitted)**
+**Paper:** *Misallocated, Not Mispriced: The Resolution Limit of Local Strength in the Factor Zoo* — working paper (companion to the JF submission; acceptance not claimed).  
+**Predecessor:** *Global Weakness, Local Strength* — **Journal of Finance** (MS 2026-0738 · **passed desk · external review** · editor: Antoinette Schoar) · **Eastern Finance Association (submitted)**
 
 > Machines propose factors faster than humans can vet them.  
-> Unconditional screens have a **structural blind spot** for state-dependent premia.  
+> Unconditional screens have a **structural blind spot** for state-dependent premia — and the fix has a hard floor: a **BBP phase transition** at **m\* ≈ 1.3 factors** (a single coarse reallocation captures **76%** of the hindsight oracle; per-factor routing is information-theoretically impossible).  
 > This repo is the **public receipt**: live web craft + one-command repro + AI-factory excerpts.
 
 ---
@@ -79,6 +80,8 @@ Measurement notes: [`SCALE.md`](SCALE.md)
 
 Exact yes/no matrix: [`REPRODUCIBILITY.md`](REPRODUCIBILITY.md)
 
+**Reallocation study** (new paper): grave Sharpe **0.85** → coarse **1.30** (gain **+0.45**, 76% of the hindsight oracle), FF6 alpha **+3.8%/yr** (t=8.3), resolution limit **m\* ≈ 1.3**. These are **shipped as paper exhibits, not in this public repro** — a boundary, not an omission. The deployable overlay above is the part you can regenerate today.
+
 ---
 
 ## Vibe coding (what “using AI” means here)
@@ -131,13 +134,14 @@ Details: [`system_showcase/README.md`](system_showcase/README.md)
 
 ## Venue status (honest)
 
-| Venue | Status |
-|---|---|
-| Journal of Finance | **Passed desk review · external / referee review** · MS **2026-0738** · received **Sep 21, 2026** · editor in charge: **Antoinette Schoar** |
-| Eastern Finance Association | Submitted |
-| This GitHub surface | Public · MIT for code |
+| Paper | Venue | Status |
+|---|---|---|
+| Global Weakness, Local Strength | Journal of Finance | **Passed desk review · external / referee review** · MS **2026-0738** · received **Sep 21, 2026** · editor in charge: **Antoinette Schoar** |
+| Global Weakness, Local Strength | Eastern Finance Association | Submitted |
+| Misallocated, Not Mispriced | — | **Working paper** · companion to the JF submission · not yet submitted |
+| This GitHub surface | — | Public · MIT for code |
 
-Acceptance is **not** claimed.
+Acceptance is **not** claimed. Status labels update as decisions arrive.
 
 ---
 
@@ -148,6 +152,13 @@ Acceptance is **not** claimed.
   title  = {Global Weakness, Local Strength: The Blind Spot of Unconditional Factor Screening},
   author = {Jin, Huannian},
   note   = {Journal of Finance MS 2026-0738: passed desk review, in external review (editor in charge: Antoinette Schoar); submitted to Eastern Finance Association},
+  year   = {2026}
+}
+
+@unpublished{jin2026misallocated,
+  title  = {Misallocated, Not Mispriced: The Resolution Limit of Local Strength in the Factor Zoo},
+  author = {Jin, Huannian},
+  note   = {Working paper; companion to the Journal of Finance submission (MS 2026-0738). Acceptance not claimed.},
   year   = {2026}
 }
 ```

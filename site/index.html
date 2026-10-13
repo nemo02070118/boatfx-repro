@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Huannian Jin — Global Weakness, Local Strength</title>
-  <meta name="description" content="Global Weakness, Local Strength — submitted to Journal of Finance; submitted to Eastern Finance Association (EFA). AI factor factory · Zheshang systems · public repro pack." />
+  <title>Huannian Jin — Misallocated, Not Mispriced · Global Weakness, Local Strength</title>
+  <meta name="description" content="Misallocated, Not Mispriced: the resolution limit of local strength in the factor zoo (m*≈1.3, 76% oracle) — the deeper law behind Global Weakness, Local Strength (Journal of Finance MS 2026-0738, external review; EFA submitted). AI factor factory · Zheshang systems · public repro pack." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
@@ -20,7 +20,7 @@
       } catch (e) {}
     })();
   </script>
-  <link rel="stylesheet" href="styles.css?term3" />
+  <link rel="stylesheet" href="styles.css?term5" />
 </head>
 <body>
   <div class="progress" id="progress" aria-hidden="true"></div>
@@ -46,6 +46,7 @@
       <a href="#paper" data-spy="paper" data-i18n="nav.paper">Paper</a>
       <a href="#atlas" data-spy="atlas" data-i18n="nav.atlas">Atlas</a>
       <a href="#math" data-spy="math" data-i18n="nav.math">Math</a>
+      <a href="#limit" data-spy="limit" data-i18n="nav.limit">Limit</a>
       <a href="#results" data-spy="results" data-i18n="nav.results">Results</a>
       <a href="#machine" data-spy="machine" data-i18n="nav.machine">Machine</a>
       <a href="#factory" data-spy="factory" data-i18n="nav.factory">Factory</a>
@@ -91,7 +92,7 @@
       </div>
       <h1 class="brand">Huannian Jin</h1>
       <p class="lede" data-i18n="hero.lede">I build an AI agent factory that proposes return factors by the thousand— then prove that unconditional screens have a structural blind spot for factors that only pay inside a market state.</p>
-      <p class="lede-sub" data-i18n="hero.sub">Flagship paper: Global Weakness, Local Strength — at the Journal of Finance (MS 2026-0738): passed desk review · in external review with editor Antoinette Schoar; also submitted to the Eastern Finance Association (EFA).</p>
+      <p class="lede-sub" data-i18n="hero.sub">The hurdle judges WHERE a factor is tested, not WHETHER it works — so I prove the exact resolution limit on fixing it: m* ≈ 1.3 factors (Misallocated, Not Mispriced). The deployable predecessor, Global Weakness, Local Strength, is at the Journal of Finance (MS 2026-0738): passed desk review · in external review with editor Antoinette Schoar; also submitted to the Eastern Finance Association (EFA).</p>
       <div class="cta-row">
         <a class="btn primary" data-magnetic href="#terminal" data-i18n="hero.cta.term">Open BOAT Terminal</a>
         <a class="btn ghost" data-magnetic href="#idea" data-i18n="hero.cta1">Enter the argument</a>
@@ -122,6 +123,8 @@
       <div class="hero-stats" id="hero-stats">
         <div><b data-count="172" data-suffix="">0</b><span data-i18n="hero.stat1">bps/yr VW active</span></div>
         <div><b data-count="1.99" data-decimals="2">0</b><span data-i18n="hero.stat2">information ratio</span></div>
+        <div><b data-count="76" data-suffix="%">0</b><span data-i18n="hero.stat.oracle">hindsight oracle captured</span></div>
+        <div><b data-count="0.45" data-decimals="2" data-suffix="">0</b><span data-i18n="hero.stat.gain">Sharpe gain (coarse − grave)</span></div>
         <div><b data-count="6881">0</b><span data-i18n="hero.stat3">machine factors</span></div>
         <div><b data-count="6.4" data-decimals="1" data-suffix="×">0</b><span data-i18n="hero.stat4">falsification excess</span></div>
         <div><b data-count="56">0</b><span data-i18n="hero.stat5">modules @ Zheshang</span></div>
@@ -147,6 +150,9 @@
         <span>Proposition 2 · Blind spot</span>
         <span>t<sub>g</sub> ≈ t<sub>state</sub>√π</span>
         <span>6881 machine factors</span>
+        <span>m* ≈ 1.3 factors</span>
+        <span>coarse 1.30 vs grave 0.85</span>
+        <span>76% oracle captured</span>
         <span>10.0% → 3.15% → 1.08%</span>
         <span>24/24 same-base increments</span>
         <span>172 bps · IR ≈ 2</span>
@@ -159,6 +165,9 @@
         <span>Proposition 2 · Blind spot</span>
         <span>t<sub>g</sub> ≈ t<sub>state</sub>√π</span>
         <span>6881 machine factors</span>
+        <span>m* ≈ 1.3 factors</span>
+        <span>coarse 1.30 vs grave 0.85</span>
+        <span>76% oracle captured</span>
         <span>10.0% → 3.15% → 1.08%</span>
         <span>24/24 same-base increments</span>
         <span>172 bps · IR ≈ 2</span>
@@ -424,6 +433,7 @@
       <p class="section-kicker" data-i18n="venues.kicker">01b · Submission track</p>
       <h2 data-i18n="venues.title">Where the paper is in flight</h2>
       <p class="section-lede"><span data-i18n="venues.lede">Not “published.” Not vapor. A dual academic track with honest status labels— the Academy cares about motion; journals care about priority and process.</span></p>
+      <p class="research-arc" data-i18n="venues.arc">Research arc: Global Weakness, Local Strength is the phenomenon and the deployable economics (at the Journal of Finance, external review). Misallocated, Not Mispriced is the law that explains and bounds it — a working paper, companion to the JF submission. Acceptance is not claimed for either.</p>
       <div class="venue-grid">
         <article class="venue jf">
           <header>
@@ -591,11 +601,64 @@
       </div>
     </section>
 
+    <!-- LIMIT · resolution wall -->
+    <section id="limit" class="section reveal">
+      <p class="section-kicker" data-i18n="limit.kicker">02b · Resolution limit</p>
+      <h2 data-i18n="limit.title">The resolution wall</h2>
+      <p class="section-lede"><span data-i18n="limit.lede">The deeper law behind the blind spot. A factor can be strong in the wrong venue — a mistake about WHERE, not WHETHER. Recovering that strength is a phase transition with a hard floor: below a critical unit size, no estimator, no timing, no ML can route factors one by one.</span></p>
+
+      <div class="limit-grid">
+        <article class="limit-card" data-magnetic>
+          <span class="limit-tag" data-i18n="limit.c1.tag">Roy (1951) self-selection</span>
+          <h3 data-i18n="limit.c1.h">Comparative advantage</h3>
+          <div class="tex" data-tex="r_{iv} = \beta_i + a_{iv} + \varepsilon_{iv}"></div>
+          <p data-i18n="limit.c1.p">A global component β_i plus a venue-local component a_iv. Factor-to-venue assignment is a self-selection problem: the screen keeps the global part and discards the local part as noise.</p>
+        </article>
+        <article class="limit-card" data-magnetic>
+          <span class="limit-tag" data-i18n="limit.c2.tag">BBP phase transition</span>
+          <h3 data-i18n="limit.c2.h">A hard recoverability floor</h3>
+          <div class="tex" data-tex="q^2 = 0 \;\; (\tau \le 1), \qquad q^2 > 0 \;\; (\tau > 1)"></div>
+          <p data-i18n="limit.c2.p">Overlap with the truth is exactly zero below the Baik–Ben Arous–Péché threshold and rises only above it. Critical unit size m* ≈ 1.3 factors. The coarse pool (m=94, τ≈73) is almost perfectly recoverable; per-factor routing (m=1, τ=0.78 &lt; 1) is information-theoretically impossible.</p>
+        </article>
+        <article class="limit-card" data-magnetic>
+          <span class="limit-tag" data-i18n="limit.c3.tag">Data-processing inequality</span>
+          <h3 data-i18n="limit.c3.h">Why timing &amp; ML can't help</h3>
+          <div class="tex" data-tex="\mathrm{coarse}\;1.30 \;>\; \mathrm{timing}\;1.25 \;>\; \mathrm{fine}\;1.12"></div>
+          <p data-i18n="limit.c3.p">No function of the data beats a one-time static reallocation of the whole pool. Chasing per-factor timing or stacking ML lands below the coarse move — more machinery, less Sharpe. The wall is in the information, not the estimator.</p>
+        </article>
+      </div>
+
+      <div class="limit-lab deluxe">
+        <div class="limit-lab-head">
+          <h3 data-i18n="limit.lab.h">Live resolution lab</h3>
+          <p data-i18n="limit.lab.p">Slide the unit size m. Watch τ and overlap q² cross the wall at m* ≈ 1.3. Illustrative BBP sketch, not a trading simulator.</p>
+        </div>
+        <div class="limit-controls deluxe">
+          <label data-i18n-label="limit.lab.m">
+            Reallocation unit size m (factors)
+            <input type="range" id="limit-m" min="1" max="94" step="1" value="1" />
+          </label>
+          <div class="limit-readout">
+            <div><span>m</span><b id="limit-m-val">1</b></div>
+            <div><span>τ (signal)</span><b id="limit-tau-val">0.78</b></div>
+            <div><span>q² (overlap)</span><b id="limit-q-val">0.00</b></div>
+            <div><span>m*</span><b>1.3</b></div>
+            <div><span>verdict</span><b id="limit-verdict">unrecoverable</b></div>
+          </div>
+        </div>
+        <canvas id="limit-canvas" width="1100" height="300"></canvas>
+        <p class="stage-caption" data-i18n="limit.lab.cap">Curve: q²(τ) with the BBP elbow at τ = 1. Crossing m* ≈ 1.3 flips the verdict from unrecoverable to recoverable. Illustrative, not a trading simulator.</p>
+      </div>
+
+      <p class="venue-note" data-i18n="limit.scale">Scale law: the discovery hurdle grows like √(2 log N); the allocation threshold like √(2 log log N). The gap diverges — stricter policing of the zoo discards MORE recoverable local strength as N grows.</p>
+    </section>
+
     <!-- RESULTS -->
     <section id="results" class="section reveal">
       <p class="section-kicker" data-i18n="results.kicker">03 · Deployable economics</p>
       <h2 data-i18n="results.title">Numbers that survive baselines</h2>
       <p class="section-lede"><span data-i18n="results.lede">Overlay on Chen–Zimmermann OSAP panels. Against seven allocators × four panels, 24/24 same-base active increments stay positive. Click a panel row — the chart locks onto that book.</span></p>
+      <p class="results-arc" data-i18n="results.arc">Two levels of one program: the 172 bps/yr value-weight overlay below is the deployable payoff; the 76% hindsight oracle captured by a single coarse reallocation (Sharpe 0.85 → 1.30) is the ceiling theory says is reachable. Same idea — route strength to its venue — read once as economics, once as a resolution limit.</p>
 
       <div class="results-lab">
         <div class="table-wrap">
@@ -1264,8 +1327,8 @@
     <button type="button" class="lightbox-close" id="lightbox-close" aria-label="Close">×</button>
     <img id="lightbox-img" alt="" />
   </div>
-  <script src="i18n.js?term4"></script>
-  <script src="app.js?term4"></script>
+  <script src="i18n.js?term5"></script>
+  <script src="app.js?term5"></script>
   <!-- Visit stats: country, referrer, path, browser. Register this exact code at goatcounter.com so the dashboard exists. -->
   <script data-goatcounter="https://nemo020701181.goatcounter.com/count" async src="gc-count.js?v=1"></script>
 </body>
