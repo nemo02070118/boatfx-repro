@@ -1,0 +1,203 @@
+/* viz.css — signature interactives (diffraction limit, Sharpe ladder, factor zoo).
+   Scoped under .viz to avoid colliding with styles.css. Theme-aware via CSS vars. */
+
+.viz {
+  --viz-ink: var(--ink, #d7e0ea);
+  --viz-muted: #8a93a3;
+  --viz-good: #6dcea8;
+  --viz-warn: #c45c26;
+  --viz-line: rgba(215, 224, 234, 0.18);
+  --viz-panel: #0b1118;
+  position: relative;
+  margin-top: 1.1rem;
+}
+:root[data-theme="light"] .viz {
+  --viz-ink: #1a2230;
+  --viz-muted: #5a6676;
+  --viz-good: #0d7a5f;
+  --viz-warn: #b24a1c;
+  --viz-line: rgba(26, 34, 48, 0.16);
+  --viz-panel: #f3f6fb;
+}
+
+.viz-card {
+  border: 1px solid var(--viz-line);
+  border-radius: 14px;
+  background: var(--viz-panel);
+  padding: 1.1rem 1.2rem 1.25rem;
+  overflow: hidden;
+}
+
+.viz-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+.viz-title {
+  font: 600 0.95rem/1.3 "IBM Plex Sans", system-ui, sans-serif;
+  color: var(--viz-ink);
+  letter-spacing: 0.01em;
+}
+.viz-sub {
+  font: 400 0.78rem/1.4 "IBM Plex Mono", ui-monospace, monospace;
+  color: var(--viz-muted);
+}
+
+.viz-canvas-wrap {
+  position: relative;
+  width: 100%;
+}
+.viz canvas {
+  display: block;
+  width: 100%;
+  border-radius: 10px;
+  touch-action: pan-y;
+}
+.viz svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* controls */
+.viz-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem 1.1rem;
+  align-items: center;
+  margin-top: 0.85rem;
+}
+.viz-control {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font: 500 0.78rem/1 "IBM Plex Mono", ui-monospace, monospace;
+  color: var(--viz-muted);
+}
+.viz-control input[type="range"] {
+  width: clamp(140px, 32vw, 280px);
+  accent-color: var(--viz-good);
+  cursor: pointer;
+}
+.viz-readout {
+  font: 500 0.82rem/1 "IBM Plex Mono", ui-monospace, monospace;
+  color: var(--viz-ink);
+}
+.viz-readout b { color: var(--viz-good); }
+
+/* segmented toggle */
+.viz-toggle {
+  display: inline-flex;
+  border: 1px solid var(--viz-line);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.viz-toggle button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--viz-muted);
+  font: 500 0.76rem/1 "IBM Plex Mono", ui-monospace, monospace;
+  padding: 0.42rem 0.85rem;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+.viz-toggle button[aria-pressed="true"] {
+  background: var(--viz-good);
+  color: #06120d;
+}
+.viz-toggle button:focus-visible {
+  outline: 2px solid var(--viz-good);
+  outline-offset: -2px;
+}
+
+/* tooltip */
+.viz-tip {
+  position: absolute;
+  pointer-events: none;
+  z-index: 5;
+  min-width: 120px;
+  max-width: 240px;
+  padding: 0.5rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid var(--viz-line);
+  background: rgba(8, 12, 18, 0.94);
+  color: #e7edf5;
+  font: 500 0.72rem/1.35 "IBM Plex Mono", ui-monospace, monospace;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.12s ease, transform 0.12s ease;
+}
+.viz-tip.show { opacity: 1; transform: translateY(0); }
+.viz-tip b { color: var(--viz-good); }
+
+.viz-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  margin-top: 0.7rem;
+  font: 400 0.72rem/1.3 "IBM Plex Mono", ui-monospace, monospace;
+  color: var(--viz-muted);
+}
+.viz-legend span { display: inline-flex; align-items: center; gap: 0.35rem; }
+.viz-swatch {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+.viz-caption {
+  margin-top: 0.75rem;
+  font: 400 0.74rem/1.45 "IBM Plex Mono", ui-monospace, monospace;
+  color: var(--viz-muted);
+}
+
+/* fallback when JS/motion disabled */
+.viz-fallback {
+  display: none;
+  color: var(--viz-muted);
+  font: 400 0.8rem/1.5 "IBM Plex Sans", system-ui, sans-serif;
+}
+.viz[data-fallback="true"] .viz-canvas-wrap,
+.viz[data-fallback="true"] .viz-controls { display: none; }
+.viz[data-fallback="true"] .viz-fallback { display: block; }
+
+/* three-act narrative dividers */
+.act-divider {
+  max-width: var(--maxw, 1200px);
+  margin: 4.5rem auto 1rem;
+  padding: 0 clamp(1rem, 4vw, 3rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  border-left: 2px solid var(--viz-good, #6dcea8);
+  padding-left: 1rem;
+  opacity: 0.35;
+  transform: translateX(-6px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.act-divider.act-live { opacity: 1; transform: translateX(0); }
+.act-num {
+  font: 700 0.72rem/1 "IBM Plex Mono", ui-monospace, monospace;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--viz-good, #6dcea8);
+}
+.act-title {
+  font: 600 clamp(1.3rem, 3vw, 2rem)/1.1 "Fraunces", Georgia, serif;
+  color: var(--ink, #d7e0ea);
+}
+.act-sub {
+  font: 400 0.9rem/1.45 "IBM Plex Sans", system-ui, sans-serif;
+  color: var(--viz-muted, #8a93a3);
+  max-width: 54ch;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .act-divider { transition: none; opacity: 1; transform: none; }
+}

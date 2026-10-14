@@ -7,7 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-2c5f7c?style=for-the-badge)](LICENSE)
 
 **Author:** Huannian Jin · **Email:** [huanian.jin@outlook.com](mailto:huanian.jin@outlook.com)  
-**Paper:** *Misallocated, Not Mispriced: The Resolution Limit of Local Strength in the Factor Zoo* — working paper (companion to the JF submission; acceptance not claimed).  
+**Paper:** *The Resolution Limit of Factor Discovery: Why the Replication Crisis Is a Measurement Problem* — working paper, Oct 2026 (companion to the JF submission; acceptance not claimed). ORCID [0009-0006-9124-9152](https://orcid.org/0009-0006-9124-9152) · repro [localstrength-repro](https://github.com/nemo02070118/localstrength-repro).  
 **Predecessor:** *Global Weakness, Local Strength* — **Journal of Finance** (MS 2026-0738 · **passed desk · external review** · editor: Antoinette Schoar) · **Eastern Finance Association (submitted)**
 
 > Machines propose factors faster than humans can vet them.  
@@ -138,7 +138,7 @@ Details: [`system_showcase/README.md`](system_showcase/README.md)
 |---|---|---|
 | Global Weakness, Local Strength | Journal of Finance | **Passed desk review · external / referee review** · MS **2026-0738** · received **Sep 21, 2026** · editor in charge: **Antoinette Schoar** |
 | Global Weakness, Local Strength | Eastern Finance Association | Submitted |
-| Misallocated, Not Mispriced | — | **Working paper** · companion to the JF submission · not yet submitted |
+| The Resolution Limit of Factor Discovery | — | **Working paper** (Oct 2026) · companion to the JF submission · public repro |
 | This GitHub surface | — | Public · MIT for code |
 
 Acceptance is **not** claimed. Status labels update as decisions arrive.
@@ -155,10 +155,10 @@ Acceptance is **not** claimed. Status labels update as decisions arrive.
   year   = {2026}
 }
 
-@unpublished{jin2026misallocated,
-  title  = {Misallocated, Not Mispriced: The Resolution Limit of Local Strength in the Factor Zoo},
+@unpublished{jin2026resolution,
+  title  = {The Resolution Limit of Factor Discovery: Why the Replication Crisis Is a Measurement Problem},
   author = {Jin, Huannian},
-  note   = {Working paper; companion to the Journal of Finance submission (MS 2026-0738). Acceptance not claimed.},
+  note   = {Working paper, Oct 2026; companion to the Journal of Finance submission (MS 2026-0738). Repro: github.com/nemo02070118/localstrength-repro. Acceptance not claimed.},
   year   = {2026}
 }
 ```

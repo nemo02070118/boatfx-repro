@@ -93,6 +93,7 @@ const CFG = {
   email: "mailto:huanian.jin@outlook.com",
   showcase: "https://github.com/nemo02070118/boatfx-repro/tree/main/system_showcase",
   live: "https://nemo02070118.github.io/boatfx-repro/",
+  ssrn: "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7607684",
 };
 
 function prettyExpr(expr, indent = 0) {
@@ -409,22 +410,24 @@ function initPiLab() {
   window.addEventListener("resize", update);
 }
 
-/* ---------- limit lab (BBP resolution wall) ---------- */
+/* ---------- limit lab (resolution limit · q²=τ/(1+τ)) ---------- */
 function initLimitLab() {
   const mRange = document.getElementById("limit-m");
   const canvas = document.getElementById("limit-canvas");
   if (!mRange || !canvas) return;
+  // The signature viz (viz.js) now owns this canvas when wrapped in [data-viz].
+  if (canvas.closest('[data-viz="diffraction"]')) return;
   const mVal = document.getElementById("limit-m-val");
   const tauVal = document.getElementById("limit-tau-val");
   const qVal = document.getElementById("limit-q-val");
   const verdict = document.getElementById("limit-verdict");
   const ctx = canvas.getContext("2d");
-  // Illustrative BBP calibration: per-factor signal tau1 so m=1 -> tau=0.78,
-  // tau scales ~linearly in unit size; overlap q^2 = 0 for tau<=1 else 1-1/tau^2.
-  const TAU1 = 0.78;
-  const tauOf = (m) => TAU1 * m;
-  const qsqOf = (tau) => (tau <= 1 ? 0 : 1 - 1 / (tau * tau));
-  const MSTAR = 1 / TAU1; // ≈ 1.283 factors -> the wall
+  // Resolution law (Theorem 1): q^2(tau) = tau/(1+tau), tau(m) = m*Var(a)/sigma^2.
+  // Calibrated half-recovery scale m* = 1.3 factors (tau = 1 there). So tau = m/1.3.
+  // Checks against the paper: m=1 -> tau=0.77, q^2=0.43; m=94 -> tau=72, q^2=0.99.
+  const MSTAR = 1.3;
+  const tauOf = (m) => m / MSTAR;
+  const qsqOf = (tau) => tau / (1 + tau);
 
   function draw(m) {
     const dpr = Math.min(devicePixelRatio || 1, 2);
@@ -442,7 +445,9 @@ function initLimitLab() {
     const pad = 54;
     const plotW = w - pad * 2;
     const plotH = h - 70;
-    const taumax = 3.0;
+    // Plot q^2 against m on a log axis (m: 1..94) so both resolutions are readable.
+    const MMAX = 94;
+    const xOfM = (mm) => pad + (Math.log(mm) / Math.log(MMAX)) * plotW;
     // axes
     ctx.strokeStyle = "rgba(215,224,234,0.18)";
     ctx.beginPath();
@@ -450,43 +455,47 @@ function initLimitLab() {
     ctx.lineTo(pad, 24 + plotH);
     ctx.lineTo(pad + plotW, 24 + plotH);
     ctx.stroke();
-    // BBP threshold at tau=1
-    const xWall = pad + (1 / taumax) * plotW;
+    // half-recovery line at m* = 1.3 (tau = 1, q^2 = 0.5) — a smooth crossover, not a wall
+    const xStar = xOfM(MSTAR);
+    const yHalf = 24 + plotH - 0.5 * plotH;
     ctx.strokeStyle = "rgba(196,92,38,0.75)";
     ctx.setLineDash([5, 5]);
     ctx.beginPath();
-    ctx.moveTo(xWall, 24);
-    ctx.lineTo(xWall, 24 + plotH);
+    ctx.moveTo(xStar, 24);
+    ctx.lineTo(xStar, 24 + plotH);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(pad, yHalf);
+    ctx.lineTo(pad + plotW, yHalf);
     ctx.stroke();
     ctx.setLineDash([]);
     ctx.fillStyle = "#c45c26";
     ctx.font = "11px IBM Plex Mono";
-    ctx.fillText("τ = 1 · BBP wall (m* ≈ 1.3)", xWall + 8, 40);
-    // q^2(tau) curve
+    ctx.fillText("m* ≈ 1.3 · half recovery (q²=0.5)", xStar + 8, 40);
+    // q^2(m) curve
     ctx.strokeStyle = "#6dcea8";
     ctx.lineWidth = 2.25;
     ctx.beginPath();
-    for (let i = 0; i <= 160; i++) {
-      const tau = (taumax * i) / 160;
-      const q = qsqOf(tau);
-      const x = pad + (tau / taumax) * plotW;
+    for (let i = 0; i <= 200; i++) {
+      const mm = Math.exp((Math.log(MMAX) * i) / 200);
+      const q = qsqOf(tauOf(mm));
+      const x = pad + (Math.log(mm) / Math.log(MMAX)) * plotW;
       const y = 24 + plotH - q * plotH;
       if (i === 0) ctx.moveTo(x, y);
       else ctx.lineTo(x, y);
     }
     ctx.stroke();
-    // current point (clamp tau to axis for display)
+    // current point
     const tau = tauOf(m);
     const q = qsqOf(tau);
-    const tauShown = Math.min(tau, taumax);
-    const x = pad + (tauShown / taumax) * plotW;
+    const x = xOfM(Math.max(1, m));
     const y = 24 + plotH - q * plotH;
     ctx.strokeStyle = "rgba(215,224,234,0.25)";
     ctx.beginPath();
     ctx.moveTo(x, 24);
     ctx.lineTo(x, 24 + plotH);
     ctx.stroke();
-    ctx.fillStyle = q > 0 ? "#6dcea8" : "#c45c26";
+    ctx.fillStyle = q >= 0.5 ? "#6dcea8" : "#c45c26";
     ctx.beginPath();
     ctx.arc(x, y, 8, 0, Math.PI * 2);
     ctx.fill();
@@ -495,9 +504,9 @@ function initLimitLab() {
     ctx.stroke();
     ctx.fillStyle = "#d7e0ea";
     ctx.font = "12px IBM Plex Mono";
-    ctx.fillText(`m=${m}  τ=${tau.toFixed(2)}  q²=${q.toFixed(2)}`, Math.min(x + 14, w - 200), Math.max(y - 10, 36));
+    ctx.fillText(`m=${m}  τ=${tau.toFixed(2)}  q²=${q.toFixed(2)}`, Math.min(x + 14, w - 210), Math.max(y - 10, 36));
     ctx.fillStyle = "#8a93a3";
-    ctx.fillText("τ (signal) →", pad + plotW - 90, 24 + plotH + 26);
+    ctx.fillText("m pooled (log) →", pad + plotW - 120, 24 + plotH + 26);
     ctx.fillText("q²", 16, 32);
   }
 
@@ -505,12 +514,12 @@ function initLimitLab() {
     const m = parseInt(mRange.value, 10);
     const tau = tauOf(m);
     const q = qsqOf(tau);
-    const ok = m >= MSTAR; // τ > 1
+    const ok = q >= 0.5; // past half-recovery (tau >= 1, i.e. m >= m*)
     if (mVal) mVal.textContent = String(m);
     if (tauVal) tauVal.textContent = tau.toFixed(2);
     if (qVal) qVal.textContent = q.toFixed(2);
     if (verdict) {
-      verdict.textContent = ok ? "recoverable" : "unrecoverable";
+      verdict.textContent = ok ? "mostly recoverable" : "below resolution";
       verdict.style.color = ok ? "#0d5c4b" : "#c45c26";
     }
     draw(m);
@@ -693,7 +702,7 @@ function initPalette() {
     { id: "venues", label: "01b Venues — JF · EFA" },
     { id: "paper", label: "01c Paper map — claim tiers" },
     { id: "math", label: "02 Math — blind-spot lab" },
-    { id: "limit", label: "02b Limit — resolution wall (m* ≈ 1.3)" },
+    { id: "limit", label: "02b Limit — resolution limit (m* ≈ 1.3)" },
     { id: "results", label: "03 Results — panel inspector" },
     { id: "machine", label: "04 Machine population funnel" },
     { id: "factory", label: "05 AI factor factory" },
@@ -762,6 +771,9 @@ function initMeta() {
   const e = document.getElementById("email-link");
   if (g1) g1.href = CFG.github;
   if (g2) g2.href = CFG.github;
+  document.querySelectorAll(".ssrn-link, #ssrn-link").forEach((a) => {
+    a.href = CFG.ssrn;
+  });
   if (v) {
     v.href = CFG.video;
     if (CFG.video === "#") v.textContent = "Add YouTube link in app.js →";

@@ -438,6 +438,51 @@ nav a.active {
   color: var(--muted);
 }
 
+.hero-acts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.9rem;
+  margin-top: 1.6rem;
+}
+.act-card {
+  position: relative;
+  padding: 1rem 1.05rem 1.05rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(246,248,250,0.7), rgba(255,255,255,0.4));
+  overflow: hidden;
+}
+.act-card .act-no {
+  font-family: var(--display);
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--accent, #2e7d32);
+  letter-spacing: -0.03em;
+}
+.act-card h3 {
+  margin: 0.3rem 0 0.4rem;
+  font-size: 1.02rem;
+  letter-spacing: -0.01em;
+}
+.act-card p {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--muted);
+}
+.act-card .act-tag {
+  display: inline-block;
+  margin-top: 0.6rem;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent, #2e7d32);
+  opacity: 0.85;
+}
+@media (max-width: 760px) {
+  .hero-acts { grid-template-columns: 1fr; }
+}
+
 .hero-stage { margin-top: 2.2rem; position: relative; }
 #regime-canvas {
   width: 100%;
