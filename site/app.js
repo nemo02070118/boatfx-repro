@@ -89,6 +89,7 @@ const SAMPLE_FACTORS = [
 
 const CFG = {
   github: "https://github.com/nemo02070118/boatfx-repro",
+  repro: "https://github.com/nemo02070118/localstrength-repro",
   video: "https://youtu.be/tVHLUQy93rg",
   email: "mailto:huanian.jin@outlook.com",
   showcase: "https://github.com/nemo02070118/boatfx-repro/tree/main/system_showcase",
@@ -699,7 +700,7 @@ function initPalette() {
     { id: "terminal", label: "00 BOAT Terminal · multi-agent desk" },
     { id: "idea", label: "01 Idea — Global Weakness" },
     { id: "tour", label: "01a Argument tour" },
-    { id: "venues", label: "01b Venues — JF · EFA" },
+    { id: "venues", label: "01b Venues — JF · EFA · WFA · SFS · EU" },
     { id: "paper", label: "01c Paper map — claim tiers" },
     { id: "math", label: "02 Math — blind-spot lab" },
     { id: "limit", label: "02b Limit — resolution limit (m* ≈ 1.3)" },
@@ -773,6 +774,9 @@ function initMeta() {
   if (g2) g2.href = CFG.github;
   document.querySelectorAll(".ssrn-link, #ssrn-link").forEach((a) => {
     a.href = CFG.ssrn;
+  });
+  document.querySelectorAll(".repro-link").forEach((a) => {
+    a.href = CFG.repro;
   });
   if (v) {
     v.href = CFG.video;
@@ -1037,7 +1041,7 @@ function initWikiGallery() {
     img.src = "";
     document.body.style.overflow = "";
   }
-  document.querySelectorAll("#wiki-gallery img, #wiki-gallery .wiki-thumb, #hkex-gallery img, #hkex-gallery .wiki-thumb, #camp-gallery img, #camp-gallery .wiki-thumb, #term-gallery .term-fig").forEach((el) => {
+  document.querySelectorAll("#wiki-gallery img, #wiki-gallery .wiki-thumb, #hkex-gallery img, #hkex-gallery .wiki-thumb, #camp-gallery img, #camp-gallery .wiki-thumb, #term-gallery .term-fig, #venue-gallery .term-fig").forEach((el) => {
     el.addEventListener("click", (ev) => {
       ev.preventDefault();
       ev.stopPropagation();
@@ -1656,8 +1660,8 @@ function initAgencyLab() {
       zh: { title: "工作证据", body: "原创研究算数。公网作品集。python repro.py（60/60）。python reproduce_headline.py（~172 bps · IR ≈ 2）。system_showcase。SCALE.md。浙商推荐信。VIP 现场照片。视频：youtu.be/tVHLUQy93rg。" },
     },
     elig: {
-      en: { title: "Leave of absence · eligibility", body: "Academic leave from Shanghai Lixin University of Accounting and Finance. Academy-eligible: not more than one year of full-time college after high school by August 2027. International. Ready for San Francisco Founding Class (Sep 2027)." },
-      zh: { title: "休学 · 资格", body: "自上海立信会计金融学院休学。符合 Academy：截至 2027 年 8 月高中后全职大学未满一年。国际申请人。准备赴旧金山 Founding Class（2027 年 9 月）。" },
+      en: { title: "Leave of absence · eligibility", body: "On academic leave from university. Academy-eligible: not more than one year of full-time college after high school by August 2027. International. Ready for San Francisco Founding Class (Sep 2027)." },
+      zh: { title: "休学 · 资格", body: "大学休学中。符合 Academy：截至 2027 年 8 月高中后全职大学未满一年。国际申请人。准备赴旧金山 Founding Class（2027 年 9 月）。" },
     },
     why: {
       en: { title: "Why The Academy · why now", body: "Harder peers and external tests. SF for a year to push AI×quant screening science into a sharper product surface without abandoning falsification. Peers ship apps and robots — I bring a research system under JF external review plus field presence." },

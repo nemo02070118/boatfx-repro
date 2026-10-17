@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Huannian Jin — The Resolution Limit of Factor Discovery</title>
-  <meta name="description" content="The Resolution Limit of Factor Discovery: why the replication crisis is a measurement problem. A universal significance hurdle is a fixed-aperture instrument with a diffraction limit: q²(τ)=τ/(1+τ), half-recovery at m*≈1.3 factors. 94 discarded anomalies earn OOS Sharpe 0.85 where tested, 1.30 reallocated as a pool (+0.45, FF6 α 3.8%/yr t=8.3); a China A-share panel of 5,441 reproduces it (+0.95, p=0). Working paper, Oct 2026. AI factor factory · Zheshang systems · public repro." />
+  <title>Huannian Jin — Discarded but Alive: What Factor Screening Throws Away</title>
+  <meta name="description" content="Discarded but Alive: What Factor Screening Throws Away, and What It Cannot Recover. A significance hurdle read in one segment discards factors alive in another. Of 179 anomalies, the 94 a |t|<1.96 screen rejects in large caps earn out-of-sample Sharpe 0.85, but 1.30 reallocated as a group to their small-cap segment (+0.45, FF6 α 3.8%/yr t=8.3), reproduced out of sample in China (+0.95, p=0). The correction has a ceiling: q²(τ)=τ/(1+τ), half-recovery at m*≈1.3. Working paper on SSRN (abstract 7607684). AI factor factory · Zheshang systems · public repro." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
@@ -20,8 +20,8 @@
       } catch (e) {}
     })();
   </script>
-  <link rel="stylesheet" href="styles.css?term10" />
-  <link rel="stylesheet" href="viz.css?term10" />
+  <link rel="stylesheet" href="styles.css?term11" />
+  <link rel="stylesheet" href="viz.css?term11" />
 </head>
 <body>
   <div class="progress" id="progress" aria-hidden="true"></div>
@@ -99,7 +99,7 @@
         <a class="btn ghost" data-magnetic href="#idea" data-i18n="hero.cta1">Enter the argument</a>
         <a class="btn ghost" data-magnetic id="github-link" href="https://github.com/" target="_blank" rel="noopener" data-i18n="hero.cta.repro">Repro pack</a>
         <a class="btn ghost" data-magnetic id="ssrn-link" href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7607684" target="_blank" rel="noopener" data-i18n="hero.cta.ssrn">SSRN working paper</a>
-        <a class="btn ghost" data-magnetic href="#venues" data-i18n="hero.cta.venues">JF · EFA</a>
+        <a class="btn ghost" data-magnetic href="#venues" data-i18n="hero.cta.venues">JF · EFA · WFA</a>
         <a class="btn ghost" data-magnetic href="#letter" data-i18n="hero.cta.letter">Zheshang letter</a>
         <a class="btn ghost" data-magnetic href="#tour" data-i18n="hero.cta2">Argument tour</a>
         <a class="btn ghost" data-magnetic href="#agency" data-i18n="hero.cta3">Academy fit</a>
@@ -464,8 +464,8 @@
     <section id="venues" class="section reveal">
       <p class="section-kicker" data-i18n="venues.kicker">01b · Submission track</p>
       <h2 data-i18n="venues.title">Where the paper is in flight</h2>
-      <p class="section-lede"><span data-i18n="venues.lede">Not “published.” Not vapor. A dual academic track with honest status labels— the Academy cares about motion; journals care about priority and process.</span></p>
-      <p class="research-arc" data-i18n="venues.arc">Research arc: Global Weakness, Local Strength is the phenomenon and the deployable economics (at the Journal of Finance, external review). The Resolution Limit of Factor Discovery is the law that explains and bounds it — a working paper (Oct 2026 draft) with a fully public repro, companion to the JF submission. Acceptance is not claimed for either.</p>
+      <p class="section-lede"><span data-i18n="venues.lede">Not “published.” Not vapor. A multi-venue academic pipeline with honest status labels— the Academy cares about motion; journals care about priority and process.</span></p>
+      <p class="research-arc" data-i18n="venues.arc">Research arc: Global Weakness, Local Strength is the phenomenon and the deployable economics (at the Journal of Finance, external review). Discarded but Alive is the law that explains and bounds it — a working paper (Oct 2026 draft) with a fully public repro, companion to the JF submission. Acceptance is not claimed for either.</p>
       <div class="venue-grid">
         <article class="venue jf">
           <header>
@@ -483,13 +483,52 @@
         <article class="venue efa">
           <header>
             <span class="badge pending" data-i18n="venues.efa.badge">Submitted</span>
-            <h3>Eastern Finance Association</h3>
+            <h3>Eastern Finance Association <span class="venue-region">· US</span></h3>
           </header>
           <p class="venue-meta" data-i18n="venues.efa.meta">U.S. academic conference · EFA annual meeting track</p>
           <ul>
-            <li>Conference submission of the same research program</li>
-            <li>Signals: peer academic pipeline, not only a private notebook</li>
-            <li>Status updates as decisions arrive — no overclaiming acceptance</li>
+            <li data-i18n="venues.efa.l1">Conference submission of the same research program</li>
+            <li data-i18n="venues.efa.l2">Signals: peer academic pipeline, not only a private notebook</li>
+            <li data-i18n="venues.efa.l3">Status updates as decisions arrive — no overclaiming acceptance</li>
+          </ul>
+        </article>
+
+        <article class="venue wfa">
+          <header>
+            <span class="badge pending" data-i18n="venues.wfa.badge">Submitted</span>
+            <h3>Western Finance Association <span class="venue-region">· US</span></h3>
+          </header>
+          <p class="venue-meta" data-i18n="venues.wfa.meta">WFA 2027 · Indian Wells · submitted Oct 15, 2026</p>
+          <ul>
+            <li data-i18n="venues.wfa.l1">Top-tier US conference — same research, submitted as <em>Discarded but Alive</em></li>
+            <li data-i18n="venues.wfa.l2">Paper + fee on file; decision pending — acceptance not claimed</li>
+            <li data-i18n="venues.wfa.l3">Peer-reviewed pipeline, not a private notebook</li>
+          </ul>
+        </article>
+
+        <article class="venue sfs">
+          <header>
+            <span class="badge prep" data-i18n="venues.sfs.badge">Preparing</span>
+            <h3>SFS Cavalcade <span class="venue-region">· US</span></h3>
+          </header>
+          <p class="venue-meta" data-i18n="venues.sfs.meta">Society for Financial Studies · North America</p>
+          <ul>
+            <li data-i18n="venues.sfs.l1">Preparing submission of the same program</li>
+            <li data-i18n="venues.sfs.l2">Broadening the peer-review surface across top US conferences</li>
+            <li data-i18n="venues.sfs.l3">Status will update honestly as it is submitted</li>
+          </ul>
+        </article>
+
+        <article class="venue eufa">
+          <header>
+            <span class="badge prep" data-i18n="venues.eufa.badge">Preparing</span>
+            <h3>European Finance Association <span class="venue-region">· EU</span></h3>
+          </header>
+          <p class="venue-meta" data-i18n="venues.eufa.meta">EFA (Europe) annual meeting · distinct from Eastern FA (US)</p>
+          <ul>
+            <li data-i18n="venues.eufa.l1">Preparing submission for the European track</li>
+            <li data-i18n="venues.eufa.l2">Note: &ldquo;EFA&rdquo; here is <em>European</em>, not the US Eastern FA above</li>
+            <li data-i18n="venues.eufa.l3">No acceptance claimed — a submission pipeline across continents</li>
           </ul>
         </article>
         <article class="venue ssrn">
@@ -497,16 +536,31 @@
             <span class="badge pending" data-i18n="venues.ssrn.badge">Working paper</span>
             <h3>SSRN</h3>
           </header>
-          <p class="venue-meta" data-i18n="venues.ssrn.meta">The Resolution Limit of Factor Discovery · abstract 7607684 · ORCID 0009-0006-9124-9152</p>
+          <p class="venue-meta" data-i18n="venues.ssrn.meta">Discarded but Alive · abstract 7607684 · ORCID 0009-0006-9124-9152</p>
           <ul>
             <li data-i18n="venues.ssrn.l1">The resolution-limit law behind the deployable economics</li>
             <li data-i18n="venues.ssrn.l2">Three acts: the money · two mirages · tradable-rank one</li>
             <li data-i18n="venues.ssrn.l3">Every number regenerates from the public repro pack</li>
           </ul>
           <a class="venue-cta ssrn-link" href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7607684" target="_blank" rel="noopener" data-i18n="venues.ssrn.cta">Read on SSRN →</a>
+          <a class="venue-cta repro-link" href="https://github.com/nemo02070118/localstrength-repro" target="_blank" rel="noopener" data-i18n="venues.ssrn.repro">Reproduction pack →</a>
         </article>
       </div>
-      <p class="venue-note" data-i18n="venues.note">Both tracks are submissions. Acceptance is not claimed. The proof of work is the paper + repro pack + systems letter—not the journal logo.</p>
+      <div class="venue-evidence" id="venue-gallery">
+        <p class="venue-evidence-head" data-i18n="venues.evidence">Receipts — click to enlarge:</p>
+        <div class="venue-shots">
+          <button type="button" class="term-fig" data-full="assets/venues/wfa-submission.png">
+            <img src="assets/venues/wfa-submission.png" alt="Western Finance Association 2027 submission record: Discarded but Alive, Indian Wells, submitted Oct 15 2026" loading="lazy" />
+            <span data-i18n="venues.shot.wfa">WFA 2027 submission · Indian Wells</span>
+          </button>
+          <button type="button" class="term-fig" data-full="assets/venues/ssrn-page.png">
+            <img src="assets/venues/ssrn-page.png" alt="SSRN page for Discarded but Alive: What Factor Screening Throws Away, and What It Cannot Recover" loading="lazy" />
+            <span data-i18n="venues.shot.ssrn">SSRN working paper · abstract 7607684</span>
+          </button>
+        </div>
+      </div>
+
+      <p class="venue-note" data-i18n="venues.note">All tracks are submissions. Acceptance is not claimed. The proof of work is the paper + repro pack + systems letter—not the journal logo.</p>
     </section>
 
     <!-- PAPER LAB -->
@@ -1040,7 +1094,7 @@
             <li data-i18n="edge.a2c">Falsification excess 6.4× · claim tiers stated upfront</li>
             <li data-i18n="edge.a2d">Public repro · CI greens · walkthrough video</li>
             <li data-i18n="edge.a2e">Zheshang MD letter: sole task-system owner · 56 modules · 64k LoC · &gt;95%</li>
-            <li data-i18n="edge.a2f">Academic leave from Shanghai Lixin · still ≤1 year of college completed</li>
+            <li data-i18n="edge.a2f">On academic leave · still ≤1 year of college completed</li>
             <li data-i18n="edge.a2g">Killed own wrong regime layer when data said no</li>
           </ul>
         </article>
@@ -1421,7 +1475,7 @@
       <div class="agency-panel" id="agency-panel"></div>
 
       <div class="agency-foot">
-        <p><span data-i18n="agency.foot">I am on an academic leave of absence from Shanghai Lixin University of Accounting and Finance to pursue this research full-time. I remain within Academy eligibility: I have not completed more than one year of full-time college after high school (through August 2027). International applicant. Willing to live in San Francisco full-time.</span></p>
+        <p><span data-i18n="agency.foot">I am on an academic leave of absence from my university to pursue this research full-time. I remain within Academy eligibility: I have not completed more than one year of full-time college after high school (through August 2027). International applicant. Willing to live in San Francisco full-time.</span></p>
         <p class="note"><span data-i18n="agency.note">Essay and video are mine. AI helps me code and edit — not invent the story.</span></p>
       </div>
     </section>
@@ -1455,9 +1509,9 @@
     <button type="button" class="lightbox-close" id="lightbox-close" aria-label="Close">×</button>
     <img id="lightbox-img" alt="" />
   </div>
-  <script src="i18n.js?term10"></script>
-  <script src="app.js?term10"></script>
-  <script defer src="viz.js?term10"></script>
+  <script src="i18n.js?term11"></script>
+  <script src="app.js?term11"></script>
+  <script defer src="viz.js?term11"></script>
   <!-- Visit stats: country, referrer, path, browser. Register this exact code at goatcounter.com so the dashboard exists. -->
   <script data-goatcounter="https://nemo020701181.goatcounter.com/count" async src="gc-count.js?v=1"></script>
 </body>
