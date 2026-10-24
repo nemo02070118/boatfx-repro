@@ -102,16 +102,31 @@
       ln = ln.trim();
       if (!ln || ln.charAt(0) === "#") return;
       var parts = ln.split(/[,;\t]+/).filter(function (s) { return s.trim() !== ""; });
-      var val = null, name = "";
-      if (parts.length >= 2) {
-        val = parseFloat(parts[parts.length - 1]);
-        name = parts.slice(0, parts.length - 1).join(" ").trim();
-      } else {
-        var bits = ln.split(/\s+/);
-        val = parseFloat(bits[bits.length - 1]);
-        name = bits.slice(0, bits.length - 1).join(" ");
+      var val = null, name = "", pi = null;
+      if (parts.length >= 3) {
+        /* name, t, π — the optional third column is the share of the panel that
+           sits in this factor's own paying state. It overrides the slider for
+           this row, which is the honest way to describe a real library: every
+           factor has its own home venue, not one shared one. */
+        var lastN = parseFloat(parts[parts.length - 1]);
+        var prevN = parseFloat(parts[parts.length - 2]);
+        if (isFinite(lastN) && lastN > 0 && lastN <= 1 && isFinite(prevN)) {
+          pi = lastN;
+          val = prevN;
+          name = parts.slice(0, parts.length - 2).join(" ").trim();
+        }
       }
-      if (isFinite(val)) rows.push({ name: name || ("factor " + (rows.length + 1)), t: val });
+      if (val == null) {
+        if (parts.length >= 2) {
+          val = parseFloat(parts[parts.length - 1]);
+          name = parts.slice(0, parts.length - 1).join(" ").trim();
+        } else {
+          var bits = ln.split(/\s+/);
+          val = parseFloat(bits[bits.length - 1]);
+          name = bits.slice(0, bits.length - 1).join(" ");
+        }
+      }
+      if (isFinite(val)) rows.push({ name: name || ("factor " + (rows.length + 1)), t: val, pi: pi });
     });
     return rows;
   }
@@ -264,20 +279,20 @@
     var paneBatch = el("div", "bench-pane");
     paneBatch.dataset.pane = "batch";
     paneBatch.hidden = true;
-    var lb = el("label", "bench-label", t("One factor per line · name, t", "每行一个因子 · 名称, t"));
+    var lb = el("label", "bench-label", t("One factor per line · name, t  or  name, t, π", "每行一个因子 · 名称, t  或  名称, t, π"));
     lb.setAttribute("for", "bench-lib");
     paneBatch.appendChild(lb);
     libEl = el("textarea", "bench-textarea");
     libEl.id = "bench-lib";
     libEl.spellcheck = false;
-    libEl.placeholder = "reversal_5d, 2.71\nnet_quote_demand_rank, 3.04\nvolume_price_corr, 1.62";
+    libEl.placeholder = "reversal_5d, 2.71\nnet_quote_demand_rank, 3.04, 0.12\nvolume_price_corr, 1.62";
     paneBatch.appendChild(libEl);
     var row2 = el("div", "bench-row");
     var demoLib = el("button", "bench-btn", t("Load a demo library", "载入示例因子库"));
     demoLib.type = "button";
     demoLib.addEventListener("click", loadDemoLib);
     row2.appendChild(demoLib);
-    row2.appendChild(el("span", "bench-hint", t("12 synthetic factors · seeded", "12 个合成因子 · 固定种子")));
+    row2.appendChild(el("span", "bench-hint", t("12 synthetic factors · seeded · π on five of them", "12 个合成因子 · 固定种子 · 其中 5 个自带 π")));
     paneBatch.appendChild(row2);
     inp.appendChild(paneBatch);
 
@@ -320,6 +335,8 @@
 
     verdictEl = el("div", "bench-verdict");
     verdictEl.dataset.verdict = "miskill";
+    verdictEl.setAttribute("role", "status");
+    verdictEl.setAttribute("aria-live", "polite");
     verdictEl.innerHTML = '<span class="bv-k">' + t("verdict", "判决") + '</span><b>—</b><p></p>';
     outEl.appendChild(verdictEl);
 
@@ -405,8 +422,13 @@
     var names = ["reversal_5d", "net_quote_demand_rank", "volume_price_corr", "microprice_pressure",
       "idio_vol_60d", "turnover_shock", "amihud_illiq", "overnight_gap", "intraday_range",
       "beta_dispersion", "earnings_drift", "short_interest_delta"];
-    var lines = names.map(function (nm) {
-      return nm + ", " + (1.2 + u() * 2.6).toFixed(2);
+    /* five rows carry their own home-state share, to show the third column */
+    var homes = [0, 2, 4, 7, 10];
+    var lines = names.map(function (nm, i) {
+      var tv = (1.2 + u() * 2.6).toFixed(2);
+      if (homes.indexOf(i) < 0) return nm + ", " + tv;
+      var p = (0.04 + u() * 0.30).toFixed(2);
+      return nm + ", " + tv + ", " + p;
     });
     libEl.value = lines.join("\n");
     run();
@@ -479,15 +501,34 @@
   function runBatch(pi, N, discovery) {
     var rows = parseLibrary(libEl.value);
     if (!rows.length) return paintEmpty(t("Paste one factor per line: name, t.", "每行粘贴一个因子：名称, t。"));
-    var pass = 0, mis = 0, weak = 0, misList = [];
+
+    var pass = 0, mis = 0, weak = 0, misList = [], withPi = 0, sum = 0, best = 0;
     rows.forEach(function (r) {
-      var v = verdictOf(Math.abs(r.t), pi);
+      var p = r.pi != null ? r.pi : pi;
+      if (r.pi != null) withPi++;
+      r.used = p;
+      var at = Math.abs(r.t);
+      sum += at;
+      if (at > best) best = at;
+      var v = verdictOf(at, p);
       if (v.key === "pass") pass++;
       else if (v.key === "miskill") { mis++; misList.push(r); }
       else weak++;
     });
+
     var total = rows.length;
+    var mean = sum / total;
+    var pooled = mean * Math.sqrt(total);
+    var misMean = 0, pooledMis = 0;
+    misList.forEach(function (r) { misMean += Math.abs(r.t); });
+    if (misList.length) {
+      misMean /= misList.length;
+      pooledMis = misMean * Math.sqrt(misList.length);
+    }
     var w = function (x) { return (x / total) * 100; };
+    var piLabel = withPi
+      ? t("each row's own π (slider " + f(pi, 2) + " for the rest)", "每行自带的 π（其余用滑块 " + f(pi, 2) + "）")
+      : "π = " + f(pi, 2);
 
     verdictEl.dataset.verdict = mis >= total * 0.5 ? "miskill" : (pass >= total * 0.5 ? "pass" : "weak");
     verdictEl.querySelector("b").textContent = t(
@@ -495,23 +536,53 @@
       total + " 个里有 " + mis + " 个会被误杀"
     );
     verdictEl.querySelector("p").textContent = t(
-      "At π = " + f(pi, 2) + ", the screen keeps " + pass + " and discards " + mis + " factors that clear the allocation hurdle inside their own state.",
-      "在 π = " + f(pi, 2) + " 下，筛选留下 " + pass + " 个，丢掉 " + mis + " 个在自身状态里已过配置门槛的因子。"
+      "At " + piLabel + ", the screen keeps " + pass + " and discards " + mis + " that clear the allocation hurdle inside their own state.",
+      "在" + piLabel + "下，筛选留下 " + pass + " 个，丢掉 " + mis + " 个在自身状态里已过配置门槛的因子。"
     );
 
-    readEl.innerHTML = [
-      [t("factors in the library", "因子库规模"), String(total)],
-      [t("pass the screen", "通过筛选"), pass + "  (" + f(w(pass), 1) + "%)"],
-      [t("mis-killed", "被误杀"), mis + "  (" + f(w(mis), 1) + "%)"],
-      [t("below allocation hurdle", "低于配置门槛"), weak + "  (" + f(w(weak), 1) + "%)"],
-      [t("discovery hurdle", "发现门槛"), f(discovery, 2) + "  (N=" + N.toLocaleString("en-US") + ")"]
-    ].map(function (r) {
-      return '<div><dt>' + r[0] + '</dt><dd>' + r[1] + '</dd></div>';
+    var read = [
+      [t("factors in the library", "因子库规模"), String(total), ""]
+    ];
+    if (withPi) {
+      read.push([t("rows carrying their own π", "自带 π 的行"), withPi + " / " + total, ""]);
+    }
+    read.push(
+      [t("pass the screen", "通过筛选"), pass + "  (" + f(w(pass), 1) + "%)", ""],
+      [t("mis-killed", "被误杀"), mis + "  (" + f(w(mis), 1) + "%)", "hot"],
+      [t("below allocation hurdle", "低于配置门槛"), weak + "  (" + f(w(weak), 1) + "%)", ""],
+      [t("discovery hurdle", "发现门槛"), f(discovery, 2) + "  (N=" + N.toLocaleString("en-US") + ")", ""]
+    );
+    readEl.innerHTML = read.map(function (r) {
+      return '<div><dt>' + r[0] + '</dt><dd class="' + r[2] + '">' + r[1] + '</dd></div>';
     }).join("");
 
     curveWrap.hidden = true;
     batchWrap.hidden = false;
     misList.sort(function (a, b) { return Math.abs(b.t) - Math.abs(a.t); });
+
+    var clears = pooled >= ALLOC;
+    var pool =
+      '<div class="bench-pool">' +
+      '<p class="bp-head">' + t("pooling · equal weight, independent (Stouffer)", "合并 · 等权、独立（Stouffer）") + '</p>' +
+      '<div class="bp-grid">' +
+      '<div><span>n</span><b>' + total + '</b></div>' +
+      '<div><span>' + t("mean |t|", "平均 |t|") + '</span><b>' + f(mean, 2) + '</b></div>' +
+      '<div><span>' + t("best |t|", "最大 |t|") + '</span><b>' + f(best, 2) + '</b></div>' +
+      '<div class="bp-key"><span>' + t("pooled t = mean · √n", "合并 t = 均值 · √n") + '</span><b class="' + (clears ? "ok" : "hot") + '">' + f(pooled, 2) + '</b></div>' +
+      '</div>' +
+      '<p class="bp-note">' + (clears
+        ? t("Not one of these rows has to clear 1.96 for the group to clear 2.38. That is the paper's entire move — the √n in the pooling, not any single factor.",
+          "这些行里没有一行需要过 1.96，整组就能过 2.38。这就是论文的全部动作——力量来自合并里的 √n，而不是任何单个因子。")
+        : t("The group does not clear 2.38 either. Pooling buys √n, and √n is not free money.",
+          "整组也没过 2.38。合并买来的是 √n，而 √n 不是白送的钱。")) +
+      (misList.length
+        ? t(" Mis-killed subset alone pools to " + f(pooledMis, 2) + ".", " 仅被误杀的那 " + misList.length + " 个合并为 " + f(pooledMis, 2) + "。")
+        : "") +
+      '</p>' +
+      '<p class="bp-caveat">' + t("assumes independent tests; correlation lowers it — which is why the paper reports GRS F = 51 rather than a pooled t.",
+        "假设检验相互独立；相关性会拉低它——所以论文报的是 GRS F = 51，而不是一个合并 t。") + '</p>' +
+      '</div>';
+
     batchWrap.innerHTML =
       '<div class="bench-batch-bar">' +
       '<i class="s-pass" style="width:' + w(pass) + '%"></i>' +
@@ -523,12 +594,19 @@
       '<span><b>' + mis + '</b> ' + t("mis-killed", "被误杀") + '</span>' +
       '<span><b>' + weak + '</b> ' + t("weak", "偏弱") + '</span>' +
       '</div>' +
+      pool +
       (misList.length
         ? '<div class="bench-list">' + misList.slice(0, 40).map(function (r) {
-          return '<div><span>' + escapeHtml(r.name) + '</span><span>t ' + f(Math.abs(r.t), 2) + ' → ' + f(Math.abs(r.t) * Math.sqrt(pi), 2) + '</span></div>';
+          return '<div><span>' + escapeHtml(r.name) + '</span><span>t ' + f(Math.abs(r.t), 2) +
+            ' · π ' + f(r.used, 2) + ' → ' + f(Math.abs(r.t) * Math.sqrt(r.used), 2) + '</span></div>';
         }).join("") + '</div>'
         : '<div class="bench-empty">' + t("Nothing is being mis-killed at this π.", "在这个 π 下没有因子被误杀。") + '</div>');
-    last = { batch: true, total: total, pass: pass, mis: mis, weak: weak, pi: pi, N: N };
+
+    last = {
+      batch: true, total: total, pass: pass, mis: mis, weak: weak, pi: pi, N: N,
+      withPi: withPi, mean: mean, best: best, pooled: pooled, pooledMis: pooledMis,
+      rows: rows
+    };
   }
 
   function paintEmpty(msg) {
@@ -555,10 +633,13 @@
       lines = [
         "BOAT autopsy bench — factor library",
         "factors: " + last.total + " · pass " + last.pass + " · mis-killed " + last.mis + " · weak " + last.weak,
-        "π = " + f(last.pi, 2) + " · N = " + last.N,
+        "π: " + (last.withPi ? last.withPi + " rows carry their own, slider " + f(last.pi, 2) + " for the rest" : f(last.pi, 2)) + " · N = " + last.N,
+        "pooled t = mean|t| · √n = " + f(last.mean, 2) + " · √" + last.total + " = " + f(last.pooled, 2) +
+          " (allocation hurdle " + f(ALLOC, 2) + ")",
+        last.mis ? "mis-killed subset pools to " + f(last.pooledMis, 2) : "",
         "identity: t_global = t_state · √π · gates 1.96 / 2.38 / √(2 ln N)",
         "source: Proposition 2, Discarded but Alive (SSRN 7607684)"
-      ];
+      ].filter(Boolean);
     } else {
       lines = [
         "BOAT autopsy bench",
@@ -601,7 +682,7 @@
     root.querySelectorAll(".bench-label")[0].textContent = t("Daily returns · comma, space or newline separated", "日收益 · 逗号 / 空格 / 换行分隔");
     root.querySelectorAll(".bench-label")[1].textContent = t("t-stat inside the paying state", "兑现状态内的 t 值");
     root.querySelectorAll(".bench-label")[2].textContent = t("Observations (optional)", "观测数（可选）");
-    root.querySelectorAll(".bench-label")[3].textContent = t("One factor per line · name, t", "每行一个因子 · 名称, t");
+    root.querySelectorAll(".bench-label")[3].textContent = t("One factor per line · name, t  or  name, t, π", "每行一个因子 · 名称, t  或  名称, t, π");
     var ctlHeads = root.querySelectorAll(".bench-ctl-head span");
     if (ctlHeads[0]) ctlHeads[0].textContent = t("π · share of the panel in the paying state", "π · 兑现状态占面板的比例");
     if (ctlHeads[1]) ctlHeads[1].textContent = t("N · candidates screened alongside it", "N · 与它一起被筛的候选数");
@@ -613,19 +694,38 @@
   }
 
   /* ---------------------------------------------------------------- init */
+  function currentStats() {
+    if (!last) return null;
+    if (last.batch) {
+      return {
+        source: "library", n: last.total, mean: last.mean, best: last.best,
+        pooledT: last.pooled, pooledMis: last.pooledMis, mis: last.mis,
+        pass: last.pass, weak: last.weak, pi: last.pi, N: last.N, withPi: last.withPi,
+        rows: last.rows
+      };
+    }
+    return {
+      source: last.n ? "series" : "stat", n: last.n || 1, mean: last.tState,
+      best: last.tState, pooledT: last.tState, pi: last.pi, N: last.N
+    };
+  }
+
   function init() {
     build();
-    var focusApi = {
-      focus: function () {
+    var api = {
+      focus: function (m) {
         if (!root) return;
         root.scrollIntoView({ behavior: "smooth", block: "start" });
         setTimeout(function () {
-          setMode("series");
-          if (seriesEl) seriesEl.focus({ preventScroll: true });
+          setMode(m === "batch" || m === "stat" ? m : "series");
+          var node = m === "batch" ? libEl : (m === "stat" ? statTEl : seriesEl);
+          if (node) node.focus({ preventScroll: true });
         }, 520);
-      }
+      },
+      stats: currentStats,
+      verdict: function () { return last; }
     };
-    window.HJ_BENCH = focusApi;
+    window.HJ_BENCH = api;
   }
 
   if (document.readyState === "loading") {

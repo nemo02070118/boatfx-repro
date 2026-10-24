@@ -116,6 +116,13 @@ html { overflow-x: clip; }
 .term-line.warn { color: #e0894f; }
 .term-line.dim { color: #7f8a99; }
 .term-line.head { color: #e8eef4; font-weight: 600; }
+.term-line a.term-link {
+  color: #9ecbff;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+.term-line a.term-link:hover { color: #cfe4ff; }
 .term-line.gap { height: 0.55rem; }
 .term-form {
   display: flex;
@@ -163,12 +170,28 @@ html { overflow-x: clip; }
 }
 .term-chips button:hover { background: rgba(158, 203, 255, 0.16); }
 .term-foot {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
   padding: 0 1.15rem 0.75rem;
   font-family: var(--mono);
   font-size: 0.66rem;
   color: #5c6675;
   background: #0a1018;
 }
+.term-foot .tf-share {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 0.64rem;
+  color: #9ecbff;
+  background: transparent;
+  border: 1px solid rgba(158, 203, 255, 0.28);
+  padding: 0.16rem 0.45rem;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.term-foot .tf-share:hover { background: rgba(158, 203, 255, 0.14); border-color: rgba(158, 203, 255, 0.55); }
 .term-foot kbd {
   font-family: var(--mono);
   border: 1px solid #2a333f;

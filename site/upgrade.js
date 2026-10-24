@@ -78,6 +78,32 @@
     var r = Math.sqrt(-2 * Math.log(u() || 1e-12));
     return r * Math.cos(2 * Math.PI * u());
   }
+  /* one-sample t of a vector — the estimator §04b runs on visitor data */
+  function tstat(xs) {
+    var n = xs.length, i, s = 0;
+    if (n < 2) return 0;
+    for (i = 0; i < n; i++) s += xs[i];
+    var m = s / n, v = 0;
+    for (i = 0; i < n; i++) { var d = xs[i] - m; v += d * d; }
+    var sd = Math.sqrt(v / (n - 1));
+    return sd > 0 ? m / (sd / Math.sqrt(n)) : 0;
+  }
+  function copyText(txt, done) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(function () { done(true); }, function () { done(false); });
+      return;
+    }
+    var ta = document.createElement("textarea");
+    ta.value = txt;
+    ta.style.position = "fixed";
+    ta.style.top = "-1000px";
+    document.body.appendChild(ta);
+    ta.select();
+    var ok = false;
+    try { ok = document.execCommand("copy"); } catch (e) {}
+    document.body.removeChild(ta);
+    done(ok);
+  }
 
   /* ------------------------------------------------------------ 1. ribbon */
   function buildGate() {
@@ -106,6 +132,7 @@
   var CMD = {};      /* name -> {desc, run} */
   var HISTORY = [];
   var CMD_COUNT = 0;
+  var REPLAY = [];   /* commands carried in on ?run=… */
   var outEl, inEl, shellEl, chipsEl;
 
   function line(text, cls) {
@@ -126,13 +153,15 @@
   var USAGE = {
     q2: "q2 1.29     |     q2 --m 94",
     diagnose: "diagnose --t 2.40 --pi 0.25",
-    resurrect: "resurrect 3",
+    resurrect: "resurrect 3     |     resurrect --compare 12",
     curse: "curse --n 500 --seed 42",
     tournament: "tournament --leak",
     zoo: "zoo 6960",
+    autopsy: "autopsy     |     autopsy lib",
     open: "open math",
     lang: "lang zh",
     theme: "theme light",
+    cite: "cite --bibtex",
     help: "help diagnose"
   };
 
@@ -156,9 +185,10 @@
         gap();
         var groups = [
           [t("NAVIGATE", "导航"), ["help", "open", "paper", "ls", "lang", "theme", "clear"]],
-          [t("THE PAPER", "论文"), ["prove", "stats", "q2", "diagnose", "resurrect", "curse", "tournament", "zoo", "compare"]],
+          [t("THE PAPER", "论文"), ["prove", "stats", "q2", "diagnose", "resurrect", "curse", "tournament", "zoo", "compare", "cite"]],
           [t("YOUR OWN FACTOR", "你自己的因子"), ["autopsy"]],
-          [t("ABOUT", "关于"), ["apply", "whoami", "honest", "cite", "contact", "factor"]]
+          [t("CHECK ME", "验算我"), ["selftest", "share"]],
+          [t("ABOUT", "关于"), ["apply", "whoami", "honest", "contact", "factor"]]
         ];
         groups.forEach(function (g) {
           line(g[0], "ok");
@@ -259,8 +289,9 @@
 
     /* --- resurrect */
     CMD.resurrect = {
-      desc: t("sample a discarded factor", "抽样一个被丢弃的因子"),
+      desc: t("sample a discard · --compare pools a library", "抽样被丢弃的因子 · --compare 合并因子库"),
       run: function (a) {
+        if (a.indexOf("--compare") >= 0) { poolCompare(a); return; }
         var n = parseInt(a[0], 10);
         if (!(n > 0)) n = 1;
         n = Math.min(n, 5);
@@ -374,11 +405,18 @@
 
     /* --- autopsy */
     CMD.autopsy = {
-      desc: t("open the bench and test your own factor", "打开解剖台，测你自己的因子"),
-      run: function () {
+      desc: t("open the bench on your own factor", "打开解剖台，测你自己的因子"),
+      run: function (a) {
+        var m = (a[0] || "").toLowerCase();
+        var mode = (m === "lib" || m === "library" || m === "batch") ? "batch"
+          : (m === "t" || m === "stat") ? "stat" : "series";
         if (window.HJ_BENCH && window.HJ_BENCH.focus) {
-          line(t("opening 04b · Autopsy bench — paste a series, a t-stat, or a library", "正在打开 04b · 误杀解剖台——粘贴序列、t 值或因子库"), "ok");
-          window.HJ_BENCH.focus();
+          line(mode === "batch"
+            ? t("opening 04b · Autopsy bench — paste your library, one factor per line", "正在打开 04b · 误杀解剖台——粘贴你的因子库，每行一个")
+            : mode === "stat"
+              ? t("opening 04b · Autopsy bench — type the t-stat you already have", "正在打开 04b · 误杀解剖台——直接输入你已有的 t 值")
+              : t("opening 04b · Autopsy bench — paste a return series", "正在打开 04b · 误杀解剖台——粘贴一段收益序列"), "ok");
+          window.HJ_BENCH.focus(mode);
         } else {
           line("bench not loaded", "warn");
         }
@@ -484,13 +522,36 @@
     /* --- cite */
     CMD.cite = {
       desc: t("how to cite the paper", "如何引用这篇论文"),
-      run: function () {
+      run: function (a) {
+        if (a && a[0] === "--bibtex") {
+          var bib = [
+            "@techreport{jin2026discarded,",
+            "  author      = {Jin, Huannian},",
+            "  title       = {Discarded but Alive: What Factor Screening Throws Away,",
+            "                 and What It Cannot Recover},",
+            "  year        = {2026},",
+            "  month       = {October},",
+            "  type        = {SSRN Working Paper},",
+            "  number      = {7607684},",
+            "  note        = {JF MS 2026-0738; EFA submitted}"
+          ].join("\n");
+          line("bibtex · select and copy", "head");
+          gap();
+          bib.split("\n").forEach(function (s) { line(s); });
+          gap();
+          copyText(bib, function (ok) {
+            line(ok ? t("  copied to clipboard", "  已复制到剪贴板") : t("  select the block above and copy it", "  选中上面整段复制"), ok ? "ok" : "dim");
+          });
+          return;
+        }
         line("Jin, H. (2026). Discarded but Alive: What Factor Screening Throws Away,", "head");
         line("and What It Cannot Recover. Working paper, Oct 2026. SSRN 7607684.", "head");
         gap();
         line("  JF manuscript   MS 2026-0738 · external review");
         line("  venues          EFA submitted · WFA · SFS");
         line("  repro           github.com/nemo02070118/boatfx-repro");
+        gap();
+        line("  cite --bibtex   for the entry, already formatted", "dim");
       }
     };
 
@@ -513,6 +574,80 @@
         line("  github    github.com/nemo02070118/boatfx-repro");
         line("  ssrn      papers.ssrn.com/sol3/papers.cfm?abstract_id=7607684");
         line("  video     youtu.be/tVHLUQy93rg");
+      }
+    };
+
+    /* --- selftest / share */
+    CMD.selftest = {
+      desc: t("re-derive this site's own thresholds", "重新推导本站自己的阈值"),
+      run: function () {
+        var q2m = function (m) { var tau = m / 1.29; return tau / (1 + tau); };
+        var rows = [], fails = 0;
+        function ck(label, got, want, tol) {
+          var good = isFinite(got) && Math.abs(got - want) <= tol;
+          if (!good) fails++;
+          rows.push([label, got, want, good]);
+        }
+        /* the two anchors of the resolution law must agree with each other */
+        ck("q² at m* = 1.29", q2m(1.29), 0.500, 5e-3);
+        ck("q² at pooled m = 94", q2m(94), 0.986, 5e-3);
+        /* the two hurdles printed in §04 */
+        ck("√(2 ln 17) alloc", Math.sqrt(2 * Math.log(17)), 2.380, 5e-3);
+        ck("√(2 ln 6960) discovery", Math.sqrt(2 * Math.log(6960)), 4.207, 5e-3);
+        /* Proposition 2, on the example the quickstart prints */
+        ck("2.40 · √0.25 dilution", 2.40 * Math.sqrt(0.25), 1.200, 5e-3);
+        /* the curse: expected max |t| of 200 coin flips */
+        ck("Φ⁻¹(1 − 1/400) curse", invNorm(1 - 1 / 400), 2.807, 5e-3);
+        /* the estimator §04b runs on visitor data, on a series anyone can check */
+        ck("t of 1,2,3,4,5", tstat([1, 2, 3, 4, 5]), 4.243, 2e-3);
+
+        line("selftest · " + rows.length + " checks · every one computed in this tab", "head");
+        gap();
+        rows.forEach(function (r) {
+          line("  " + (r[3] ? "✓" : "✗") + " " + pad(r[0], 24) + pad(fmt(r[1], 4), 9) + "= " + fmt(r[2], 3),
+            r[3] ? "" : "warn");
+        });
+        gap();
+        if (fails) {
+          line(fails + " failed — that is a bug, and I would like to know about it.", "warn");
+        } else {
+          line("all " + rows.length + " passed · 0 failed", "ok");
+          line(t("  the thresholds are the ones printed in §04; the estimator is the one §04b runs on your data.",
+            "  阈值就是 §04 上印的那些；估计量就是 §04b 在你数据上跑的那个。"), "dim");
+        }
+      }
+    };
+
+    CMD.share = {
+      desc: t("turn this run into a link anyone can replay", "把这次运行变成任何人可回放的链接"),
+      run: function () {
+        var cmds = HISTORY.filter(function (c) {
+          var n = c.split(/\s+/)[0].toLowerCase();
+          return CMD[n] && n !== "clear" && n !== "share";
+        }).slice(-8);
+        if (!cmds.length) {
+          line(t("nothing to share yet — run a command first, then `share`", "还没有可分享的——先跑一条命令，再输入 `share`"), "warn");
+          return;
+        }
+        var url = location.origin + location.pathname + "?run=" +
+          cmds.map(function (c) { return encodeURIComponent(c.slice(0, 60)); }).join("|");
+        line("shared run · " + cmds.length + " command" + (cmds.length === 1 ? "" : "s") + " · no server involved", "head");
+        gap();
+        var urlLine = line(url, "cmd");
+        if (urlLine) {
+          urlLine.textContent = "";
+          var a = el("a", "term-link", url);
+          a.href = url;
+          a.rel = "noopener";
+          urlLine.appendChild(a);
+        }
+        gap();
+        line(t("  whoever opens it gets the same commands replayed in their own tab, on their own machine.",
+          "  打开的人会在自己的浏览器里看到同样的命令被回放。"), "dim");
+        copyText(url, function (ok) {
+          line(ok ? t("  copied to clipboard", "  已复制到剪贴板")
+            : t("  select the line above and copy it", "  选中上面那行复制"), ok ? "ok" : "warn");
+        });
       }
     };
 
@@ -576,6 +711,62 @@
     };
   }
 
+  /* `resurrect --compare` — the pooling arithmetic, on the visitor's library if
+     they have one on the bench, otherwise on a seeded draw. Equal weight,
+     independent tests: pooled t = mean |t| · √n (Stouffer). */
+  function poolCompare(args) {
+    var nArg = 12, i;
+    for (i = 0; i < args.length; i++) {
+      if (args[i] === "--compare" && args[i + 1] && isFinite(parseFloat(args[i + 1]))) {
+        nArg = parseInt(args[i + 1], 10);
+      }
+    }
+    var ts = [], src, bs = window.HJ_BENCH && window.HJ_BENCH.stats ? window.HJ_BENCH.stats() : null;
+    if (bs && bs.source === "library" && bs.rows && bs.rows.length >= 2) {
+      ts = bs.rows.map(function (r) { return Math.abs(r.t); });
+      src = t("§04b library · " + ts.length + " rows", "§04b 因子库 · " + ts.length + " 行");
+    } else {
+      var n = Math.min(Math.max(nArg, 2), 94);
+      var u = rng(20261105);
+      for (i = 0; i < n; i++) ts.push(u() * 1.96);
+      src = t("synthetic draw · U(0, 1.96) · seed 20261105 · paste a library on the bench for your own",
+        "合成抽样 · U(0, 1.96) · 种子 20261105 · 在解剖台粘贴因子库可换成你自己的");
+    }
+    var n2 = ts.length, s = 0, best = 0, pass = 0, alloc = 0;
+    for (i = 0; i < n2; i++) {
+      s += ts[i];
+      if (ts[i] > best) best = ts[i];
+      if (ts[i] >= 1.96) pass++;
+      if (ts[i] >= 2.3803) alloc++;
+    }
+    var mean = s / n2, pooled = mean * Math.sqrt(n2), clears = pooled >= 2.3803;
+
+    line("pooling arithmetic · n = " + n2 + " · equal weight, independent (Stouffer)", "head");
+    gap();
+    line("  source                     " + src, "dim");
+    line("  mean |t|                   " + fmt(mean, 2));
+    line("  best |t|                   " + fmt(best, 2));
+    line("  clear the 1.96 screen      " + pass + " of " + n2);
+    line("  clear the 2.38 allocation  " + alloc + " of " + n2);
+    gap();
+    line("  pooled t = mean · √n       " + fmt(mean, 2) + " × " + fmt(Math.sqrt(n2), 2) + " = " + fmt(pooled, 2),
+      clears ? "ok" : "warn");
+    line("  allocation hurdle          " + fmt(2.3803, 2), "dim");
+    gap();
+    if (clears && alloc < n2) {
+      line("  VERDICT  the group clears the hurdle that the members do not.", "ok");
+      line("           one WHERE decision on the pool, not one per factor.");
+    } else if (clears) {
+      line("  VERDICT  the group clears it — and so do some members individually.", "ok");
+    } else {
+      line("  VERDICT  the group does not clear it either. Pooling buys √n, and √n", "warn");
+      line("           is not free money.", "warn");
+    }
+    gap();
+    line("  assumes independent tests; correlation lowers the pooled t, which is why the", "dim");
+    line("  paper reports GRS F = 51 for the correlated version instead of a pooled t.", "dim");
+  }
+
   function runCommand(raw) {
     var text = String(raw || "").trim();
     if (!text) return;
@@ -601,6 +792,20 @@
     } catch (e) {
       line("error: " + (e && e.message ? e.message : "command failed"), "warn");
     }
+  }
+
+  /* ?run=cmd|cmd|… — a shared run. Only known commands survive, so a link can
+     never inject anything that is not already part of this console. */
+  function parseRun() {
+    var m = /[?&]run=([^&#]*)/.exec(location.search || "");
+    if (!m) return [];
+    var raw = "";
+    try { raw = decodeURIComponent(m[1]); } catch (e) { return []; }
+    return raw.split("|").map(function (s) { return s.trim(); }).filter(function (s) {
+      if (!s) return false;
+      var n = s.split(/\s+/)[0].toLowerCase();
+      return CMD[n] && n !== "clear" && n !== "share";
+    }).slice(0, 12);
   }
 
   function bootConsole() {
@@ -661,10 +866,18 @@
     shellEl.appendChild(chipsEl);
 
     var foot = el("div", "term-foot");
-    foot.innerHTML = t(
+    var ftxt = el("span", "tf-text", t(
       "↑ history · Tab completes · Esc clears · every number is computed here or quoted from the paper",
       "↑ 历史 · Tab 补全 · Esc 清空 · 所有数字在此计算或引自论文"
-    );
+    ));
+    foot.appendChild(ftxt);
+    var shareBtn = el("button", "tf-share", t("share this run ↗", "分享这次运行 ↗"));
+    shareBtn.type = "button";
+    shareBtn.addEventListener("click", function () {
+      runCommand("share");
+      inEl.focus({ preventScroll: true });
+    });
+    foot.appendChild(shareBtn);
     shellEl.appendChild(foot);
 
     block.appendChild(shellEl);
@@ -729,6 +942,7 @@
         setTimeout(function () { line(b[0], b[1]); }, 90 + i * 120);
       });
       setTimeout(function () {
+        if (REPLAY.length) { replayRun(); return; }
         if (HISTORY.length) return;
         gap();
         line(t("most useful first", "最常用的先来"), "ok");
@@ -738,7 +952,47 @@
         line("  " + pad("help", 32) + t("full command list", "全部命令"));
       }, 380);
     }
-    if ("IntersectionObserver" in window) {
+
+    function replayRun() {
+      gap();
+      line(t("shared run · " + REPLAY.length + " commands · replayed in this tab",
+        "分享的运行 · " + REPLAY.length + " 条命令 · 在本页回放"), "ok");
+      line(t("  nothing is fetched — every number is recomputed on your machine",
+        "  没有请求任何数据——每个数字都在你的机器上重新算出来"), "dim");
+      REPLAY.forEach(function (c, i) {
+        setTimeout(function () {
+          if (HISTORY.indexOf(c) < 0) HISTORY.push(c);
+          HIST_AT = HISTORY.length;
+          runCommand(c);
+        }, 240 + i * 300);
+      });
+    }
+
+    if (REPLAY.length) {
+      /* a shared link is a request to watch: start at once, and bring the block
+         into view only if it is not already on screen. Instant, not smooth —
+         the run is already printing and a glide just delays it. */
+      boot();
+      /* the page is still growing (lazy vizzes, images), so a single scroll can
+         clamp to a short document. Retry a few times, and stop the moment the
+         block is actually on screen. */
+      var tries = 0;
+      function ensureVisible() {
+        var r = block.getBoundingClientRect();
+        if (r.top >= 0 && r.bottom <= window.innerHeight) return;
+        var y = (window.pageYOffset || document.documentElement.scrollTop || 0) + r.top -
+          Math.max(0, (window.innerHeight - block.offsetHeight) / 2);
+        /* styles.css sets html{scroll-behavior:smooth}; override it for this one
+           jump, otherwise the call animates and reads back a stale position */
+        var root = document.documentElement;
+        var prev = root.style.scrollBehavior;
+        root.style.scrollBehavior = "auto";
+        window.scrollTo(0, Math.max(0, y));
+        root.style.scrollBehavior = prev;
+        if (++tries < 4) setTimeout(ensureVisible, 500 + tries * 250);
+      }
+      setTimeout(ensureVisible, 650);
+    } else if ("IntersectionObserver" in window) {
       var io = new IntersectionObserver(function (es) {
         if (es[0].isIntersecting) { boot(); io.disconnect(); }
       }, { threshold: 0.25 });
@@ -847,6 +1101,14 @@
         "休学中，截至 2027-08 大学未满一年，国际申请者，可全职赴 SF。JF 外审中，EFA 已投，终端每日在用。"),
       metric: t("§08 Academy fit · eligibility tab", "§08 Academy 契合 · 资格标签"),
       jump: "agency"
+    },
+    {
+      k: t("09 · the receipt", "09 · 收据"),
+      title: t("Don't take the numbers on faith", "这些数字不必信我"),
+      body: t("Every figure above has a command behind it. `selftest` re-derives the thresholds, `prove` walks the headline, `share` turns your own run into a link. The site is the receipt.",
+        "上面每个数字背后都有一条命令。`selftest` 重新推导阈值，`prove` 走一遍头条，`share` 把你的运行变成一条链接。站点本身就是收据。"),
+      metric: t("§07 console · type selftest", "§07 控制台 · 输入 selftest"),
+      jump: "proof"
     }
   ];
 
@@ -966,14 +1228,17 @@
     if (ba) ba.textContent = t("Open live console →", "打开实时控制台 →");
     var fi = document.getElementById("term-in");
     if (fi) fi.setAttribute("aria-label", t("Terminal input — type help", "终端输入 — 输入 help"));
-    var ft = document.querySelector(".term-foot");
+    var ft = document.querySelector(".term-foot .tf-text");
     if (ft) ft.textContent = t("↑ history · Tab completes · Esc clears · every number is computed here or quoted from the paper", "↑ 历史 · Tab 补全 · Esc 清空 · 所有数字在此计算或引自论文");
+    var fs = document.querySelector(".term-foot .tf-share");
+    if (fs) fs.textContent = t("share this run ↗", "分享这次运行 ↗");
     if (modal && !modal.hidden) paintPath();
   }
 
   /* ------------------------------------------------------------------ init */
   function init() {
     registerConsole();
+    REPLAY = parseRun();
     buildGate();
     bootConsole();
     buildBridge();
