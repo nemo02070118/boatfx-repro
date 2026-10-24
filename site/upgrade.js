@@ -105,6 +105,7 @@
   /* ------------------------------------------------------ 2. the console */
   var CMD = {};      /* name -> {desc, run} */
   var HISTORY = [];
+  var CMD_COUNT = 0;
   var outEl, inEl, shellEl, chipsEl;
 
   function line(text, cls) {
@@ -122,31 +123,54 @@
     "limit", "results", "machine", "factory", "letter", "edge", "fusion", "craft",
     "scale", "proof", "field", "hkex", "camp", "stack", "agency", "links"];
 
+  var USAGE = {
+    q2: "q2 1.29     |     q2 --m 94",
+    diagnose: "diagnose --t 2.40 --pi 0.25",
+    resurrect: "resurrect 3",
+    curse: "curse --n 500 --seed 42",
+    tournament: "tournament --leak",
+    zoo: "zoo 6960",
+    open: "open math",
+    lang: "lang zh",
+    theme: "theme light",
+    help: "help diagnose"
+  };
+
   function registerConsole() {
     /* --- help */
     CMD.help = {
       desc: t("list every command", "列出全部命令"),
-      run: function () {
-        line("BOAT console · static build · every number is computed here or quoted from the shipped paper.", "dim");
+      run: function (a) {
+        if (a && a[0] && CMD[a[0]]) {
+          var c = CMD[a[0]];
+          line(a[0], "head");
+          line("  " + c.desc);
+          if (USAGE[a[0]]) {
+            gap();
+            line("  usage   " + USAGE[a[0]], "dim");
+          }
+          return;
+        }
+        line(t("BOAT console · static build · every number is computed here or quoted from the shipped paper.",
+          "BOAT 控制台 · 静态构建 · 每个数字都在此计算，或引自论文。"), "dim");
         gap();
-        var rows = [
-          ["help", t("this list", "本清单")],
-          ["paper", t("the paper, venue status, links", "论文、投稿状态、链接")],
-          ["q2 [tau]", t("resolution law q²(τ) = τ/(1+τ)", "分辨率定律 q²(τ) = τ/(1+τ)")],
-          ["diagnose --t 2.4 --pi .25", t("dilution identity: killed or alive?", "稀释恒等式：被误杀还是幸存？")],
-          ["resurrect [n]", t("sample the 94 discarded factors", "抽样 94 个被丢弃因子")],
-          ["curse [--n 200]", t("winner's curse under a zero-advantage null", "零优势零假设下的赢家诅咒")],
-          ["tournament [--leak]", t("five routers vs the coarse baseline", "五路由器 vs 粗池基线")],
-          ["prove", t("headline arithmetic, step by step", "头条数字逐步验算")],
-          ["repro", t("one-command reproduction", "一条命令复现")],
-          ["open <section>", t("jump · " + SECTIONS.slice(0, 6).join(" "), "跳转 · " + SECTIONS.slice(0, 6).join(" "))],
-          ["lang en|zh · theme light|dark · clear", t("console & page controls", "控制台与页面控制")]
+        var groups = [
+          [t("NAVIGATE", "导航"), ["help", "open", "paper", "ls", "lang", "theme", "clear"]],
+          [t("THE PAPER", "论文"), ["prove", "stats", "q2", "diagnose", "resurrect", "curse", "tournament", "zoo", "compare"]],
+          [t("YOUR OWN FACTOR", "你自己的因子"), ["autopsy"]],
+          [t("ABOUT", "关于"), ["apply", "whoami", "honest", "cite", "contact", "factor"]]
         ];
-        rows.forEach(function (r) {
-          line("  " + pad(r[0], 30) + r[1]);
+        groups.forEach(function (g) {
+          line(g[0], "ok");
+          g[1].forEach(function (name) {
+            var c = CMD[name];
+            if (!c) return;
+            line("  " + pad(name, 30) + c.desc);
+          });
+          gap();
         });
-        gap();
-        line(t("  ↑ history · Tab completes · Esc clears the line", "  ↑ 历史 · Tab 补全 · Esc 清空当前行"), "dim");
+        line(t("  help <command> for usage · ↑ history · Tab completes · Ctrl+L clears",
+          "  help <命令> 看用法 · ↑ 历史 · Tab 补全 · Ctrl+L 清屏"), "dim");
       }
     };
 
@@ -225,6 +249,11 @@
         line("  to survive at this t you would need π ≥ " + fmt(need, 3) +
           (need > 1 ? "  (unreachable)" : ""), "dim");
         line("  source   Proposition 2 · §03 blind-spot identity", "dim");
+        if (tg < 1.96 && tt >= 2.38) {
+          gap();
+          line(t("  → this is a mis-kill. type `autopsy` to run the full report on your own data.",
+            "  → 这就是误杀。输入 `autopsy` 用你自己的数据跑完整报告。"), "ok");
+        }
       }
     };
 
@@ -343,7 +372,150 @@
       }
     };
 
-    /* --- open */
+    /* --- autopsy */
+    CMD.autopsy = {
+      desc: t("open the bench and test your own factor", "打开解剖台，测你自己的因子"),
+      run: function () {
+        if (window.HJ_BENCH && window.HJ_BENCH.focus) {
+          line(t("opening 04b · Autopsy bench — paste a series, a t-stat, or a library", "正在打开 04b · 误杀解剖台——粘贴序列、t 值或因子库"), "ok");
+          window.HJ_BENCH.focus();
+        } else {
+          line("bench not loaded", "warn");
+        }
+      }
+    };
+
+    /* --- zoo */
+    CMD.zoo = {
+      desc: t("two hurdles as the zoo grows", "因子动物园变大时的两道门槛"),
+      run: function (a) {
+        var N = parseInt(a[0], 10);
+        if (!(N > 1)) N = 6960;
+        N = Math.min(N, 1e7);
+        var univ = Math.sqrt(2 * Math.log(N));
+        var alloc = Math.sqrt(2 * Math.log(17));
+        line("hurdles · N = " + N.toLocaleString("en-US") + " candidates · d_eff = 17", "head");
+        gap();
+        line("  discovery  √(2 ln N)        " + fmt(univ, 2) + "   what a universal screen demands");
+        line("  allocation √(2 ln d_eff)    " + fmt(alloc, 2) + "   what a home-venue bet needs");
+        line("  gap                         " + fmt(univ - alloc, 2));
+        gap();
+        line("  the gap widens with N: every extra candidate raises the bar for all of them,");
+        line("  including the ones that only pay inside one state.");
+        gap();
+        line("  measured on the 6,960 pool: ~94% of home-profitable factors are discarded.", "dim");
+        line("  source   §04 The factor zoo · N=6,960, d_eff=17", "dim");
+      }
+    };
+
+    /* --- compare */
+    CMD.compare = {
+      desc: t("pooled vs per-factor routing", "粗池 vs 逐因子路由"),
+      run: function () {
+        line("one WHERE decision vs many WHERE decisions", "head");
+        gap();
+        line("  pooled (m = 94, τ ≈ 72)      q² ≈ 0.99    Sharpe 0.85 → 1.30");
+        line("  per-factor (m = 1, τ ≈ 0.77) q² ≈ 0.43    below half-recovery");
+        line("  oracle (hindsight)           Sharpe 1.45   not implementable");
+        gap();
+        line("  the paper's move is the boring one: stop routing, pool the discards.", "ok");
+        line("  source   §03 identification · §04 resolution law", "dim");
+      }
+    };
+
+    /* --- factor */
+    CMD.factor = {
+      desc: t("draw a machine-emitted factor", "抽一个机器生成的因子"),
+      run: function () {
+        if (typeof SAMPLE_FACTORS === "undefined" || !SAMPLE_FACTORS.length) {
+          line("factor pool not loaded", "warn");
+          return;
+        }
+        var f = SAMPLE_FACTORS[Math.floor(Math.random() * SAMPLE_FACTORS.length)];
+        line(f.name, "head");
+        line("  " + f.rationale);
+        if (typeof prettyExpr === "function") {
+          gap();
+          line(prettyExpr(f.expr), "dim");
+        }
+        gap();
+        line("  one of 60 sample factors shipped in the public grammar.", "dim");
+      }
+    };
+
+    /* --- stats */
+    CMD.stats = {
+      desc: t("the headline numbers in one screen", "一屏看完头条数字"),
+      run: function () {
+        line("headline tape", "head");
+        gap();
+        line("  discards revived            94 of 179 anomalies");
+        line("  out-of-sample Sharpe        0.85 → 1.30   (+0.45)");
+        line("  FF6 alpha                   +3.8%/yr   t = 8.3   GRS F = 51");
+        line("  China replication           +0.95   p = 0   5,441 stocks");
+        line("  pooled tilt                 172 bps/yr   IR ≈ 1.99");
+        line("  same-base increments        24 / 24 positive");
+        line("  machine pool                6,881 factors · 0 clear the screen");
+        line("  falsification excess        6.4×");
+        line("  oracle phantom gain         5.9× the real gain");
+        line("  resolution ceiling          q²(τ)=τ/(1+τ) · m* ≈ 1.29");
+        gap();
+        line("  every line above is quoted from the paper or the shipped repro pack.", "dim");
+      }
+    };
+
+    /* --- honest */
+    CMD.honest = {
+      desc: t("what this site does not claim", "这个站点不主张什么"),
+      run: function () {
+        line("limits, stated on purpose", "head");
+        gap();
+        line("  · backtests are not a live book, and not the JF claim under review.");
+        line("  · the 94-factor ladder is an aggregate, not a per-factor forecast.");
+        line("  · the router code is withheld; only the tilt OUTPUT ships.");
+        line("  · the parliament is a seeded, deterministic simulation — it is a");
+        line("    mechanism demo, not a live desk.");
+        line("  · the winner's curse is shown as a failure, not buried.");
+        gap();
+        line("  if a number here is not reproducible, it is a bug — tell me.", "dim");
+      }
+    };
+
+    /* --- cite */
+    CMD.cite = {
+      desc: t("how to cite the paper", "如何引用这篇论文"),
+      run: function () {
+        line("Jin, H. (2026). Discarded but Alive: What Factor Screening Throws Away,", "head");
+        line("and What It Cannot Recover. Working paper, Oct 2026. SSRN 7607684.", "head");
+        gap();
+        line("  JF manuscript   MS 2026-0738 · external review");
+        line("  venues          EFA submitted · WFA · SFS");
+        line("  repro           github.com/nemo02070118/boatfx-repro");
+      }
+    };
+
+    /* --- apply / contact */
+    CMD.apply = {
+      desc: t("what this site is for", "这个站点是干什么的"),
+      run: function () {
+        line("applying   a16z Horowitz Andreessen Academy · Founding Class 2027", "head");
+        line("  early deadline   5 Nov 2026 · rolling review");
+        line("  program          Sep 2027 – Aug 2028 · San Francisco · one year");
+        line("  status           on academic leave · ≤ 1 year college · SF-ready");
+        gap();
+        line("  the reviewer path in the top ribbon is the 60-second version of this site.", "dim");
+      }
+    };
+    CMD.contact = {
+      desc: t("email and links", "邮箱与链接"),
+      run: function () {
+        line("  email     huanian.jin@outlook.com");
+        line("  github    github.com/nemo02070118/boatfx-repro");
+        line("  ssrn      papers.ssrn.com/sol3/papers.cfm?abstract_id=7607684");
+        line("  video     youtu.be/tVHLUQy93rg");
+      }
+    };
+
     CMD.open = {
       desc: t("jump to a section", "跳转到区块"),
       run: function (a) {
@@ -410,7 +582,13 @@
     line("huannian@boatfx:~$ " + text, "cmd");
     var parts = text.split(/\s+/);
     var name = parts[0].toLowerCase();
+    if (name === "?") name = "help";
     var args = parts.slice(1);
+    var badge = document.getElementById("term-badge");
+    if (badge) {
+      CMD_COUNT++;
+      badge.textContent = "LIVE · " + CMD_COUNT + (CMD_COUNT === 1 ? " cmd" : " cmds") + " · 0 requests";
+    }
     if (!CMD[name]) {
       var near = Object.keys(CMD).filter(function (k) {
         return k.indexOf(name.slice(0, 3)) === 0 || name.indexOf(k.slice(0, 3)) === 0;
@@ -429,13 +607,21 @@
     var block = document.querySelector("#proof .terminal-block");
     if (!block) return;
 
+    try {
+      var saved = JSON.parse(localStorage.getItem("hj-term-history") || "[]");
+      if (saved && saved.length) HISTORY = saved.slice(-60);
+      HIST_AT = HISTORY.length;
+    } catch (e) {}
+
     block.innerHTML = "";
     var bar = el("div", "terminal-bar");
     bar.appendChild(el("span"));
     bar.appendChild(el("span"));
     bar.appendChild(el("span"));
     bar.appendChild(el("i", null, "boatfx-repro · live console"));
-    bar.appendChild(el("b", "term-badge", "LIVE"));
+    var badge = el("b", "term-badge", "LIVE · 0 cmds");
+    badge.id = "term-badge";
+    bar.appendChild(badge);
     block.appendChild(bar);
 
     shellEl = el("div", "term-shell");
@@ -487,7 +673,11 @@
       e.preventDefault();
       var v = inEl.value;
       inEl.value = "";
-      if (v.trim()) HISTORY.push(v.trim());
+      if (v.trim()) {
+        HISTORY.push(v.trim());
+        if (HISTORY.length > 60) HISTORY = HISTORY.slice(-60);
+        try { localStorage.setItem("hj-term-history", JSON.stringify(HISTORY)); } catch (err) {}
+      }
       HIST_AT = HISTORY.length;
       runCommand(v);
     });
@@ -629,7 +819,15 @@
       jump: "limit"
     },
     {
-      k: t("06 · the build", "06 · 工程"),
+      k: t("06 · your turn", "06 · 轮到你了"),
+      title: t("Put your own factor on the bench", "把你的因子放上解剖台"),
+      body: t("Paste a return series, a t-stat, or a whole library. The bench applies the paper's dilution identity to your numbers and tells you whether the screen would have killed it — computed in your browser, nothing uploaded.",
+        "粘贴一段收益序列、一个 t 值，或整个因子库。解剖台把论文的稀释恒等式套到你的数字上，告诉你筛选会不会把它杀掉——全部在你浏览器里算，不上传。"),
+      metric: t("§04b Autopsy bench · paste and run", "§04b 误杀解剖台 · 粘贴即算"),
+      jump: "bench"
+    },
+    {
+      k: t("07 · the build", "07 · 工程"),
       title: t("670k lines behind the claim", "论断背后是 67 万行"),
       body: t("12 Rust crates, ~2.3k source files, 56 modules shipped at Zheshang with >95% coverage. AI proposes factors; a constitution gate admits them.",
         "12 个 Rust crate、约 2.3k 源文件、浙商上线 56 个模块、覆盖率 >95%。AI 提案因子，宪章闸门准入。"),
@@ -637,7 +835,7 @@
       jump: "scale"
     },
     {
-      k: t("07 · the fit", "07 · 契合"),
+      k: t("08 · the fit", "08 · 契合"),
       title: t("Eligible, and already in motion", "符合资格，且已在行动"),
       body: t("On academic leave, no more than one year of college through Aug 2027, international, SF-ready. JF external review, EFA submitted, terminal in daily use.",
         "休学中，截至 2027-08 大学未满一年，国际申请者，可全职赴 SF。JF 外审中，EFA 已投，终端每日在用。"),
