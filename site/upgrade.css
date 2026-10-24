@@ -99,7 +99,7 @@ html { overflow-x: clip; }
 .term-out {
   padding: 1rem 1.15rem 0.25rem;
   min-height: 7rem;
-  max-height: 21rem;
+  max-height: 27rem;
   overflow-y: auto;
   overscroll-behavior: contain;
   font-family: var(--mono);

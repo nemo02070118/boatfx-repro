@@ -184,21 +184,20 @@
           "BOAT 控制台 · 静态构建 · 每个数字都在此计算，或引自论文。"), "dim");
         gap();
         var groups = [
-          [t("NAVIGATE", "导航"), ["help", "open", "paper", "ls", "lang", "theme", "clear"]],
           [t("THE PAPER", "论文"), ["prove", "stats", "q2", "diagnose", "resurrect", "curse", "tournament", "zoo", "compare", "cite"]],
           [t("YOUR OWN FACTOR", "你自己的因子"), ["autopsy"]],
-          [t("CHECK ME", "验算我"), ["selftest", "share"]],
-          [t("ABOUT", "关于"), ["apply", "whoami", "honest", "contact", "factor"]]
+          [t("CHECK ME", "验算我"), ["selftest", "share"]]
         ];
         groups.forEach(function (g) {
           line(g[0], "ok");
           g[1].forEach(function (name) {
             var c = CMD[name];
             if (!c) return;
-            line("  " + pad(name, 30) + c.desc);
+            line("  " + pad(name, 14) + c.desc);
           });
-          gap();
         });
+        line(pad(t("NAVIGATE", "导航"), 10) + "help · open · paper · ls · lang · theme · clear", "ok");
+        line(pad(t("ABOUT", "关于"), 10) + "apply · whoami · honest · contact · factor", "ok");
         line(t("  help <command> for usage · ↑ history · Tab completes · Ctrl+L clears",
           "  help <命令> 看用法 · ↑ 历史 · Tab 补全 · Ctrl+L 清屏"), "dim");
       }
