@@ -53,9 +53,28 @@
       "roster.f": "Every call runs in this tab.",
       "empty.k": "00b · research agent",
       "empty.t": "Ask boat-1.",
-      "empty.s": "It judges factor expressions, evaluates them on a declared market, trains real models on the eight signals and permutation-tests the answer — all computed in this tab. No model call, no network, no API key.",
+      "empty.s": "It judges factor expressions, evaluates them on a declared market, trains real models on the eight signals and permutation-tests the answer — all computed in this tab. No model call, no network, no API key. Attach a brain (top right) and a real language model answers instead — with the same instruments as its tools, and still no invented numbers.",
       "send": "Send", "stop": "Stop",
       "note": "computed in this tab · 0 network requests · open DevTools and watch",
+      "brain.off": "Brain · off",
+      "brain.title": "The brain",
+      "brain.lead": "Two ways to give this page a real language model. Either way the model cannot compute anything itself: the ten instruments stay its tools, and the system prompt forbids stating a number that did not come back from one.",
+      "brain.p.none": "no brain — the deterministic router answers",
+      "brain.p.deepseek": "DeepSeek · your key",
+      "brain.p.openai": "OpenAI · your key",
+      "brain.p.custom": "any OpenAI-compatible endpoint",
+      "brain.p.local": "in this browser · WebLLM + WebGPU",
+      "brain.key": "API key",
+      "brain.keyph": "sk-…",
+      "brain.base": "base URL",
+      "brain.baseph": "https://…/v1",
+      "brain.model": "model",
+      "brain.load": "load the model",
+      "brain.clear": "clear the brain",
+      "brain.note": "The key is written to this browser's localStorage and is sent to nobody except the provider you chose. The tape stays declared-synthetic either way: admission at the gate never means a program earns.",
+      "brain.close": "close",
+      "brain.net.byok": "model via your key · the instruments are its tools · it may not invent a number",
+      "brain.net.local": "local model in this tab · the instruments are its tools · it may not invent a number",
       "rail.session": "Session",
       "rail.canon": "§05b canonical funnel",
       "rail.jump": "Jump",
@@ -95,9 +114,28 @@
       "roster.f": "每次调用都在本页运行。",
       "empty.k": "00b · 研究代理",
       "empty.t": "问 boat-1。",
-      "empty.s": "它评判因子表达式、在声明市场上评估它们、在八个信号上训练真实模型、再对答案做置换检验——全部在这个页面里算完。没有模型调用、没有网络、没有 API 密钥。",
+      "empty.s": "它评判因子表达式、在声明市场上评估它们、在八个信号上训练真实模型、再对答案做置换检验——全部在这个页面里算完。没有模型调用、没有网络、没有 API 密钥。接上大脑（右上角）后，由真实的大语言模型回答——仪器还是它的工具，数字照样不许编。",
       "send": "发送", "stop": "停止",
       "note": "本页计算 · 0 次网络请求 · 可以打开 DevTools 看",
+      "brain.off": "大脑 · 关",
+      "brain.title": "大脑",
+      "brain.lead": "有两种方式给这个页面接上真实的大语言模型。两种方式下模型自己都算不了任何东西：十件仪器仍然是它的工具，系统提示词禁止它陈述任何没从仪器调用回来的数字。",
+      "brain.p.none": "无大脑——确定性路由器回答",
+      "brain.p.deepseek": "DeepSeek · 你的密钥",
+      "brain.p.openai": "OpenAI · 你的密钥",
+      "brain.p.custom": "任何 OpenAI 兼容端点",
+      "brain.p.local": "在本浏览器里 · WebLLM + WebGPU",
+      "brain.key": "API 密钥",
+      "brain.keyph": "sk-…",
+      "brain.base": "接口地址",
+      "brain.baseph": "https://…/v1",
+      "brain.model": "模型",
+      "brain.load": "加载模型",
+      "brain.clear": "清除大脑",
+      "brain.note": "密钥只写进这个浏览器的 localStorage，除了你选择的提供方之外不发给任何人。胶带无论如何都是声明的合成数据：闸门准入从来不代表一个程序能赚钱。",
+      "brain.close": "关闭",
+      "brain.net.byok": "模型经由你的密钥 · 仪器是它的工具 · 它不许编造数字",
+      "brain.net.local": "本页运行本地模型 · 仪器是它的工具 · 它不许编造数字",
       "rail.session": "本次会话",
       "rail.canon": "§05b 标准漏斗",
       "rail.jump": "跳转",
@@ -1379,6 +1417,588 @@
     return { steps: steps, blocks: blocks };
   }
 
+  /* ======================================================================
+     THE BRAIN — a real language model, with the instruments above as tools
+     --------------------------------------------------------------------------
+     The deterministic router answers ten shapes of question well and
+     everything else with "I can't". A model answers anything. What keeps
+     the model honest is that it cannot compute anything itself: every
+     instrument on this page is a tool, and the system prompt forbids
+     stating a number that did not come back from one.
+     ====================================================================== */
+  /* evaluated per call: the model must be addressed in the visitor's language */
+  function sysPrompt() { return t(
+    "You are boat-1, the research agent on a personal portfolio page about quantitative research discipline. You are a real language model running in the visitor's browser, and you are talking to a reviewer.\n\n" +
+    "GROUND RULES — these are not suggestions:\n" +
+    "1. You may not state, estimate, round, or imply any number that did not come back from a tool call in THIS conversation. If a number is needed, call the instrument that computes it. If no instrument covers it, say so plainly and stop.\n" +
+    "2. Never claim to have computed something you did not compute. The tool trail is on screen next to your answer; the reader can see it.\n" +
+    "3. The tape the instruments run on is a DECLARED SYNTHETIC market, not real market data. Never present its results as live, real, or tradeable.\n" +
+    "4. Admission at the gate means a program is executable, dispersed and argued — never that it earns. Keep that distinction in every sentence.\n" +
+    "5. Be brief and concrete. Two short paragraphs beat eight. No filler, no restating the question.\n" +
+    "6. Reply in the language the visitor used (English or simplified Chinese).\n\n" +
+    "INSTRUMENTS — each runs in this tab, no network, deterministic under seed 20261105:\n" +
+    "- judge_factor(expr, why): run a factor expression through the page's nine gates.\n" +
+    "- evaluate_factor(expr): evaluate an expression on the declared tape; returns IC, t over non-overlapping blocks, Sharpe, turnover, drawdown, pi, diluted t.\n" +
+    "- train_models(): logistic regression by gradient descent + ridge by normal equations on the eight signals; returns weights, holdout accuracy vs base rate, permutation importance.\n" +
+    "- placebo_test(expr): permutation test; returns the null distribution and an empirical p-value.\n" +
+    "- market_process(): prints the declared generative process.\n" +
+    "- dilute(t, pi): Proposition 2, t_g = t*sqrt(pi).\n" +
+    "- hurdle(N): the discovery wall sqrt(2 ln N).\n" +
+    "- pool(vals): Stouffer pooled t.\n" +
+    "- run_funnel(n): the seeded proposal funnel.\n" +
+    "- bench_stats(): the last numbers the autopsy bench computed in this tab.\n\n" +
+    "FACTOR GRAMMAR: Mean[w] Zscore[w] Slope[w] Std[w] Rank Abs Sign Diff Neg Log Sqrt over signals BidSize AskSize BestBid BestAsk MidPrice Volume TradeSide TradeSize, combined with Add Sub Mul Div Min Max Pow, e.g. Rank(Mean[10](BestAsk - BestBid) / MidPrice).\n" +
+    "CONSTANTS: screen 1.96, allocation sqrt(2 ln 17) = 2.3803, D_eff 17, seed 20261105, declared tape 1200 bars.\n" +
+    "If the visitor asks something outside all of this — live prices, advice, a brokerage, your training data — say what you are and are not, in one sentence, and offer the nearest instrument.",
+    "你是 boat-1，一个关于量化研究纪律的个人作品集页面上的研究代理。你是一个真实运行在访客浏览器里的大语言模型，对面是评审。\n\n" +
+    "基本规则——不是建议：\n" +
+    "1. 凡是本次对话里没有从工具调用拿回来的数字，你一律不许说、不许估、不许四舍五入、不许暗示。需要数字就调用算它的仪器；没有仪器覆盖就直说，然后停下。\n" +
+    "2. 不许声称你算了你没算的东西。工具调用轨迹就在你答案旁边，读者看得见。\n" +
+    "3. 仪器运行的是一条声明的合成胶带，不是真实行情。永远不要把它说成实时、真实或可交易。\n" +
+    "4. 闸门准入只说明一个程序可执行、有离散、有理由——从不说它能赚钱。每一句话都要守住这个区分。\n" +
+    "5. 简短、具体。两小段胜过八大段。不写废话，不重复问题。\n" +
+    "6. 用访客使用的语言回答（英语或简体中文）。\n\n" +
+    "仪器——每一个都在本页运行、不走网络、在种子 20261105 下确定：\n" +
+    "- judge_factor(expr, why)：把因子表达式过完本页九道闸门。\n" +
+    "- evaluate_factor(expr)：在声明胶带上评估表达式；返回 IC、非重叠区块的 t、夏普、换手、回撤、π、稀释 t。\n" +
+    "- train_models()：八个信号上的逻辑回归（梯度下降）+ 岭回归（正规方程）；返回权重、留出集准确率对基准率、置换重要性。\n" +
+    "- placebo_test(expr)：置换检验；返回零分布和经验 p 值。\n" +
+    "- market_process()：打印声明的生成过程。\n" +
+    "- dilute(t, pi)：命题 2，t_g = t*sqrt(pi)。\n" +
+    "- hurdle(N)：发现之墙 sqrt(2 ln N)。\n" +
+    "- pool(vals)：Stouffer 合并 t。\n" +
+    "- run_funnel(n)：定种提案漏斗。\n" +
+    "- bench_stats()：解剖台在这个页面里最近算出的数字。\n\n" +
+    "因子文法：Mean[w] Zscore[w] Slope[w] Std[w] Rank Abs Sign Diff Neg Log Sqrt，作用于信号 BidSize AskSize BestBid BestAsk MidPrice Volume TradeSide TradeSize，用 Add Sub Mul Div Min Max Pow 组合，例如 Rank(Mean[10](BestAsk - BestBid) / MidPrice)。\n" +
+    "常数：筛选线 1.96，配置线 sqrt(2 ln 17) = 2.3803，D_eff 17，种子 20261105，声明胶带 1200 根。\n" +
+    "如果访客问的是这些之外的事——实时行情、投资建议、券商、你的训练数据——用一句话说清你是什么、不是什么，然后指给最近的仪器。"); }
+
+  /* every instrument, in the shape a model can call */
+  function buildTools() {
+    function S(desc, props, req) {
+      return { type: "object", properties: props, required: req || [] };
+    }
+    return [
+      { name: "judge_factor",
+        description: "Run a factor expression through this page's nine gates and return the verdict, the failing gate if any, and the AST facts. Use this when the visitor wants a program judged.",
+        parameters: S("", {
+          expr: { type: "string", description: "the factor expression in the site grammar" },
+          why: { type: "string", description: "the economic rationale, if the visitor gave one" }
+        }, ["expr"]),
+        run: function (a) { return instGate({ expr: a.expr, why: a.why }); } },
+      { name: "evaluate_factor",
+        description: "Evaluate a factor expression as a time series on the declared synthetic tape and measure it: IC, its t-stat over non-overlapping blocks, Sharpe, turnover, max drawdown, pi and the pi-diluted t. Use this when the visitor asks whether a factor works, or what a number means.",
+        parameters: S("", {
+          expr: { type: "string", description: "the factor expression in the site grammar" }
+        }, ["expr"]),
+        run: function (a) { return instMlEval({ expr: a.expr }); } },
+      { name: "train_models",
+        description: "Fit logistic regression by full-batch gradient descent and ridge by normal equations on the eight declared signals, predicting the sign of the next bar's return. Returns weights, holdout accuracy vs the base rate, and permutation importance.",
+        parameters: S("", {}),
+        run: function () { return instMlTrain(); } },
+      { name: "placebo_test",
+        description: "Permutation test on a factor: shuffle the signal many times, re-measure the same statistic, and report where the real number falls in the null distribution. Use this when the visitor asks whether a result is real.",
+        parameters: S("", {
+          expr: { type: "string", description: "the factor expression in the site grammar" }
+        }, ["expr"]),
+        run: function (a) { return instMlPlacebo({ expr: a.expr }); } },
+      { name: "market_process",
+        description: "Print the declared generative process of the synthetic tape the instruments run on, with each raw signal measured.",
+        parameters: S("", {}),
+        run: function () { return instMlMarket(); } },
+      { name: "dilute",
+        description: "Proposition 2 of the page's paper: the unconditional t-stat t_g = t * sqrt(pi), where pi is the share of bars in the paying state.",
+        parameters: S("", {
+          t: { type: "number", description: "the t-stat inside the paying state" },
+          pi: { type: "number", description: "the paying-state share, 0..1" }
+        }, ["t"]),
+        run: function (a) { return instDilute({ t: a.t, pi: a.pi }); } },
+      { name: "hurdle",
+        description: "The discovery wall: sqrt(2 ln N) for N candidates tried — how high a single t-stat must reach under multiple testing.",
+        parameters: S("", {
+          N: { type: "number", description: "number of candidates screened" }
+        }, ["N"]),
+        run: function (a) { return instHurdle({ N: a.N, t: a.t }); } },
+      { name: "pool",
+        description: "Stouffer's method: pool several t-stats into one.",
+        parameters: S("", {
+          vals: { type: "array", items: { type: "number" }, description: "the t-stats to pool" }
+        }, ["vals"]),
+        run: function (a) { return instPool({ vals: a.vals }); } },
+      { name: "run_funnel",
+        description: "Run the seeded proposal funnel: n proposals through the site's grammar and gates, with defects deliberately included.",
+        parameters: S("", {
+          n: { type: "number", description: "how many proposals to sample (20..2000)" }
+        }),
+        run: function (a) { return instLibrary({ n: a.n }); } },
+      { name: "bench_stats",
+        description: "The last numbers the §04b autopsy bench computed in this tab, if any.",
+        parameters: S("", {}),
+        run: function () { return instAutopsy(); } }
+    ];
+  }
+
+  /* ------------------------------------------------------------ brain state */
+  function brainActive() {
+    return !!(window.HJ_LLM && window.HJ_LLM.active());
+  }
+  function brainCfg() {
+    return window.HJ_LLM && window.HJ_LLM.active();
+  }
+  function brainLabel() {
+    var a = brainCfg();
+    if (!a) return t("no brain", "无大脑");
+    if (a.provider === "local") return t("local · ", "本地 · ") + shortModel(a.model);
+    var p = window.HJ_LLM.providers[a.provider];
+    return (p ? p.label : a.provider) + " · " + (a.model || "");
+  }
+  function shortModel(m) {
+    m = String(m || "");
+    m = m.replace(/-q4f16_1-MLC$/, "").replace(/-Instruct$/, "").replace(/-MLC$/, "");
+    return m;
+  }
+
+  /* ------------------------------------------------------- mini markdown */
+  /* The model answers in prose. This renders the small subset of markdown a
+     research answer actually uses — bold, code, lists, headings — with text
+     nodes only, so nothing in the answer can inject markup. */
+  function inlineMd(text) {
+    var frag = document.createDocumentFragment();
+    var re = /(\*\*[^*\n]+\*\*|`[^`\n]+`)/g;
+    var last = 0, m;
+    while ((m = re.exec(text))) {
+      if (m.index > last) frag.appendChild(document.createTextNode(text.slice(last, m.index)));
+      var s = m[0];
+      if (s.charAt(0) === "*") frag.appendChild(el("b", null, s.slice(2, -2)));
+      else frag.appendChild(el("code", null, s.slice(1, -1)));
+      last = m.index + s.length;
+    }
+    if (last < text.length) frag.appendChild(document.createTextNode(text.slice(last)));
+    return frag;
+  }
+
+  function renderMiniMarkdown(host, raw) {
+    var lines = String(raw || "").split("\n");
+    var para = [], list = null;
+    function flushPara() {
+      if (!para.length) return;
+      var p = el("p", "ag-md-p");
+      p.appendChild(inlineMd(para.join(" ")));
+      host.appendChild(p);
+      para = [];
+    }
+    function flushList() {
+      if (list) { host.appendChild(list); list = null; }
+    }
+    lines.forEach(function (line) {
+      var li = /^\s*[-*•]\s+(.*)$/.exec(line);
+      var head = /^(#{1,4})\s+(.*)$/.exec(line);
+      if (li) {
+        flushPara();
+        if (!list) list = el("ul", "ag-md-ul");
+        var item = el("li");
+        item.appendChild(inlineMd(li[1]));
+        list.appendChild(item);
+        return;
+      }
+      flushList();
+      if (head) {
+        flushPara();
+        host.appendChild(el("p", "ag-md-h", head[2].replace(/\*\*/g, "")));
+        return;
+      }
+      if (!line.trim()) { flushPara(); return; }
+      para.push(line.trim());
+    });
+    flushPara();
+    flushList();
+  }
+
+  /* a live trail for brain calls — same markup as the deterministic one */
+  function liveTrace() {
+    var det = el("details", "ag-trace");
+    det.open = true;
+    var sum = el("summary", "ag-trace-summary");
+    sum.appendChild(el("span", null, t("tool calls", "工具调用")));
+    var msEl = el("span", "ag-trace-ms");
+    sum.appendChild(msEl);
+    det.appendChild(sum);
+    var ul = el("ul", "ag-trace-steps");
+    det.appendChild(ul);
+    return {
+      det: det, ul: ul, msEl: msEl, n: 0, total: 0,
+      close: function () {
+        this.msEl.textContent = this.n + " " + t("calls", "次调用") +
+          (this.total ? " · " + num(this.total, 2) + " ms" : "");
+        this.det.open = false;
+      }
+    };
+  }
+
+  function traceRow(tr, rec) {
+    tr.n += 1;
+    tr.total += rec.ms || 0;
+    var li = el("li", "ag-step" + (rec.error ? " is-fail" : ""));
+    li.appendChild(el("span", "ag-step-ico", rec.error ? "✕" : "✓"));
+    var nm = el("div", "ag-step-name");
+    nm.appendChild(el("em", null, rec.name));
+    var args = rec.args || {};
+    var keys = Object.keys(args);
+    if (keys.length) nm.appendChild(document.createTextNode(" " + keys.map(function (k) {
+      return k + "=" + String(args[k]);
+    }).join(" ")));
+    li.appendChild(nm);
+    li.appendChild(el("span", "ag-step-ms", rec.ms != null ? num(rec.ms, 2) + " ms" : ""));
+    var brief = briefOf(rec.result);
+    if (brief) {
+      var d = el("div", "ag-step-detail");
+      d.textContent = brief;
+      li.appendChild(d);
+    }
+    tr.ul.appendChild(li);
+    maybeScroll();
+  }
+
+  /* one line saying what came back — enough to audit the call without opening it */
+  function briefOf(out) {
+    if (!out) return null;
+    var blocks = out.blocks || [];
+    for (var i = 0; i < blocks.length; i++) {
+      var b = blocks[i];
+      if (b.k === "verdict") return "verdict · " + b.h;
+      if (b.k === "table") return "table · " + (b.head || []).map(function (h) { return h.t; }).join(" / ");
+      if (b.k === "kv") return "kv · " + b.items.map(function (it) { return it.k + " " + it.v; }).join(" · ");
+      if (b.k === "math") return "math · " + (b.lines || []).length + " lines";
+    }
+    var steps = out.steps || [];
+    if (steps.length) return steps[0].name + (steps[0].detail ? " · " + steps[0].detail : "");
+    return null;
+  }
+
+  /* ------------------------------------------------------------- the brain */
+  /* Auto mode: a real model answers, with the ten instruments above as its
+     tools. It may not state a number that did not come back from one — the
+     trail next to the answer is the proof. Deterministic shapes still take
+     the router, because for those the router is exact and instant. */
+  function runBrain(text) {
+    var L = window.HJ_LLM;
+    var cfg = L && L.active();
+    if (!cfg) { run(text); return; }
+
+    if (emptyEl) emptyEl.hidden = true;
+
+    var um = el("div", "ag-msg ag-msg-user");
+    um.appendChild(el("div", "ag-bubble", text));
+    streamEl.appendChild(um);
+    maybeScroll(true);
+
+    setBusy(true);
+    if (liveEl) liveEl.textContent = t("the model is thinking", "模型正在思考");
+
+    var t0 = now();
+    var msg = el("div", "ag-msg");
+    msg.style.setProperty("--ac", "#c084fc");
+    var who = el("div", "ag-msg-who");
+    who.appendChild(el("i"));
+    who.appendChild(el("span", null, "boat-1"));
+    who.appendChild(el("span", "ag-msg-tag", brainLabel()));
+    msg.appendChild(who);
+    var body = el("div", "ag-blocks");
+    msg.appendChild(body);
+    streamEl.appendChild(msg);
+
+    var ctl = { aborted: false, ctl: null };
+    activeCtl = ctl;
+
+    /* the trail is created on the first tool call — a purely conversational
+       turn must not leave an empty "0 calls" box above the answer */
+    var tr = null;
+    function ensureTrace() {
+      if (tr) return tr;
+      tr = liveTrace();
+      body.insertBefore(tr.det, body.firstChild);
+      return tr;
+    }
+    var proseHost = el("div", "ag-prose ag-md");
+    body.appendChild(proseHost);
+    var caret = el("span", "ag-caret");
+    var raw = "";
+    var painting = false;
+
+    function paint() {
+      if (painting) return;
+      painting = true;
+      proseHost.textContent = "";
+      renderMiniMarkdown(proseHost, raw);
+      proseHost.appendChild(caret);
+      painting = false;
+      maybeScroll();
+    }
+
+    session.calls += 1;
+    session.ms += msOf(t0);
+    if (cfg.provider !== "local") session.net += 1;
+    paintSession();
+
+    var ac = null;
+    if (cfg.provider !== "local" && window.AbortController) {
+      ac = new AbortController();
+      ctl.ctl = ac;
+    }
+
+    L.chat({
+      system: sysPrompt(),
+      tools: buildTools(),
+      text: text,
+      signal: ac ? ac.signal : undefined,
+      onProgress: function (p) {
+        if (liveEl && p && p.text) liveEl.textContent = t("loading the model · ", "正在加载模型 · ") + p.text;
+      },
+      onToken: function (tok) {
+        if (ctl.aborted) return;
+        raw += tok;
+        paint();
+      },
+      onCall: function (rec) {
+        if (ctl.aborted) return;
+        traceRow(ensureTrace(), rec);
+      }
+    }).then(function (final) {
+      if (caret.parentNode) caret.parentNode.removeChild(caret);
+      if (tr) tr.close();
+      var computeMs = msOf(t0);
+      session.ms += computeMs;
+      paintSession();
+      finishBrain(body, cfg, final, computeMs, text, ctl);
+    }).catch(function (err) {
+      if (caret.parentNode) caret.parentNode.removeChild(caret);
+      if (ctl.aborted) {
+        if (tr) tr.close();
+        finishBrain(body, cfg, { text: raw, calls: [] }, msOf(t0), text, ctl, true);
+        return;
+      }
+      if (tr) tr.close();
+      var box = el("div", "ag-verdict");
+      box.setAttribute("data-tone", "no");
+      box.appendChild(el("p", "ag-verdict-h", t("the model call failed", "模型调用失败")));
+      box.appendChild(el("p", "ag-verdict-b",
+        t("Nothing was computed on the way here that the trail does not show. ",
+          "在这一路上除了轨迹里显示的，没有算别的东西。") +
+        String(err && err.message || err)));
+      body.appendChild(box);
+      body.appendChild(actionsOf([
+        { label: t("try again", "重试"), fn: function () { runBrain(text); } },
+        { label: t("answer with the deterministic router", "用确定性路由器回答"),
+          fn: function () { run(text, { deterministic: true }); } }
+      ]));
+      maybeScroll();
+      if (activeCtl === ctl) activeCtl = null;
+      setBusy(false);
+      if (liveEl) liveEl.textContent = t("the model call failed", "模型调用失败");
+    });
+  }
+
+  function actionsOf(items) {
+    var node = el("div", "ag-actions");
+    items.forEach(function (a) {
+      var btn = el("button", "ag-act", a.label);
+      btn.type = "button";
+      btn.addEventListener("click", a.fn);
+      node.appendChild(btn);
+    });
+    return node;
+  }
+
+  function finishBrain(body, cfg, final, computeMs, text, ctl, interrupted) {
+    var nCalls = (final.calls || []).length;
+    var prov = el("p", "ag-prov");
+    prov.textContent = cfg.provider === "local"
+      ? t("local model · " + shortModel(cfg.model) + " · runs in this tab · " + nCalls +
+          " tool call" + (nCalls === 1 ? "" : "s") + " · compute " + num(computeMs, 2) +
+          " ms · seed " + SEED + " · boat-1 " + VERSION,
+          "本地模型 · " + shortModel(cfg.model) + " · 在本页运行 · " + nCalls +
+          " 次工具调用 · 计算 " + num(computeMs, 2) + " ms · 种子 " + SEED +
+          " · boat-1 " + VERSION)
+      : t("model " + cfg.model + " via " + cfg.provider + " · " + nCalls +
+          " tool call" + (nCalls === 1 ? "" : "s") + " · every number above came back from one · " +
+          (nCalls ? "compute " : "provider latency ") + num(computeMs, 2) + " ms · seed " + SEED +
+          " · boat-1 " + VERSION,
+          "模型 " + cfg.model + " · 经由 " + cfg.provider + " · " + nCalls +
+          " 次工具调用 · 上面每个数字都从其中一次回来 · " + (nCalls ? "计算 " : "提供方时延 ") +
+          num(computeMs, 2) + " ms · 种子 " + SEED + " · boat-1 " + VERSION);
+    body.appendChild(prov);
+
+    if (!interrupted) {
+      body.appendChild(actionsOf([
+        { label: t("new topic", "新话题"), fn: function () {
+          if (window.HJ_LLM) window.HJ_LLM.resetChat();
+          sysLine(t("conversation cleared — the model starts fresh", "对话已清空——模型重新开始"));
+        } }
+      ]));
+    } else {
+      body.appendChild(el("p", "ag-prov", t("interrupted — the partial answer stays above",
+        "已中断——部分答案保留在上面")));
+    }
+
+    maybeScroll();
+    if (activeCtl === ctl) activeCtl = null;
+    setBusy(false);
+    if (liveEl) {
+      liveEl.textContent = interrupted
+        ? t("answer interrupted", "回答已中断")
+        : t("answer ready", "回答就绪");
+    }
+  }
+
+  /* ------------------------------------------------------------ brain UI */
+  function paintBrainChip() {
+    var chip = $("ag-brain");
+    var dict = AG_I18N[lang()] || AG_I18N.en;
+    if (chip) {
+      var a = brainCfg();
+      if (a) {
+        chip.textContent = t("Brain · ", "大脑 · ") +
+          (a.provider === "local" ? shortModel(a.model) : (a.model || a.provider));
+        chip.classList.add("is-on");
+        chip.setAttribute("aria-pressed", "true");
+      } else {
+        chip.textContent = dict["brain.off"];
+        chip.classList.remove("is-on");
+        chip.setAttribute("aria-pressed", "false");
+      }
+    }
+    var note = document.querySelector(".ag-note");
+    if (note) {
+      var a2 = brainCfg();
+      note.textContent = a2
+        ? (a2.provider === "local" ? dict["brain.net.local"] : dict["brain.net.byok"])
+        : dict["note"];
+    }
+  }
+
+  function paintBrainPanel() {
+    var s = window.HJ_LLM ? window.HJ_LLM.get() : {};
+    var prov = s.provider || "none";
+    document.querySelectorAll('input[name="ag-bp-prov"]').forEach(function (r) {
+      r.checked = (r.value === prov);
+    });
+    var byok = $("ag-bp-byok"), local = $("ag-bp-local"), custom = $("ag-bp-custom");
+    if (byok) byok.hidden = !(window.HJ_LLM.providers[prov] && window.HJ_LLM.providers[prov].byok);
+    if (local) local.hidden = prov !== "local";
+    if (custom) custom.hidden = prov !== "custom";
+    var key = $("ag-bp-key");
+    if (key && s.key && key.value !== s.key) key.value = s.key;
+    var base = $("ag-bp-base"), mod = $("ag-bp-model-c"), ml = $("ag-bp-model-l");
+    if (base && s.base) base.value = s.base;
+    if (mod && s.model) mod.value = s.model;
+    if (ml) ml.value = s.model || window.HJ_LLM.localModels[0].id;
+    var gpu = $("ag-bp-gpu");
+    if (gpu) {
+      gpu.textContent = window.HJ_LLM.localSupported()
+        ? t("WebGPU is available — the model can run in this tab.",
+           "WebGPU 可用——模型可以在本页运行。")
+        : t("No WebGPU in this browser — the local model needs it (Chrome/Edge 113+). Use your own key instead.",
+           "这个浏览器没有 WebGPU——本地模型需要它（Chrome/Edge 113+）。请改用你自己的密钥。");
+    }
+  }
+
+  function wireBrain() {
+    var chip = $("ag-brain"), panel = $("ag-brain-panel");
+    if (!chip || !panel || !window.HJ_LLM) return;
+
+    function toggle(force) {
+      var open = force == null ? panel.hidden : force;
+      panel.hidden = !open;
+      chip.setAttribute("aria-expanded", open ? "true" : "false");
+      if (open) paintBrainPanel();
+    }
+    chip.addEventListener("click", function () { toggle(); });
+    var x = $("ag-bp-close");
+    if (x) x.addEventListener("click", function () { toggle(false); });
+    document.addEventListener("click", function (e) {
+      if (panel.hidden) return;
+      if (panel.contains(e.target) || chip.contains(e.target)) return;
+      toggle(false);
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && !panel.hidden) toggle(false);
+    });
+
+    document.querySelectorAll('input[name="ag-bp-prov"]').forEach(function (r) {
+      r.addEventListener("change", function () {
+        if (!r.checked) return;
+        window.HJ_LLM.set({ provider: r.value });
+        if (r.value !== "none") window.HJ_LLM.resetChat();
+        paintBrainChip();
+        paintBrainPanel();
+        paintSession();
+        sysLine(r.value === "none"
+          ? t("brain off — the deterministic router answers again", "大脑已关——重新由确定性路由器回答")
+          : t("brain · " + r.value + " — auto mode now goes to the model", "大脑 · " + r.value + "——自动模式现在交给模型"));
+      });
+    });
+
+    var key = $("ag-bp-key");
+    if (key) key.addEventListener("change", function () {
+      window.HJ_LLM.set({ key: key.value.trim() });
+      paintBrainChip();
+      paintSession();
+    });
+    var base = $("ag-bp-base");
+    if (base) base.addEventListener("change", function () {
+      window.HJ_LLM.set({ base: base.value.trim() });
+      paintBrainChip();
+      paintSession();
+    });
+    var modc = $("ag-bp-model-c");
+    if (modc) modc.addEventListener("change", function () {
+      window.HJ_LLM.set({ model: modc.value.trim() });
+      paintBrainChip();
+      paintSession();
+    });
+    var modl = $("ag-bp-model-l");
+    if (modl) modl.addEventListener("change", function () {
+      window.HJ_LLM.set({ model: modl.value });
+      paintBrainChip();
+      paintSession();
+    });
+
+    var load = $("ag-bp-load"), prog = $("ag-bp-prog"), fill = $("ag-bp-prog-fill"), ptxt = $("ag-bp-prog-t");
+    if (load) load.addEventListener("click", function () {
+      var id = modl ? modl.value : window.HJ_LLM.localModels[0].id;
+      load.disabled = true;
+      if (prog) prog.hidden = false;
+      if (ptxt) ptxt.textContent = t("starting…", "启动中…");
+      window.HJ_LLM.loadLocal(id, function (p) {
+        var pct = p && p.progress != null ? Math.round(p.progress * 100) : null;
+        if (fill) fill.style.width = (pct == null ? 8 : pct) + "%";
+        if (ptxt) ptxt.textContent = (pct == null ? "" : pct + "% · ") + (p && p.text ? p.text : "");
+      }).then(function () {
+        window.HJ_LLM.set({ provider: "local", model: id });
+        window.HJ_LLM.resetChat();
+        if (ptxt) ptxt.textContent = t("loaded", "已加载");
+        paintBrainChip();
+        paintBrainPanel();
+        paintSession();
+        sysLine(t("local model loaded — auto mode now goes to it", "本地模型已加载——自动模式现在交给它"));
+      }).catch(function (e) {
+        if (ptxt) ptxt.textContent = String(e && e.message || e);
+      }).then(function () {
+        load.disabled = false;
+      });
+    });
+
+    var clr = $("ag-bp-clear");
+    if (clr) clr.addEventListener("click", function () {
+      window.HJ_LLM.clear();
+      window.HJ_LLM.resetChat();
+      paintBrainChip();
+      paintBrainPanel();
+      paintSession();
+      sysLine(t("brain cleared — key and settings removed from this browser", "大脑已清除——密钥和设置已从本浏览器移除"));
+    });
+  }
+
   /* ------------------------------------------------------------------ desk */
   function instDesk() {
     var steps = [], blocks = [];
@@ -1491,10 +2111,13 @@
 
   function instHelp() {
     var steps = [], blocks = [];
+    var cfg = brainCfg();
     steps.push({ name: "route", args: "capability query", status: "ok" });
-    blocks.push({ k: "prose", text: t(
-      "I am boat-1, the research agent on this page. I am not a language model and I make no network calls — I am a router over the instruments this site already ships. Ten of them:",
-      "我是 boat-1，这个页面上的研究代理。我不是语言模型，也不发任何网络请求——我是站点自带仪器之上的一台路由器。一共十件：") });
+    blocks.push({ k: "prose", text: cfg
+      ? t("I am boat-1. Right now a real language model (" + brainLabel() + ") is answering, and the ten instruments below are its tools — it may not state a number that did not come back from one of them:",
+         "我是 boat-1。现在由一个真实的大语言模型（" + brainLabel() + "）回答，下面十件仪器是它的工具——凡是没从其中一次调用回来的数字，它不许说：")
+      : t("I am boat-1, the research agent on this page. I am not a language model and I make no network calls — I am a router over the instruments this site already ships. Ten of them:",
+         "我是 boat-1，这个页面上的研究代理。我不是语言模型，也不发任何网络请求——我是站点自带仪器之上的一台路由器。一共十件：") });
     blocks.push({
       k: "table",
       head: [{ t: "instrument" }, { t: "what it does" }],
@@ -1502,28 +2125,51 @@
     });
     blocks.push({ k: "verdict", tone: "warn",
       h: t("What I cannot do", "我做不到的事"),
-      b: t("No live market data. No brokerage. No LLM. No network. If a question needs one of those I will say so instead of guessing — try asking me something outside that list.",
-        "没有实时行情。没有券商。没有大模型。没有网络。哪个问题需要这些，我会直说，而不是瞎猜——可以试试问一个这个清单外面的事情。") });
+      b: cfg
+        ? t("No live market data. No brokerage. The model can reason about anything, but every number it says has to come back from an instrument — so when no instrument covers a number, it says that instead.",
+           "没有实时行情。没有券商。模型可以推理任何事，但它说出的每个数字都必须从仪器回来——所以没有仪器覆盖的数字，它会直说。")
+        : t("No live market data. No brokerage. No LLM. No network. If a question needs one of those I will say so instead of guessing — try asking me something outside that list.",
+           "没有实时行情。没有券商。没有大模型。没有网络。哪个问题需要这些，我会直说，而不是瞎猜——可以试试问一个这个清单外面的事情。") });
     return { steps: steps, blocks: blocks };
   }
 
   /* --------------------------------------------------------------- unknown */
   function instUnknown(raw) {
     var steps = [], blocks = [];
+    var cfg = brainCfg();
     steps.push({ name: "route", args: "no instrument matched", status: "fail",
       detail: JSON.stringify(String(raw || "").slice(0, 120)) });
-    blocks.push({ k: "verdict", tone: "no",
-      h: t("I can't answer that from this tab", "这个我在本页答不了"),
-      b: t("Not a language model — no network, no model call. What I can do is judge a factor expression, evaluate it on the declared market, train real models on the eight signals, permutation-test the result, dilute a t-stat by √π, compute the discovery wall, pool t-stats, report the bench, or run the seeded funnel.",
-        "不是语言模型——没有网络、没有模型调用。我能做的是：评判一个因子表达式、在声明市场上评估它、在八个信号上训练真实模型、对结果做置换检验、用 √π 稀释一个 t 值、算发现之墙、合并 t 值、报告解剖台、或者跑定种漏斗。") });
-    blocks.push({ k: "actions", items: [
+    blocks.push({ k: "verdict", tone: cfg ? "warn" : "no",
+      h: cfg
+        ? t("the router has no instrument for this", "路由器没有覆盖这个的仪器")
+        : t("I can't answer that from this tab", "这个我在本页答不了"),
+      b: cfg
+        ? t("A brain is attached (" + brainLabel() + "), but this answer is running on the deterministic router — which has no instrument for this question. In Auto the model takes it, with the same instruments as its tools.",
+           "已经接上了大脑（" + brainLabel() + "），但这个回答跑在确定性路由器上——它没有覆盖这个问题的仪器。在自动模式下模型会接，用的还是同一批仪器当工具。")
+        : t("Not a language model — no network, no model call. What I can do is judge a factor expression, evaluate it on the declared market, train real models on the eight signals, permutation-test the result, dilute a t-stat by √π, compute the discovery wall, pool t-stats, report the bench, or run the seeded funnel.",
+           "不是语言模型——没有网络、没有模型调用。我能做的是：评判一个因子表达式、在声明市场上评估它、在八个信号上训练真实模型、对结果做置换检验、用 √π 稀释一个 t 值、算发现之墙、合并 t 值、报告解剖台、或者跑定种漏斗。") });
+    var acts = [
       { label: t("judge Rank(Mean[10](BestAsk - BestBid) / MidPrice)", "评判 Rank(Mean[10](BestAsk - BestBid) / MidPrice)"),
         fn: function () { run("judge Rank(Mean[10](BestAsk - BestBid) / MidPrice) — order-book imbalance"); } },
       { label: t("evaluate it on the declared market", "在声明市场上评估它"),
         fn: function () { run("evaluate Rank(Mean[10](BestAsk - BestBid) / MidPrice)"); } },
       { label: t("train the models", "训练模型"), fn: function () { run("train logistic + ridge"); } },
       { label: t("what can't you answer?", "有什么你答不了？"), fn: function () { run("what can't you answer?"); } }
-    ] });
+    ];
+    if (cfg) acts.unshift({
+      label: t("ask the model instead", "改问模型"),
+      fn: function () {
+        currentMode = "auto";
+        document.querySelectorAll(".ag-mode").forEach(function (x) {
+          var on = x.dataset.mode === "auto";
+          x.classList.toggle("is-on", on);
+          x.setAttribute("aria-pressed", on ? "true" : "false");
+        });
+        sysLine(t("mode · auto — the model answers this one", "模式 · 自动——这个交给模型"));
+        run(String(raw || ""));
+      }
+    });
+    blocks.push({ k: "actions", items: acts });
     return { steps: steps, blocks: blocks };
   }
 
@@ -1641,7 +2287,7 @@
      RENDER — blocks, tool trail, streaming
      ====================================================================== */
   var streamEl, emptyEl, formEl, inputEl, parseEl, sendBtn, stopBtn, liveEl, statusEl;
-  var session = { calls: 0, ms: 0 };
+  var session = { calls: 0, ms: 0, net: 0 };
   var activeCtl = null;
   var thinkOn = true;
   var currentMode = "auto";
@@ -1877,13 +2523,29 @@
   }
 
   function abortActive() {
-    if (activeCtl) activeCtl.aborted = true;
+    if (!activeCtl) return;
+    activeCtl.aborted = true;
+    if (activeCtl.ctl) { try { activeCtl.ctl.abort(); } catch (e) {} }
   }
 
-  function run(raw) {
+  function run(raw, opts) {
     var text = String(raw == null ? "" : raw).trim();
     if (!text || !streamEl) return;
+    if (activeCtl) abortActive();   /* a new question retires the old answer */
 
+    /* Auto + a brain: every question goes to the model first. The ten
+       instruments are its tools, so a question the router "knows" comes back
+       as the same computed blocks — with the model's prose around them and
+       the tool trail proving which call produced which number. Forced modes
+       and the no-brain configuration keep the deterministic router. */
+    if (!(opts && opts.deterministic) && brainActive() && currentMode === "auto") {
+      runBrain(text);
+      return;
+    }
+    runDeterministic(text, route(text, currentMode));
+  }
+
+  function runDeterministic(text, r) {
     if (emptyEl) emptyEl.hidden = true;
 
     /* the question, echoed synchronously — acknowledge first */
@@ -1897,7 +2559,6 @@
     if (liveEl) liveEl.textContent = t("boat-1 is computing", "boat-1 正在计算");
 
     var t0 = now();
-    var r = route(text, currentMode);
     r.raw = text;
     var out = dispatch(r);
     var computeMs = msOf(t0);
@@ -1956,13 +2617,19 @@
   function paintSession() {
     var host = $("ag-kv-session");
     if (!host) return;
+    var cfg = brainCfg();
     var rows = [
       [t("tool calls", "工具调用"), String(session.calls)],
-      [t("network requests", "网络请求"), "0"],
+      [t("network requests", "网络请求"),
+        cfg ? (cfg.provider === "local"
+          ? t("0 in-tab · weights once", "页内 0 · 权重仅一次")
+          : String(session.net) + " · " + cfg.provider)
+        : "0"],
       [t("compute", "计算"), num(session.ms, 1) + " ms"],
-      [t("seed", "种子"), String(SEED)],
-      [t("engine", "引擎"), "boat-1 " + VERSION]
+      [t("seed", "种子"), String(SEED)]
     ];
+    if (cfg) rows.push([t("brain", "大脑"), brainLabel()]);
+    rows.push([t("engine", "引擎"), "boat-1 " + VERSION]);
     host.textContent = "";
     rows.forEach(function (r) {
       var row = el("div", "ag-kv-row");
@@ -2116,8 +2783,11 @@
       chips.push({ label: k + "=" + (typeof v === "object" ? JSON.stringify(v) : String(v)) });
     });
     if (r.forced) chips.push({ label: t("mode " + currentMode, "模式 " + currentMode) });
+    if (r.intent === "unknown" && brainActive()) {
+      chips.push({ label: t("→ the model", "→ 模型"), brain: true });
+    }
     chips.forEach(function (c) {
-      var chip = el("span", "ag-parse-chip" + (c.bad ? " is-no" : ""), c.label);
+      var chip = el("span", "ag-parse-chip" + (c.bad ? " is-no" : "") + (c.brain ? " is-brain" : ""), c.label);
       parseEl.appendChild(chip);
     });
   }
@@ -2276,6 +2946,8 @@
     liveEl = $("ag-live");
     wireComposer();
     wireModes();
+    wireBrain();
+    paintBrainChip();
     paintSession();
     paintCanon();
     paintJumps();
@@ -2284,6 +2956,7 @@
 
     window.addEventListener("hj:lang", function () {
       applyAgI18n();
+      paintBrainChip();
       paintSession();
       paintCanon();
       paintJumps();
@@ -2308,6 +2981,8 @@
     route: route,
     run: run,
     version: VERSION,
-    session: function () { return { calls: session.calls, ms: session.ms, seed: SEED }; }
+    brain: function () { return brainCfg(); },
+    brainActive: brainActive,
+    session: function () { return { calls: session.calls, ms: session.ms, net: session.net, seed: SEED }; }
   };
 })();

@@ -40,6 +40,7 @@
   <link rel="stylesheet" href="gate.css?v=3" />
   <link rel="stylesheet" href="agent.css?v=1" />
   <link rel="stylesheet" href="ml.css?v=1" />
+  <link rel="stylesheet" href="llm.css?v=1" />
 </head>
 <body>
   <div class="progress" id="progress" aria-hidden="true"></div>
@@ -313,8 +314,51 @@
             <button type="button" class="ag-mode" data-mode="learn" aria-pressed="false" data-ag-i18n="m.learn">Learn</button>
           </div>
           <button type="button" class="ag-think is-on" id="ag-think" aria-pressed="true" data-ag-i18n="think.on">Think · on</button>
+          <button type="button" class="ag-brain" id="ag-brain" aria-pressed="false" aria-expanded="false" aria-haspopup="true" data-ag-i18n="brain.off">Brain · off</button>
           <span class="ag-status" id="ag-status" data-ag-i18n="status.ready">ready</span>
         </header>
+
+        <!-- the brain: a real language model, with the instruments as its tools -->
+        <div class="ag-brain-panel" id="ag-brain-panel" hidden role="dialog" aria-label="brain">
+          <div class="ag-bp-head">
+            <strong data-ag-i18n="brain.title">The brain</strong>
+            <button type="button" class="ag-bp-x" id="ag-bp-close" data-ag-i18n="brain.close">close</button>
+          </div>
+          <p class="ag-bp-lead" data-ag-i18n="brain.lead">Two ways to give this page a real language model. Either way the model cannot compute anything itself: the ten instruments stay its tools, and the system prompt forbids stating a number that did not come back from one.</p>
+          <div class="ag-bp-provs" role="radiogroup">
+            <label class="ag-bp-prov"><input type="radio" name="ag-bp-prov" value="none" checked> <span data-ag-i18n="brain.p.none">no brain — the deterministic router answers</span></label>
+            <label class="ag-bp-prov"><input type="radio" name="ag-bp-prov" value="deepseek"> <span data-ag-i18n="brain.p.deepseek">DeepSeek · your key</span></label>
+            <label class="ag-bp-prov"><input type="radio" name="ag-bp-prov" value="openai"> <span data-ag-i18n="brain.p.openai">OpenAI · your key</span></label>
+            <label class="ag-bp-prov"><input type="radio" name="ag-bp-prov" value="custom"> <span data-ag-i18n="brain.p.custom">any OpenAI-compatible endpoint</span></label>
+            <label class="ag-bp-prov"><input type="radio" name="ag-bp-prov" value="local"> <span data-ag-i18n="brain.p.local">in this browser · WebLLM + WebGPU</span></label>
+          </div>
+          <div class="ag-bp-byok" id="ag-bp-byok" hidden>
+            <label class="ag-bp-field"><span data-ag-i18n="brain.key">API key</span>
+              <input type="password" id="ag-bp-key" autocomplete="off" spellcheck="false" data-ag-i18n-ph="brain.keyph" placeholder="sk-…"></label>
+            <div class="ag-bp-custom" id="ag-bp-custom" hidden>
+              <label class="ag-bp-field"><span data-ag-i18n="brain.base">base URL</span>
+                <input type="text" id="ag-bp-base" autocomplete="off" spellcheck="false" data-ag-i18n-ph="brain.baseph" placeholder="https://…/v1"></label>
+              <label class="ag-bp-field"><span data-ag-i18n="brain.model">model</span>
+                <input type="text" id="ag-bp-model-c" autocomplete="off" spellcheck="false"></label>
+            </div>
+          </div>
+          <div class="ag-bp-local" id="ag-bp-local" hidden>
+            <label class="ag-bp-field"><span data-ag-i18n="brain.model">model</span>
+              <select id="ag-bp-model-l">
+                <option value="Qwen2.5-1.5B-Instruct-q4f16_1-MLC">Qwen2.5 1.5B · ~1.1 GB · tool calling</option>
+                <option value="Qwen2.5-3B-Instruct-q4f16_1-MLC">Qwen2.5 3B · ~2 GB · tool calling</option>
+                <option value="SmolLM2-1.7B-Instruct-q4f16_1-MLC">SmolLM2 1.7B · ~1.1 GB · chat only</option>
+              </select></label>
+            <div class="ag-bp-loadrow">
+              <button type="button" class="ag-bp-load" id="ag-bp-load" data-ag-i18n="brain.load">load the model</button>
+              <div class="ag-bp-prog" id="ag-bp-prog" hidden><div class="ag-bp-prog-fill" id="ag-bp-prog-fill"></div></div>
+              <span class="ag-bp-prog-t" id="ag-bp-prog-t"></span>
+            </div>
+            <p class="ag-bp-gpu" id="ag-bp-gpu"></p>
+          </div>
+          <p class="ag-bp-note" data-ag-i18n="brain.note">The key is written to this browser's localStorage and is sent to nobody except the provider you chose. The tape stays declared-synthetic either way: admission at the gate never means a program earns.</p>
+          <button type="button" class="ag-bp-clear" id="ag-bp-clear" data-ag-i18n="brain.clear">clear the brain</button>
+        </div>
 
         <div class="ag-body">
           <aside class="ag-roster" data-ag-aria="aria.roster">
@@ -358,7 +402,7 @@
             <div class="ag-empty" id="ag-empty">
               <p class="ag-empty-k" data-ag-i18n="empty.k">00b · research agent</p>
               <h3 class="ag-empty-t" data-ag-i18n="empty.t">Ask boat-1.</h3>
-              <p class="ag-empty-s" data-ag-i18n="empty.s">It judges factor expressions, dilutes t-stats and pools evidence — with this site's own instruments, computed in this tab. No model call, no network, no API key.</p>
+              <p class="ag-empty-s" data-ag-i18n="empty.s">It judges factor expressions, evaluates them on a declared market, trains real models on the eight signals and permutation-tests the answer — all computed in this tab. No model call, no network, no API key. Attach a brain (top right) and a real language model answers instead — with the same instruments as its tools, and still no invented numbers.</p>
               <div class="ag-sugg" id="ag-sugg"></div>
             </div>
 
@@ -1592,6 +1636,7 @@
   <script src="bench.js?v=10"></script>
   <script src="gate.js?v=3"></script>
   <script src="ml.js?v=1"></script>
+  <script src="llm.js?v=1"></script>
   <script src="agent.js?v=1"></script>
   <script src="upgrade.js?v=11"></script>
   <script src="i18n.js?term11"></script>

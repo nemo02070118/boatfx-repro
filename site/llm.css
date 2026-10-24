@@ -1,0 +1,308 @@
+/* ==========================================================================
+   BOAT · 00b the brain — chip, settings panel, streamed markdown answers
+   --------------------------------------------------------------------------
+   Consumes styles.css tokens only. The panel is a dropdown anchored inside
+   the agent shell (position: relative), so it overlays the stream without
+   disturbing layout. The markdown answer area reuses the agent's prose
+   metrics so a model answer and an instrument answer read as one voice.
+   ========================================================================== */
+
+/* ------------------------------------------------------------------- chip */
+.ag-brain {
+  appearance: none;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: .68rem;
+  letter-spacing: .05em;
+  padding: .32rem .6rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color .15s ease, border-color .15s ease, background .15s ease;
+}
+
+.ag-brain:hover { color: var(--ink); border-color: var(--accent); }
+
+.ag-brain.is-on {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  background: var(--accent-soft);
+}
+
+.ag-brain.is-on::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: .45em;
+  border-radius: 50%;
+  background: var(--accent);
+  vertical-align: 1px;
+}
+
+/* ------------------------------------------------------------------ panel */
+.ag-brain-panel {
+  position: absolute;
+  top: 3.4rem;
+  right: 1.1rem;
+  z-index: 40;
+  width: min(24rem, calc(100% - 2.2rem));
+  max-height: min(32rem, 70vh);
+  overflow-y: auto;
+  padding: 1rem 1.1rem 1.1rem;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  box-shadow: 0 24px 60px var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: .8rem;
+}
+
+.ag-brain-panel[hidden] { display: none; }
+
+.ag-bp-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.ag-bp-head strong {
+  font-family: var(--mono);
+  font-size: .82rem;
+  letter-spacing: .04em;
+  color: var(--ink);
+}
+
+.ag-bp-x {
+  appearance: none;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: .66rem;
+  letter-spacing: .05em;
+  padding: .22rem .5rem;
+  cursor: pointer;
+}
+
+.ag-bp-x:hover { color: var(--ink); border-color: var(--accent); }
+
+.ag-bp-lead,
+.ag-bp-note,
+.ag-bp-gpu {
+  font-size: .78rem;
+  line-height: 1.55;
+  color: var(--muted);
+  margin: 0;
+}
+
+.ag-bp-note {
+  padding-top: .7rem;
+  border-top: 1px dashed var(--line);
+}
+
+/* ------------------------------------------------------------ providers */
+.ag-bp-provs {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ag-bp-prov {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  padding: .38rem .5rem;
+  font-size: .8rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.ag-bp-prov:hover { background: var(--accent-soft); color: var(--ink); }
+
+.ag-bp-prov input { accent-color: var(--accent); margin: 0; }
+
+.ag-bp-prov:has(input:checked) {
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  background: var(--accent-soft);
+  color: var(--ink);
+}
+
+.ag-bp-byok,
+.ag-bp-local {
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+  padding: .7rem .75rem;
+  border: 1px solid var(--line);
+  background: var(--card);
+}
+
+.ag-bp-byok[hidden], .ag-bp-local[hidden] { display: none; }
+
+.ag-bp-custom {
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+}
+
+.ag-bp-custom[hidden] { display: none; }
+
+.ag-bp-field {
+  display: flex;
+  flex-direction: column;
+  gap: .3rem;
+  font-size: .72rem;
+  color: var(--muted);
+  font-family: var(--mono);
+  letter-spacing: .04em;
+}
+
+.ag-bp-field input,
+.ag-bp-field select {
+  appearance: none;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: .78rem;
+  padding: .42rem .55rem;
+  border-radius: 0;
+}
+
+.ag-bp-field input:focus,
+.ag-bp-field select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* --------------------------------------------------------------- loading */
+.ag-bp-loadrow {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  flex-wrap: wrap;
+}
+
+.ag-bp-load {
+  appearance: none;
+  border: 1px solid var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: .7rem;
+  letter-spacing: .05em;
+  padding: .35rem .7rem;
+  cursor: pointer;
+}
+
+.ag-bp-load:disabled { opacity: .55; cursor: wait; }
+
+.ag-bp-prog {
+  flex: 1 1 6rem;
+  height: 6px;
+  min-width: 4rem;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.ag-bp-prog[hidden] { display: none; }
+
+.ag-bp-prog-fill {
+  height: 100%;
+  width: 0;
+  background: var(--accent);
+  transition: width .25s ease;
+}
+
+.ag-bp-prog-t {
+  font-family: var(--mono);
+  font-size: .68rem;
+  color: var(--muted);
+}
+
+.ag-bp-clear {
+  appearance: none;
+  align-self: flex-start;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: .68rem;
+  letter-spacing: .05em;
+  padding: .32rem .6rem;
+  cursor: pointer;
+}
+
+.ag-bp-clear:hover { color: var(--warn); border-color: var(--warn); }
+
+/* ------------------------------------------------- streamed md answers */
+.ag-md p { margin: 0 0 .55em; }
+.ag-md p:last-child { margin-bottom: 0; }
+
+.ag-md-p { color: var(--ink-soft); }
+
+.ag-md-h {
+  font-family: var(--mono);
+  font-size: .76rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: .7em 0 .35em;
+}
+
+.ag-md-ul {
+  margin: 0 0 .55em;
+  padding-left: 1.1rem;
+  color: var(--ink-soft);
+}
+
+.ag-md-ul li { margin: 0 0 .25em; }
+
+.ag-md code {
+  font-family: var(--mono);
+  font-size: .86em;
+  padding: .08em .32em;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--ink);
+  word-break: break-all;
+}
+
+.ag-md b { color: var(--ink); }
+
+/* the model's badge next to boat-1 — which brain answered */
+.ag-msg-tag {
+  margin-left: .5rem;
+  padding: .1rem .4rem;
+  font-family: var(--mono);
+  font-size: .62rem;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  background: var(--card);
+  vertical-align: 1px;
+}
+
+/* parse echo chip for "→ the model" */
+.ag-parse-chip.is-brain {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  background: var(--accent-soft);
+}
+
+/* ------------------------------------------------------------- narrow */
+@media (max-width: 640px) {
+  .ag-brain-panel {
+    top: auto;
+    right: .6rem;
+    left: .6rem;
+    width: auto;
+    margin-top: .5rem;
+  }
+  .ag-msg-tag { display: none; }
+}
