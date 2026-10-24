@@ -1104,8 +1104,8 @@
     {
       k: t("09 · the receipt", "09 · 收据"),
       title: t("Don't take the numbers on faith", "这些数字不必信我"),
-      body: t("Every figure above has a command behind it. `selftest` re-derives the thresholds, `prove` walks the headline, `share` turns your own run into a link. The site is the receipt.",
-        "上面每个数字背后都有一条命令。`selftest` 重新推导阈值，`prove` 走一遍头条，`share` 把你的运行变成一条链接。站点本身就是收据。"),
+      body: t("Every figure above has a command behind it. selftest re-derives the thresholds, prove walks the headline, share turns your own run into a link. The site is the receipt.",
+        "上面每个数字背后都有一条命令。selftest 重新推导阈值，prove 走一遍头条，share 把你的运行变成一条链接。站点本身就是收据。"),
       metric: t("§07 console · type selftest", "§07 控制台 · 输入 selftest"),
       jump: "proof"
     }
