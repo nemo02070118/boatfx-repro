@@ -184,6 +184,39 @@
         "全局 t 值随兑现状态占比变化的曲线；橙色点是你输入的因子，虚线是 1.96 门槛。") + '">' + parts.join("") + '</svg>';
   }
 
+  /* pooled t as a function of how many factors you put in the pool:
+     mean|t| · √m. The crossing of the allocation hurdle is the number that
+     matters — m* = (2.38 / mean)². */
+  function poolCurve(mean, n) {
+    if (!(mean > 0) || !(n >= 2)) return "";
+    var W = 520, H = 172, L = 46, R = 16, T = 18, B = 32;
+    var top = Math.max(2.9, mean * Math.sqrt(n) * 1.08);
+    var x = function (m) { return L + ((m - 1) / Math.max(1, n - 1)) * (W - L - R); };
+    var y = function (v) { return H - B - (Math.min(v, top) / top) * (H - B - T); };
+    var mStar = Math.pow(ALLOC / mean, 2);
+    var pts = [], m;
+    for (m = 1; m <= n; m++) pts.push(x(m).toFixed(1) + " " + y(mean * Math.sqrt(m)).toFixed(1));
+    var p = [];
+    p.push('<rect x="0" y="0" width="' + W + '" height="' + H + '" fill="none"/>');
+    p.push('<line x1="' + L + '" y1="' + y(0) + '" x2="' + (W - R) + '" y2="' + y(0) + '" stroke="currentColor" stroke-opacity=".22"/>');
+    p.push('<line x1="' + L + '" y1="' + T + '" x2="' + L + '" y2="' + y(0) + '" stroke="currentColor" stroke-opacity=".22"/>');
+    var yA = y(ALLOC);
+    p.push('<line x1="' + L + '" y1="' + yA + '" x2="' + (W - R) + '" y2="' + yA + '" stroke="var(--warn)" stroke-opacity=".6" stroke-dasharray="4 4"/>');
+    p.push('<text x="' + (W - R) + '" y="' + (yA - 5) + '" text-anchor="end">alloc 2.38</text>');
+    p.push('<polyline points="' + pts.join(" ") + '" fill="none" stroke="var(--accent)" stroke-width="1.8"/>');
+    if (mStar >= 1 && mStar <= n) {
+      p.push('<line x1="' + x(mStar) + '" y1="' + yA + '" x2="' + x(mStar) + '" y2="' + y(0) + '" stroke="var(--accent)" stroke-opacity=".4" stroke-dasharray="3 3"/>');
+      p.push('<circle cx="' + x(mStar) + '" cy="' + yA + '" r="4" fill="var(--warn)" stroke="var(--bg)" stroke-width="1.5"/>');
+      p.push('<text x="' + (x(mStar) + 6) + '" y="' + (y(0) - 6) + '">m* ' + f(mStar, 1) + '</text>');
+    }
+    p.push('<text x="' + L + '" y="' + (H - 12) + '">1</text>');
+    p.push('<text x="' + (W - R) + '" y="' + (H - 12) + '" text-anchor="end">' + n + '</text>');
+    p.push('<text x="' + (L + 4) + '" y="' + (T - 5) + '">pooled t · pool size m</text>');
+    return '<svg class="bench-curve bench-poolcurve" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' +
+      t("Pooled t-statistic against the number of factors in the pool; the dashed line is the 2.38 allocation hurdle.",
+        "合并 t 值随池中因子数变化；虚线是 2.38 配置门槛。") + '">' + p.join("") + '</svg>';
+  }
+
   /* --------------------------------------------------------------- markup */
   var root, seriesEl, statTEl, statNEl, libEl, piEl, piOut, nEl, nOut;
   var outEl, verdictEl, readEl, curveWrap, batchWrap, copyBtn;
@@ -294,6 +327,37 @@
     row2.appendChild(demoLib);
     row2.appendChild(el("span", "bench-hint", t("12 synthetic factors · seeded · π on five of them", "12 个合成因子 · 固定种子 · 其中 5 个自带 π")));
     paneBatch.appendChild(row2);
+
+    /* simulate a library — so a visitor with no data of their own can still
+       put the screen under load. Parameters are explicit; nothing is hidden. */
+    var simRow = el("div", "bench-row sim-row");
+    simRow.appendChild(el("span", "bench-hint", t("or simulate:", "或模拟：")));
+    function numBox(val, label, w) {
+      var i = el("input", "bench-num small");
+      i.type = "number";
+      i.value = val;
+      i.setAttribute("aria-label", label);
+      i.title = label;
+      if (w) i.style.width = w;
+      return i;
+    }
+    var simN = numBox("40", t("how many factors", "多少个因子"));
+    var simAlive = numBox("35", t("share with a real home-state edge, %", "有真实状态内优势的比例 %"));
+    var simMu = numBox("2.2", t("typical t inside the state", "状态内典型 t"));
+    simRow.appendChild(simN);
+    simRow.appendChild(el("span", "bench-hint", t("factors ·", "个因子 ·")));
+    simRow.appendChild(simAlive);
+    simRow.appendChild(el("span", "bench-hint", t("% alive ·", "% 有优势 ·")));
+    simRow.appendChild(simMu);
+    simRow.appendChild(el("span", "bench-hint", "t"));
+    var genBtn = el("button", "bench-btn", t("Generate", "生成"));
+    genBtn.type = "button";
+    genBtn.id = "bench-gen";
+    genBtn.addEventListener("click", function () {
+      loadSimLibrary(parseInt(simN.value, 10), parseInt(simAlive.value, 10), parseFloat(simMu.value));
+    });
+    simRow.appendChild(genBtn);
+    paneBatch.appendChild(simRow);
     inp.appendChild(paneBatch);
 
     /* controls */
@@ -417,6 +481,26 @@
     run();
   }
 
+  /* a synthetic library, with its parameters on the surface. The point is not
+     the numbers — it is that the screen's behaviour is visible at any scale. */
+  function loadSimLibrary(n, alivePct, mu) {
+    n = Math.min(Math.max(n || 40, 4), 400);
+    var share = Math.min(Math.max((alivePct || 0) / 100, 0), 1);
+    mu = Math.min(Math.max(mu || 2, 0.5), 6);
+    var u = rng(20261105), lines = [], i;
+    for (i = 0; i < n; i++) {
+      var alive = u() < share;
+      var tState = alive ? Math.max(1.05, mu + gauss(u) * 0.55) : Math.abs(gauss(u)) * 1.15;
+      var pi = 0.03 + u() * 0.32;
+      var id = String(i + 1);
+      while (id.length < 3) id = "0" + id;
+      lines.push("sim_" + id + ", " + tState.toFixed(2) + ", " + pi.toFixed(2));
+    }
+    libEl.value = lines.join("\n");
+    if (mode !== "batch") setMode("batch");
+    run();
+  }
+
   function loadDemoLib() {
     var u = rng(77031);
     var names = ["reversal_5d", "net_quote_demand_rank", "volume_price_corr", "microprice_pressure",
@@ -526,9 +610,11 @@
       pooledMis = misMean * Math.sqrt(misList.length);
     }
     var w = function (x) { return (x / total) * 100; };
-    var piLabel = withPi
-      ? t("each row's own π (slider " + f(pi, 2) + " for the rest)", "每行自带的 π（其余用滑块 " + f(pi, 2) + "）")
-      : "π = " + f(pi, 2);
+    var piLabel = withPi >= total
+      ? t("each row's own π", "每行自带的 π")
+      : withPi
+        ? t("each row's own π (slider " + f(pi, 2) + " for the rest)", "每行自带的 π（其余用滑块 " + f(pi, 2) + "）")
+        : "π = " + f(pi, 2);
 
     verdictEl.dataset.verdict = mis >= total * 0.5 ? "miskill" : (pass >= total * 0.5 ? "pass" : "weak");
     verdictEl.querySelector("b").textContent = t(
@@ -578,7 +664,12 @@
       (misList.length
         ? t(" Mis-killed subset alone pools to " + f(pooledMis, 2) + ".", " 仅被误杀的那 " + misList.length + " 个合并为 " + f(pooledMis, 2) + "。")
         : "") +
+      (mean > 0 && Math.pow(ALLOC / mean, 2) <= total
+        ? t(" You need about " + Math.ceil(Math.pow(ALLOC / mean, 2)) + " of these in the pool to clear the hurdle.",
+          " 大约需要把 " + Math.ceil(Math.pow(ALLOC / mean, 2)) + " 个放进池子才能过这道门槛。")
+        : "") +
       '</p>' +
+      '<div class="bp-curve">' + poolCurve(mean, total) + '</div>' +
       '<p class="bp-caveat">' + t("assumes independent tests; correlation lowers it — which is why the paper reports GRS F = 51 rather than a pooled t.",
         "假设检验相互独立；相关性会拉低它——所以论文报的是 GRS F = 51，而不是一个合并 t。") + '</p>' +
       '</div>';
@@ -723,6 +814,18 @@
         }, 520);
       },
       stats: currentStats,
+      generate: loadSimLibrary,
+      prefill: function (tState, pi) {
+        if (!root) return;
+        setMode("stat");
+        statTEl.value = String(tState);
+        if (pi != null && isFinite(pi)) {
+          piEl.value = String(Math.round(clamp(pi, 0.01, 1) * 100));
+          piOut.textContent = f(parseInt(piEl.value, 10) / 100, 2);
+        }
+        run();
+        root.scrollIntoView({ behavior: "smooth", block: "start" });
+      },
       verdict: function () { return last; }
     };
     window.HJ_BENCH = api;

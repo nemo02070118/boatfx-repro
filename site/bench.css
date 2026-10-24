@@ -403,6 +403,18 @@
 @media (max-width: 560px) {
   .bench-pool .bp-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+.bp-curve { margin: 0.5rem 0 0.2rem; }
+.bp-curve svg { width: 100%; height: auto; display: block; color: var(--ink-soft); }
+.bp-curve text { font-family: var(--mono); font-size: 9px; fill: currentColor; opacity: 0.75; }
+
+/* library simulator row */
+.sim-row { flex-wrap: wrap; align-items: center; }
+.bench-num.small {
+  width: 3.4rem;
+  padding: 0.26rem 0.35rem;
+  font-size: 0.72rem;
+  text-align: center;
+}
 
 /* a quiet entry point from the zoo chart */
 .bench-jump {
