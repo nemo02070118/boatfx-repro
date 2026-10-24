@@ -80,13 +80,17 @@
     for (i = 0; i < raw.length; i++) {
       tok = raw[i].trim();
       if (!tok) continue;
+      /* drop date stamps and index columns so a pasted CSV still works */
+      if (/^\d{4}[-/.]\d{1,2}([-/.]\d{1,2})?$/.test(tok)) continue;
+      if (/^\d{4}-\d{2}-\d{2}T/.test(tok)) continue;
       if (/%$/.test(tok)) {
         v = parseFloat(tok.slice(0, -1));
-        if (isFinite(v)) out.push(v / 100);
+        if (isFinite(v) && Math.abs(v) < 1000) out.push(v / 100);
         continue;
       }
       v = parseFloat(tok);
-      if (isFinite(v)) out.push(v);
+      /* a daily return outside +/-1000% is a parse accident, not a return */
+      if (isFinite(v) && Math.abs(v) < 10) out.push(v);
     }
     return out;
   }
@@ -421,8 +425,11 @@
     if (mode === "series") {
       var xs = parseSeries(seriesEl.value);
       var st = stats(xs);
-      if (!st || st.n < 2 || !isFinite(st.t)) {
+      if (!st || st.n < 2) {
         return paintEmpty(t("Paste at least two numbers to start.", "至少粘贴两个数字开始。"));
+      }
+      if (!(st.sd > 0)) {
+        return paintEmpty(t("This series has no variance — there is nothing to test.", "这段序列没有方差——没有可检验的东西。"));
       }
       tState = Math.abs(st.t);
       nObs = st.n;
