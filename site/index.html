@@ -1525,6 +1525,10 @@
     <button type="button" class="lightbox-close" id="lightbox-close" aria-label="Close">×</button>
     <img id="lightbox-img" alt="" />
   </div>
+  <!-- The shipped sample factors load first: app.js renders the §06 list from
+       them and gate.js draws duplicate proposals from them, so the seeded
+       sampler must never see an empty list. -->
+  <script src="factors.js?v=1"></script>
   <!-- The console's gate/agent/sim commands need these two libraries, and a
        shared ?run= link starts printing the moment upgrade.js executes. Load
        them first so the replay can never outrun them on a slow network. -->
@@ -1532,7 +1536,7 @@
   <script src="gate.js?v=3"></script>
   <script src="upgrade.js?v=11"></script>
   <script src="i18n.js?term11"></script>
-  <script src="app.js?term11"></script>
+  <script src="app.js?term12"></script>
   <script defer src="viz.js?term11"></script>
   <!-- Visit stats: country, referrer, path, browser. Register this exact code at goatcounter.com so the dashboard exists. -->
   <script data-goatcounter="https://nemo020701181.goatcounter.com/count" async src="gc-count.js?v=1"></script>

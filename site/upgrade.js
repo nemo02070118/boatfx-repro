@@ -875,15 +875,25 @@
 
     /* ------------------------------------------- the paper as an instrument */
 
-    /* gate.js and bench.js are separate files. They are self-contained, but a
-       slow network — or any future reordering — can mean the console is asked
-       to run before they exist. Wait for them instead of printing a misleading
-       "not on this page": the command re-enters itself the moment they land. */
-    function whenLibs(fn) {
-      if (window.HJ_GATE && window.HJ_BENCH) { fn(); return; }
+    /* gate.js, bench.js and factors.js are separate files. A slow network — or
+       any future reordering — can mean the console is asked to run before they
+       exist. Wait instead of printing a misleading "not on this page": the
+       command re-enters itself the moment they land. */
+    function haveFactors() {
+      /* SAMPLE_FACTORS is a script-scoped const, so a plain typeof would throw
+         while it is still in its temporal dead zone. */
+      try {
+        return typeof SAMPLE_FACTORS !== "undefined" && SAMPLE_FACTORS && SAMPLE_FACTORS.length > 0;
+      } catch (e) { return false; }
+    }
+    function whenLibs(fn, withFactors) {
+      var ready = function () {
+        return window.HJ_GATE && window.HJ_BENCH && (!withFactors || haveFactors());
+      };
+      if (ready()) { fn(); return; }
       var n = 0;
       (function poll() {
-        if (window.HJ_GATE && window.HJ_BENCH) { fn(); return; }
+        if (ready()) { fn(); return; }
         if (++n > 160) {
           line(t("the gate library did not load — reload the page and run it again",
             "闸门库没有加载成功——刷新页面后再跑一次"), "warn");
@@ -892,10 +902,11 @@
         setTimeout(poll, 50);
       })();
     }
-    function needsLibs(a, self) {
-      if (window.HJ_GATE && window.HJ_BENCH) return false;
+    function needsLibs(a, self, withFactors) {
+      var ready = window.HJ_GATE && window.HJ_BENCH && (!withFactors || haveFactors());
+      if (ready) return false;
       line(t("  waiting for the gate library…", "  正在等待闸门库加载…"), "dim");
-      whenLibs(function () { self.run(a); });
+      whenLibs(function () { self.run(a); }, withFactors);
       return true;
     }
 
@@ -966,7 +977,7 @@
       desc: t("compile a factor through the constitution gate", "把因子送进宪章闸门编译"),
       run: function (a) {
         var G = window.HJ_GATE;
-        if (!G) { if (needsLibs(a, CMD.gate)) return; G = window.HJ_GATE; }
+        if (!G) { if (needsLibs(a, CMD.gate, true)) return; G = window.HJ_GATE; }
 
         if (a[0] === "--sweep") {
           var rows = G.sweep();
@@ -1041,7 +1052,7 @@
       desc: t("let the pipeline run on its own and report what it decided", "让流水线自己跑，并报告它决定了什么"),
       run: function (a) {
         var G = window.HJ_GATE;
-        if (!G) { if (needsLibs(a, CMD.agent)) return; G = window.HJ_GATE; }
+        if (!G) { if (needsLibs(a, CMD.agent, true)) return; G = window.HJ_GATE; }
         var n = 400, i;
         for (i = 0; i < a.length; i++) if (a[i] === "--n" && a[i + 1]) n = parseInt(a[i + 1], 10);
         n = Math.min(Math.max(n || 400, 20), 2000);
