@@ -1501,13 +1501,32 @@
     }
 
     if (REPLAY.length) {
-      /* a shared link is a request to watch: start at once, and bring the block
-         into view only if it is not already on screen. Instant, not smooth —
-         the run is already printing and a glide just delays it. */
+      /* A shared link is a request to watch — but the section is .reveal, and
+         styles.css keeps .reveal at opacity 0 until the IntersectionObserver
+         adds .in (then a further 0.7s transition). On an instant jump the run
+         would print into an invisible box: a link click, a screenshot, or any
+         capture faster than the observer never sees it. Force the reveal on
+         the block's own section, synchronously, so the shared run is always
+         readable the moment it lands. */
+      var host = (block.closest && block.closest(".reveal")) || null;
+      if (host) {
+        host.classList.add("in");
+        var hostTr = host.style.transition;
+        host.style.transition = "none";
+        host.style.opacity = "1";
+        host.style.transform = "none";
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            host.style.transition = hostTr;
+          });
+        });
+      }
       boot();
       /* the page is still growing (lazy vizzes, images), so a single scroll can
-         clamp to a short document. Retry a few times, and stop the moment the
-         block is actually on screen. */
+         clamp to a short document. Jump the instant the link lands — a shared
+         run is a request to watch, and a capture 300ms in must already show
+         the console, not the hero — then retry while the layout settles, and
+         stop the moment the block is actually on screen. */
       var tries = 0;
       function ensureVisible() {
         var r = block.getBoundingClientRect();
@@ -1521,8 +1540,9 @@
         root.style.scrollBehavior = "auto";
         window.scrollTo(0, Math.max(0, y));
         root.style.scrollBehavior = prev;
-        if (++tries < 4) setTimeout(ensureVisible, 500 + tries * 250);
+        if (++tries < 6) setTimeout(ensureVisible, 500 + tries * 250);
       }
+      ensureVisible();
       setTimeout(ensureVisible, 650);
     } else if ("IntersectionObserver" in window) {
       var io = new IntersectionObserver(function (es) {
