@@ -192,6 +192,29 @@ html { overflow-x: clip; }
   transition: background 0.15s ease, border-color 0.15s ease;
 }
 .term-foot .tf-share:hover { background: rgba(158, 203, 255, 0.14); border-color: rgba(158, 203, 255, 0.55); }
+
+/* the bar has to stay one line on a phone, and the badge is the part that
+   carries information — the path label is allowed to ellipsize instead */
+@media (max-width: 600px) {
+  .terminal-block .terminal-bar { flex-wrap: nowrap; }
+  .terminal-block .term-out { font-size: 0.78rem; }
+  .terminal-block .term-in { font-size: 0.78rem; }
+  .terminal-block .terminal-bar i {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .terminal-block .term-badge {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    font-size: 0.56rem;
+    letter-spacing: 0.06em;
+    padding: 0.1rem 0.35rem;
+  }
+  .term-foot { gap: 0.35rem; }
+  .term-foot .tf-share { margin-left: 0; }
+}
 .term-foot kbd {
   font-family: var(--mono);
   border: 1px solid #2a333f;

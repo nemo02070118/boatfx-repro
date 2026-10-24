@@ -602,8 +602,11 @@
 
         line("selftest · " + rows.length + " checks · every one computed in this tab", "head");
         gap();
+        var narrow = window.innerWidth < 600;
         rows.forEach(function (r) {
-          line("  " + (r[3] ? "✓" : "✗") + " " + pad(r[0], 24) + pad(fmt(r[1], 4), 9) + "= " + fmt(r[2], 3),
+          line("  " + (r[3] ? "✓" : "✗") + " " +
+            (narrow ? r[0] + "  " + fmt(r[1], 4) + " = " + fmt(r[2], 3)
+              : pad(r[0], 24) + pad(fmt(r[1], 4), 9) + "= " + fmt(r[2], 3)),
             r[3] ? "" : "warn");
         });
         gap();
