@@ -1,0 +1,329 @@
+/* ==========================================================================
+   BOAT · in-place upgrade layer
+   Loaded AFTER styles.css / viz.css, BEFORE app.js.
+   Nothing here replaces an existing rule — it only adds new components in the
+   same token system (--mono / --display / --accent / --line / --paper).
+   ========================================================================== */
+
+/* ---------------------------------------------------------------- 1. HAA gate */
+/* The original hero lets the secondary portrait hang 8% past its column, which
+   pushed an 11px horizontal scrollbar at 1200-1400px. Clip at the viewport
+   instead of at the section, so the overhang still reads as intentional. */
+html { overflow-x: clip; }
+
+.haa-gate {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.6rem;
+  margin: 0;
+  padding: 0.5rem clamp(1rem, 4vw, 3rem);
+  border-bottom: 1px solid var(--line);
+  background: var(--paper);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  color: var(--ink-soft);
+}
+.haa-gate b {
+  color: var(--ink);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+.haa-gate .haa-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+  animation: haaPulse 2.4s ease-in-out infinite;
+}
+@keyframes haaPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+.haa-gate .haa-sep { color: var(--muted); }
+.haa-gate .haa-note { color: var(--muted); }
+.haa-gate .haa-note-short { display: none; color: var(--muted); }
+.haa-gate .haa-actions {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.haa-gate button,
+.haa-gate a {
+  font: inherit;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--line);
+  padding: 0.3rem 0.6rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+.haa-gate button:hover,
+.haa-gate a:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--ink);
+}
+.haa-gate .haa-primary {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+@media (max-width: 720px) {
+  .haa-gate { font-size: 0.66rem; padding: 0.45rem 1rem; }
+  .haa-gate .haa-note { display: none; }
+  .haa-gate .haa-note-short { display: inline; }
+  .haa-gate .haa-sep { display: none; }
+  .haa-gate .haa-actions { margin-left: 0; width: 100%; }
+}
+
+/* ------------------------------------------------------- 2. live console */
+.terminal-block .term-badge {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  color: #6dcea8;
+  border: 1px solid rgba(109, 206, 168, 0.35);
+  padding: 0.1rem 0.4rem;
+  line-height: 1.4;
+}
+.term-shell {
+  background: #0a1018;
+  display: flex;
+  flex-direction: column;
+}
+.term-out {
+  padding: 1rem 1.15rem 0.25rem;
+  min-height: 7rem;
+  max-height: 21rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: #d7e0ea;
+  scrollbar-width: thin;
+}
+.term-out::-webkit-scrollbar { width: 8px; }
+.term-out::-webkit-scrollbar-thumb { background: #2a333f; }
+.term-line { margin: 0; white-space: pre-wrap; word-break: break-word; }
+.term-line.cmd { color: #9ecbff; }
+.term-line.ok { color: #6dcea8; }
+.term-line.warn { color: #e0894f; }
+.term-line.dim { color: #7f8a99; }
+.term-line.head { color: #e8eef4; font-weight: 600; }
+.term-line.gap { height: 0.55rem; }
+.term-form {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 1.15rem 0.8rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  background: #0a1018;
+}
+.term-ps {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: #6dcea8;
+  white-space: nowrap;
+  user-select: none;
+}
+.term-in {
+  flex: 1 1 auto;
+  min-width: 0;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  color: #e8eef4;
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  caret-color: #6dcea8;
+}
+.term-in::placeholder { color: #5c6675; }
+.term-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0 1.15rem 0.85rem;
+  background: #0a1018;
+}
+.term-chips button {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: #9ecbff;
+  background: rgba(158, 203, 255, 0.07);
+  border: 1px solid rgba(158, 203, 255, 0.22);
+  padding: 0.22rem 0.5rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.term-chips button:hover { background: rgba(158, 203, 255, 0.16); }
+.term-foot {
+  padding: 0 1.15rem 0.75rem;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  color: #5c6675;
+  background: #0a1018;
+}
+.term-foot kbd {
+  font-family: var(--mono);
+  border: 1px solid #2a333f;
+  padding: 0 0.25rem;
+  color: #8a93a3;
+}
+
+/* a one-line bridge inside the #terminal showcase */
+.term-bridge {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--line);
+  background: var(--card);
+  font-family: var(--mono);
+  font-size: 0.76rem;
+  color: var(--ink-soft);
+}
+.term-bridge .tb-prompt { color: var(--accent); }
+.term-bridge a {
+  margin-left: auto;
+  color: var(--ink);
+  border-bottom: 1px solid var(--accent);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.term-bridge a:hover { color: var(--accent); }
+
+/* --------------------------------------------------- 3. reviewer 60s path */
+.path-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(6, 9, 13, 0.72);
+  backdrop-filter: blur(6px);
+}
+.path-modal[hidden] { display: none; }
+.path-shell {
+  width: min(640px, 100%);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  box-shadow: 0 24px 80px var(--shadow);
+  display: flex;
+  flex-direction: column;
+  max-height: min(84vh, 640px);
+}
+.path-head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.path-head .ph-count { color: var(--ink); }
+.path-close {
+  margin-left: auto;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  width: 1.9rem;
+  height: 1.9rem;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+}
+.path-close:hover { border-color: var(--accent); color: var(--accent); }
+.path-body {
+  padding: 1.4rem 1.4rem 0.6rem;
+  overflow-y: auto;
+}
+.path-k {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.path-body h3 {
+  font-family: var(--display);
+  font-size: clamp(1.35rem, 3vw, 1.85rem);
+  line-height: 1.15;
+  margin: 0.5rem 0 0.6rem;
+  letter-spacing: -0.01em;
+}
+.path-body p {
+  margin: 0 0 0.9rem;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+.path-body .path-metric {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+  border-left: 2px solid var(--accent);
+  padding-left: 0.6rem;
+  margin-bottom: 1rem;
+}
+.path-jump {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 0.4rem 0.7rem;
+  text-decoration: none;
+  cursor: pointer;
+  background: transparent;
+}
+.path-jump:hover { border-color: var(--accent); color: var(--accent); }
+.path-foot {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.9rem 1.4rem 1.1rem;
+  border-top: 1px solid var(--line);
+}
+.path-foot button {
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  padding: 0.4rem 0.8rem;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+.path-foot button:hover { border-color: var(--accent); color: var(--accent); }
+.path-dots {
+  display: flex;
+  gap: 0.3rem;
+  margin: 0 auto;
+}
+.path-dots i {
+  width: 6px;
+  height: 6px;
+  background: var(--line);
+  display: block;
+}
+.path-dots i.on { background: var(--accent); }
+@media (max-width: 560px) {
+  .path-body { padding: 1.1rem 1rem 0.4rem; }
+  .path-foot { padding: 0.8rem 1rem 1rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .haa-gate .haa-dot { animation: none; }
+}
