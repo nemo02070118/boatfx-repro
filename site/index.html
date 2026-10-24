@@ -38,6 +38,8 @@
   <link rel="stylesheet" href="upgrade.css?v=9" />
   <link rel="stylesheet" href="bench.css?v=8" />
   <link rel="stylesheet" href="gate.css?v=3" />
+  <link rel="stylesheet" href="agent.css?v=1" />
+  <link rel="stylesheet" href="ml.css?v=1" />
 </head>
 <body>
   <div class="progress" id="progress" aria-hidden="true"></div>
@@ -182,7 +184,7 @@
 
     <div class="marquee" aria-hidden="true">
       <div class="marquee-track">
-        <span>BOAT Terminal · OpenClaw</span>
+        <span>BOAT Terminal · boat-1 agent</span>
         <span>600519.SH · Ising High</span>
         <span>V12 Sharpe 2.595</span>
         <span>¥50k → ~¥1.00M</span>
@@ -226,11 +228,11 @@
     <section id="terminal" class="section reveal terminal-showcase">
       <div class="term-beacon" aria-hidden="true">
         <span class="term-beacon-live"></span>
-        <span data-i18n="term.beacon">DESK LIVE · OPENCLAW PARLIAMENT · 600519.SH</span>
+        <span data-i18n="term.beacon">DESK LIVE · BOAT-1 AGENT · 600519.SH</span>
       </div>
 
       <p class="section-kicker" data-i18n="term.kicker">00 · BOAT Terminal</p>
-      <h2 data-i18n="term.title">A full-stack quant desk — Chanlun · physics · factors · multi-agent parliament</h2>
+      <h2 data-i18n="term.title">A full-stack quant desk — Chanlun · physics · factors · a research agent that computes</h2>
       <p class="section-lede" data-i18n="term.lede">
         Nearly one year of nights shipping a usable terminal: Rust for the compute core, Python for strategies and AI, Flutter for the desk UI.
         Walkthrough lens is 600519.SH (Moutai). Posted to learn in public — backtests labeled as backtests, personal A-share book labeled separately from the JF paper track.
@@ -250,7 +252,7 @@
       <div class="term-meta">
         <div><span data-i18n="term.m1s">Stack</span><b>Rust · Python · Flutter</b></div>
         <div><span data-i18n="term.m2s">Lens</span><b data-i18n="term.m2b">600519.SH · Moutai walkthrough</b></div>
-        <div><span data-i18n="term.m3s">Agents</span><b data-i18n="term.m3b">6-lane parliament · DeepSeek</b></div>
+        <div><span data-i18n="term.m3s">Agents</span><b data-i18n="term.m3b">boat-1 agent · 0 network calls</b></div>
         <div><span data-i18n="term.m4s">Personal book</span><b data-i18n="term.m4b">¥50k → ~¥1.00M A-share</b></div>
       </div>
 
@@ -272,8 +274,8 @@
         </article>
         <article>
           <span class="term-cap-k" data-i18n="term.c4k">Agency</span>
-          <h3 data-i18n="term.c4t">OpenClaw parliament</h3>
-          <p data-i18n="term.c4p">Six specialists speak in lane order; Captain tallies a falsifiable verdict. Demo below — real desk wires DeepSeek.</p>
+          <h3 data-i18n="term.c4t">Research agent</h3>
+          <p data-i18n="term.c4p">boat-1 judges factors, evaluates them on a declared market, trains real models on them and permutation-tests the result — every number computed in this tab. Try it below.</p>
         </article>
       </div>
 
@@ -288,49 +290,104 @@
         </article>
         <article>
           <h3 data-i18n="term.p3t">What to pressure-test</h3>
-          <p data-i18n="term.p3p">Ask the parliament hard questions below. Collaboration depth is the open research problem — if you have built agent meshes, tell me where this is naive.</p>
+          <p data-i18n="term.p3p">Ask boat-1 hard questions below. It answers only from instruments that run in this tab — and says so when it can't.</p>
         </article>
       </div>
 
-      <!-- Professional multi-agent dialog -->
-      <div class="ai-parliament" id="ai-parliament" aria-label="Multi-agent dialogue">
-        <header class="ai-parliament-bar">
-          <div class="ai-brand">
-            <span class="ai-dot"></span>
-            <strong data-i18n="term.ai.brand">OpenClaw · Agent Parliament</strong>
+      <!-- 00b · boat-1 research agent — every answer computed in this tab -->
+      <div class="ag-shell" id="boat-agent">
+        <header class="ag-bar">
+          <span class="ag-dot" aria-hidden="true"></span>
+          <strong class="ag-brand" data-ag-i18n="brand">boat-1</strong>
+          <span class="ag-ver" data-ag-i18n="ver">engine v1.0 · local</span>
+          <span class="ag-sep" aria-hidden="true"></span>
+          <span class="ag-ctx mono">600519.SH</span>
+          <span class="ag-ctx2" data-ag-i18n="ctx">Moutai · daily</span>
+          <span class="ag-grow"></span>
+          <div class="ag-modes" role="group" data-ag-aria="aria.modes">
+            <button type="button" class="ag-mode is-on" data-mode="auto" aria-pressed="true" data-ag-i18n="m.auto">Auto</button>
+            <button type="button" class="ag-mode" data-mode="gate" aria-pressed="false" data-ag-i18n="m.gate">Gate</button>
+            <button type="button" class="ag-mode" data-mode="paper" aria-pressed="false" data-ag-i18n="m.paper">Paper</button>
+            <button type="button" class="ag-mode" data-mode="desk" aria-pressed="false" data-ag-i18n="m.desk">Desk</button>
+            <button type="button" class="ag-mode" data-mode="library" aria-pressed="false" data-ag-i18n="m.library">Library</button>
+            <button type="button" class="ag-mode" data-mode="learn" aria-pressed="false" data-ag-i18n="m.learn">Learn</button>
           </div>
-          <div class="ai-context">
-            <span class="mono">600519.SH</span>
-            <span data-i18n="term.ai.ctx">Moutai · daily · demo session</span>
-          </div>
-          <div class="ai-phase" id="ai-phase" aria-live="polite">
-            <span data-phase="brief">Brief</span>
-            <span data-phase="speak">Speak</span>
-            <span data-phase="vote">Vote</span>
-            <span data-phase="verdict">Verdict</span>
-          </div>
-          <div class="ai-status" id="ai-status" data-i18n="term.ai.status">6 agents online</div>
+          <button type="button" class="ag-think is-on" id="ag-think" aria-pressed="true" data-ag-i18n="think.on">Think · on</button>
+          <span class="ag-status" id="ag-status" data-ag-i18n="status.ready">ready</span>
         </header>
 
-        <div class="ai-parliament-body">
-          <aside class="ai-roster" id="ai-roster" aria-label="Agents"></aside>
-          <div class="ai-stream-wrap">
-            <div class="ai-stream" id="ai-stream" role="log" aria-live="polite"></div>
-            <div class="ai-verdict" id="ai-verdict" hidden></div>
-            <div class="ai-composer">
-              <div class="ai-chip-groups" id="ai-chip-groups"></div>
-              <form class="ai-form" id="ai-form">
-                <input type="text" id="ai-input" autocomplete="off" data-i18n-placeholder="term.ai.ph" placeholder="Ask the parliament about 600519.SH…" />
-                <button type="button" class="btn ghost" id="ai-rerun" data-i18n="term.ai.rerun">Replay</button>
-                <button type="submit" class="btn primary" data-i18n="term.ai.send">Send</button>
-              </form>
-              <p class="ai-note" data-i18n="term.ai.note">High-fidelity demo replay · DeepSeek-shaped lanes · not live brokerage advice · Pages never holds API keys</p>
+        <div class="ag-body">
+          <aside class="ag-roster" data-ag-aria="aria.roster">
+            <p class="ag-roster-h" data-ag-i18n="roster.h">Instruments</p>
+            <button type="button" class="ag-tool" data-tool="gate" style="--ac:#5ec9a8">
+              <b>gate.check</b><span data-ag-i18n="t.gate.d">judge a factor expression · 9 gates</span>
+            </button>
+            <button type="button" class="ag-tool" data-tool="dilute" style="--ac:#a78bfa">
+              <b>paper.dilute</b><span data-ag-i18n="t.dilute.d">Prop. 2 · t_g = t·√π</span>
+            </button>
+            <button type="button" class="ag-tool" data-tool="hurdle" style="--ac:#38bdf8">
+              <b>paper.hurdle</b><span data-ag-i18n="t.hurdle.d">discovery wall · √(2 ln N)</span>
+            </button>
+            <button type="button" class="ag-tool" data-tool="pool" style="--ac:#2c5f7c">
+              <b>paper.pool</b><span data-ag-i18n="t.pool.d">Stouffer · pooled t</span>
+            </button>
+            <button type="button" class="ag-tool" data-tool="autopsy" style="--ac:#fb923c">
+              <b>bench.stats</b><span data-ag-i18n="t.autopsy.d">last autopsy-bench numbers</span>
+            </button>
+            <button type="button" class="ag-tool" data-tool="library" style="--ac:#fbbf24">
+              <b>gate.funnel</b><span data-ag-i18n="t.library.d">seeded proposal funnel</span>
+            </button>
+            <button type="button" class="ag-tool" data-tool="mleval" style="--ac:#22d3ee">
+              <b>ml.evaluate</b><span data-ag-i18n="t.mleval.d">a factor on the declared market · IC, t, Sharpe</span>
+            </button>
+            <button type="button" class="ag-tool" data-tool="train" style="--ac:#a3e635">
+              <b>ml.train</b><span data-ag-i18n="t.mltrain.d">logistic + ridge · real gradient descent</span>
+            </button>
+            <button type="button" class="ag-tool" data-tool="placebo" style="--ac:#fb7185">
+              <b>ml.placebo</b><span data-ag-i18n="t.mlplacebo.d">permutation test · null distribution + p</span>
+            </button>
+            <button type="button" class="ag-tool" data-tool="market" style="--ac:#818cf8">
+              <b>ml.market</b><span data-ag-i18n="t.mlmarket.d">the declared generative process</span>
+            </button>
+            <p class="ag-roster-f" data-ag-i18n="roster.f">Every call runs in this tab.</p>
+          </aside>
+
+          <div class="ag-main">
+            <div class="ag-stream" id="ag-stream" role="log" aria-live="off"></div>
+
+            <div class="ag-empty" id="ag-empty">
+              <p class="ag-empty-k" data-ag-i18n="empty.k">00b · research agent</p>
+              <h3 class="ag-empty-t" data-ag-i18n="empty.t">Ask boat-1.</h3>
+              <p class="ag-empty-s" data-ag-i18n="empty.s">It judges factor expressions, dilutes t-stats and pools evidence — with this site's own instruments, computed in this tab. No model call, no network, no API key.</p>
+              <div class="ag-sugg" id="ag-sugg"></div>
             </div>
+
+            <p class="ag-live" id="ag-live" role="status" aria-live="polite"></p>
+
+            <form class="ag-form" id="ag-form">
+              <div class="ag-parse" id="ag-parse" hidden></div>
+              <div class="ag-row">
+                <textarea id="ag-input" class="ag-input" rows="1" autocomplete="off" spellcheck="false" data-ag-i18n-ph="ph.0" placeholder="judge Rank(Mean[10](BestAsk - BestBid) / MidPrice) — order-book imbalance…"></textarea>
+                <button type="submit" class="ag-send btn primary" id="ag-send" data-ag-i18n="send">Send</button>
+                <button type="button" class="ag-stop btn ghost" id="ag-stop" hidden data-ag-i18n="stop">Stop</button>
+              </div>
+              <p class="ag-note" data-ag-i18n="note">computed in this tab · 0 network requests · open DevTools and watch</p>
+            </form>
           </div>
-          <aside class="ai-rail" aria-label="Session rail">
-            <div class="ai-consensus" id="ai-consensus"></div>
-            <div class="ai-session" id="ai-session"></div>
-            <div class="ai-metrics" id="ai-metrics"></div>
+
+          <aside class="ag-rail" data-ag-aria="aria.rail">
+            <div class="ag-panel">
+              <p class="ag-panel-h" data-ag-i18n="rail.session">Session</p>
+              <div class="ag-kv" id="ag-kv-session"></div>
+            </div>
+            <div class="ag-panel">
+              <p class="ag-panel-h" data-ag-i18n="rail.canon">§05b canonical funnel</p>
+              <div class="ag-canon" id="ag-canon"></div>
+            </div>
+            <div class="ag-panel">
+              <p class="ag-panel-h" data-ag-i18n="rail.jump">Jump</p>
+              <div class="ag-jumps" id="ag-jumps"></div>
+            </div>
           </aside>
         </div>
       </div>
@@ -338,7 +395,7 @@
       <div class="term-figures">
         <div class="term-fig-head">
           <h3 data-i18n="term.fig.h">Figures · Moutai desk walkthrough</h3>
-          <p data-i18n="term.fig.sub">Click any panel to expand. Same tape the parliament is debating.</p>
+          <p data-i18n="term.fig.sub">Click any panel to expand. Same tape boat-1 reasons over.</p>
         </div>
         <div class="term-fig-grid" id="term-gallery">
           <button type="button" class="term-fig term-fig-hero" data-full="assets/terminal/term-1.webp">
@@ -1534,6 +1591,8 @@
        them first so the replay can never outrun them on a slow network. -->
   <script src="bench.js?v=10"></script>
   <script src="gate.js?v=3"></script>
+  <script src="ml.js?v=1"></script>
+  <script src="agent.js?v=1"></script>
   <script src="upgrade.js?v=11"></script>
   <script src="i18n.js?term11"></script>
   <script src="app.js?term12"></script>

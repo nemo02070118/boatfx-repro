@@ -798,6 +798,10 @@
     window.HJ_GATE = {
       check: check,
       funnel: funnel,
+      /* the gate's own parser, exposed so the learning bench can evaluate a
+         factor as a time series instead of judging it as a proposal */
+      parse: function (src) { return parse(src); },
+      signals: SIGNALS.slice(),
       sweep: function () {
         return shipped().map(function (f) {
           var r = check(canonToText(f.expr), "shipped sample factor: " + f.name, { admitted: true });

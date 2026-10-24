@@ -1,0 +1,88 @@
+/* ==========================================================================
+   BOAT · 04c learning bench charts
+   --------------------------------------------------------------------------
+   Inline SVG charts the agent streams into its answers: the factor series,
+   the logistic loss curve, and the placebo null distribution. Everything
+   consumes styles.css tokens and the message's own --ac lane colour, so the
+   charts follow light/dark and the intent that produced them.
+   ========================================================================== */
+
+.agc-chart {
+  margin: .55rem 0 .2rem;
+  padding: .5rem .65rem .3rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--ink) 3%, transparent);
+  overflow: hidden;
+}
+
+.agc-cap {
+  margin: 0 0 .3rem;
+  font-family: var(--mono);
+  font-size: .64rem;
+  letter-spacing: .02em;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.agc-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* line chart ------------------------------------------------------------- */
+.agc-grid {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+.agc-area {
+  fill: color-mix(in srgb, var(--ac, var(--accent)) 12%, transparent);
+  stroke: none;
+}
+.agc-line {
+  fill: none;
+  stroke: var(--ac, var(--accent));
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.agc-pt {
+  fill: var(--ac, var(--accent));
+}
+
+/* histogram -------------------------------------------------------------- */
+.agc-axisline {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+.agc-bar {
+  fill: color-mix(in srgb, var(--ac, var(--accent)) 52%, transparent);
+  stroke: none;
+}
+.agc-screen {
+  stroke: var(--muted);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+.agc-real {
+  stroke: var(--warn);
+  stroke-width: 1.6;
+}
+.agc-axis {
+  fill: var(--muted);
+  font-family: var(--mono);
+  font-size: 9px;
+}
+.agc-real-t {
+  fill: var(--warn);
+  font-weight: 600;
+}
+
+/* narrow screens: the charts keep their aspect, they just get shorter */
+@media (max-width: 640px) {
+  .agc-chart { padding: .45rem .5rem .25rem; }
+  .agc-cap { font-size: .6rem; }
+}
