@@ -813,6 +813,15 @@
     };
   }
 
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
-  else init();
+  /* This is a classic script at the end of <body>, so #factory is already in
+     the DOM by the time it runs. Initialise now instead of on DOMContentLoaded:
+     upgrade.js loads immediately after this file and hands HJ_GATE to the
+     console, and a shared ?run= link starts printing before that event fires.
+     Language resolution reads localStorage, so the labels are the same either
+     way, and hj:lang still relabels on toggle. */
+  if (document.readyState === "loading" && !document.getElementById("factory")) {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
 })();

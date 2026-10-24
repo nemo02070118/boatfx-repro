@@ -831,7 +831,12 @@
     window.HJ_BENCH = api;
   }
 
-  if (document.readyState === "loading") {
+  /* Same reasoning as gate.js: the host node is already parsed by the time this
+     end-of-body script runs, so initialise now rather than on DOMContentLoaded.
+     Language resolution reads localStorage, so the labels are identical either
+     way, and hj:lang still relabels on toggle. */
+  if (document.readyState === "loading" &&
+      !document.querySelector("#machine .viz[data-viz='zoo']")) {
     document.addEventListener("DOMContentLoaded", init);
   } else {
     init();
