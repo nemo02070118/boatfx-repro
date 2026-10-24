@@ -630,7 +630,14 @@
               : t("opening 04b · Autopsy bench — paste a return series", "正在打开 04b · 误杀解剖台——粘贴一段收益序列"), "ok");
           window.HJ_BENCH.focus(mode);
         } else {
-          line("bench not loaded", "warn");
+          whenLibs(function () {
+            line(mode === "batch"
+              ? t("opening 04b · Autopsy bench — paste your library, one factor per line", "正在打开 04b · 误杀解剖台——粘贴你的因子库，每行一个")
+              : mode === "stat"
+                ? t("opening 04b · Autopsy bench — type the t-stat you already have", "正在打开 04b · 误杀解剖台——直接输入你已有的 t 值")
+                : t("opening 04b · Autopsy bench — paste a return series", "正在打开 04b · 误杀解剖台——粘贴一段收益序列"), "ok");
+            window.HJ_BENCH.focus(mode);
+          });
         }
       }
     };
@@ -868,6 +875,30 @@
 
     /* ------------------------------------------- the paper as an instrument */
 
+    /* gate.js and bench.js are separate files. They are self-contained, but a
+       slow network — or any future reordering — can mean the console is asked
+       to run before they exist. Wait for them instead of printing a misleading
+       "not on this page": the command re-enters itself the moment they land. */
+    function whenLibs(fn) {
+      if (window.HJ_GATE && window.HJ_BENCH) { fn(); return; }
+      var n = 0;
+      (function poll() {
+        if (window.HJ_GATE && window.HJ_BENCH) { fn(); return; }
+        if (++n > 160) {
+          line(t("the gate library did not load — reload the page and run it again",
+            "闸门库没有加载成功——刷新页面后再跑一次"), "warn");
+          return;
+        }
+        setTimeout(poll, 50);
+      })();
+    }
+    function needsLibs(a, self) {
+      if (window.HJ_GATE && window.HJ_BENCH) return false;
+      line(t("  waiting for the gate library…", "  正在等待闸门库加载…"), "dim");
+      whenLibs(function () { self.run(a); });
+      return true;
+    }
+
     CMD.plot = {
       desc: t("draw the paper's curves", "画出论文的曲线"),
       run: function (a) {
@@ -935,7 +966,7 @@
       desc: t("compile a factor through the constitution gate", "把因子送进宪章闸门编译"),
       run: function (a) {
         var G = window.HJ_GATE;
-        if (!G) { line("the gate is not on this page — open §05b", "warn"); return; }
+        if (!G) { if (needsLibs(a, CMD.gate)) return; G = window.HJ_GATE; }
 
         if (a[0] === "--sweep") {
           var rows = G.sweep();
@@ -1010,7 +1041,7 @@
       desc: t("let the pipeline run on its own and report what it decided", "让流水线自己跑，并报告它决定了什么"),
       run: function (a) {
         var G = window.HJ_GATE;
-        if (!G) { line("the gate is not on this page — open §05b", "warn"); return; }
+        if (!G) { if (needsLibs(a, CMD.agent)) return; G = window.HJ_GATE; }
         var n = 400, i;
         for (i = 0; i < a.length; i++) if (a[i] === "--n" && a[i + 1]) n = parseInt(a[i + 1], 10);
         n = Math.min(Math.max(n || 400, 20), 2000);
@@ -1114,7 +1145,7 @@
       desc: t("generate a factor library and pool it", "生成一个因子库并做合并"),
       run: function (a) {
         var B = window.HJ_BENCH;
-        if (!B || !B.generate) { line("the bench is not on this page — open §04b", "warn"); return; }
+        if (!B || !B.generate) { if (needsLibs(a, CMD.sim)) return; B = window.HJ_BENCH; }
         var n = 40, alive = 70, mu = 2.4, i;
         for (i = 0; i < a.length; i++) {
           if (a[i] === "--n" && a[i + 1]) n = parseInt(a[i + 1], 10);

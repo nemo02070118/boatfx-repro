@@ -1525,9 +1525,12 @@
     <button type="button" class="lightbox-close" id="lightbox-close" aria-label="Close">×</button>
     <img id="lightbox-img" alt="" />
   </div>
-  <script src="upgrade.js?v=9"></script>
+  <!-- The console's gate/agent/sim commands need these two libraries, and a
+       shared ?run= link starts printing the moment upgrade.js executes. Load
+       them first so the replay can never outrun them on a slow network. -->
   <script src="bench.js?v=9"></script>
   <script src="gate.js?v=2"></script>
+  <script src="upgrade.js?v=10"></script>
   <script src="i18n.js?term11"></script>
   <script src="app.js?term11"></script>
   <script defer src="viz.js?term11"></script>
