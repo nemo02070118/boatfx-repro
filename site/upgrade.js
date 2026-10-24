@@ -729,7 +729,13 @@
         setTimeout(function () { line(b[0], b[1]); }, 90 + i * 120);
       });
       setTimeout(function () {
-        if (!HISTORY.length) runCommand("help");
+        if (HISTORY.length) return;
+        gap();
+        line(t("most useful first", "最常用的先来"), "ok");
+        line("  " + pad("diagnose --t 2.40 --pi 0.25", 32) + t("is this factor killed?", "这个因子会被杀掉吗？"));
+        line("  " + pad("autopsy", 32) + t("test your own data", "测你自己的数据"));
+        line("  " + pad("prove", 32) + t("headline arithmetic", "头条数字验算"));
+        line("  " + pad("help", 32) + t("full command list", "全部命令"));
       }, 380);
     }
     if ("IntersectionObserver" in window) {
