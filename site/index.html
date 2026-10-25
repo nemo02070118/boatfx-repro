@@ -476,6 +476,17 @@
               </div>
               <p class="ag-note" data-ag-i18n="note">computed in this tab · 0 network requests · open DevTools and watch</p>
             </form>
+            <details class="ag-wb" id="ag-wb">
+              <summary data-ag-i18n="wb.h">Factor workbench — your factors, our machinery</summary>
+              <p class="ag-wb-p" data-ag-i18n="wb.p">Paste a library — one “name, t” per line, or “name :: formula”, or bare expressions, or sharpe= for your own strategy — or load a .txt/.csv file. It is measured here, then run through both ways: the universal screen against home-venue routing plus pooling.</p>
+              <textarea class="ag-wb-ta" id="ag-wb-ta" rows="4" spellcheck="false" placeholder="alpha, 2.60&#10;beta, 2.45&#10;gamma, 2.50&#10;delta, 1.20&#10;epsilon, 3.00"></textarea>
+              <div class="ag-wb-row">
+                <input type="file" id="ag-wb-file" accept=".txt,.csv,.md" hidden />
+                <button type="button" class="btn ghost" id="ag-wb-upload" data-ag-i18n="wb.upload">load a file</button>
+                <button type="button" class="btn primary" id="ag-wb-run" data-ag-i18n="wb.run">run it</button>
+                <span class="ag-wb-note" data-ag-i18n="wb.note">computed in this tab · nothing leaves the page</span>
+              </div>
+            </details>
           </div>
 
           <aside class="ag-rail" data-ag-aria="aria.rail">
@@ -1701,7 +1712,7 @@
        first. Terminal commands that need it wait for it (whenAgent). -->
   <script>
   (function () {
-    var files = ["engines.js?v=1", "council.js?v=1", "zoo.js?v=1", "guide.js?v=1", "whatif.js?v=1", "llm.js?v=1", "agent.js?v=1"];
+    var files = ["engines.js?v=1", "council.js?v=1", "zoo.js?v=1", "guide.js?v=1", "whatif.js?v=1", "workbench.js?v=1", "llm.js?v=1", "agent.js?v=1"];
     var done = false;
     function load(i) {
       if (i >= files.length) return;

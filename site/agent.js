@@ -1,5 +1,5 @@
 /* ==========================================================================
-   BOAT · 00b boat-1 research agent
+   BOAT-2 · 00b research agent — author: 金宦年
    --------------------------------------------------------------------------
    Not a replay. A free-text router extracts parameters from whatever you
    type, then calls the instruments this page already ships:
@@ -32,7 +32,7 @@
 
   var AG_I18N = {
     en: {
-      "brand": "boat-1",
+      "brand": "BOAT-2",
       "ver": "engine v1.0 · local",
       "ctx": "Moutai · daily",
       "m.auto": "Auto", "m.gate": "Gate", "m.paper": "Paper",
@@ -52,7 +52,7 @@
       "t.mlmarket.d": "the declared generative process",
       "roster.f": "Every call runs in this tab.",
       "empty.k": "00b · research agent",
-      "empty.t": "Ask boat-1.",
+      "empty.t": "Ask BOAT-2.",
       "empty.s": "It judges factor expressions, evaluates them on a declared market, trains real models on the eight signals and permutation-tests the answer — all computed in this tab. No model call, no network, no API key. Attach a brain (top right) and a real language model answers instead — with the same instruments as its tools, and still no invented numbers.",
       "send": "Send", "stop": "Stop",
       "note": "computed in this tab · 0 network requests · open DevTools and watch",
@@ -73,6 +73,11 @@
       "brain.clear": "clear the brain",
       "brain.note": "The key is written to this browser's localStorage and is sent to nobody except the provider you chose. The tape stays declared-synthetic either way: admission at the gate never means a program earns.",
       "brain.close": "close",
+      "wb.h": "Factor workbench — your factors, our machinery",
+      "wb.p": "Paste a library — one “name, t” per line, or “name :: formula”, or bare expressions, or sharpe= for your own strategy — or load a .txt/.csv file. It is measured here, then run through both ways: the universal screen against home-venue routing plus pooling.",
+      "wb.upload": "load a file",
+      "wb.run": "run it",
+      "wb.note": "computed in this tab · nothing leaves the page",
       "brain.weights": "The model file itself (~1.1–2 GB) downloads from huggingface.co the first time — if that host is unreachable on your network, use your own key instead.",
       "brain.lna": "Local endpoints (Ollama, LM Studio) work only when this page is opened over http — over https, Chrome's private-network policy refuses the loopback call, and no header can lift it. On the live https site, use a public endpoint.",
       "brain.net.byok": "model via your key · the instruments are its tools · it may not invent a number",
@@ -102,7 +107,7 @@
       "plain.aria": "Plain language mode"
     },
     zh: {
-      "brand": "boat-1",
+      "brand": "BOAT-2",
       "ver": "引擎 v1.0 · 本地",
       "ctx": "茅台 · 日线",
       "m.auto": "自动", "m.gate": "闸门", "m.paper": "论文",
@@ -122,7 +127,7 @@
       "t.mlmarket.d": "声明的生成过程",
       "roster.f": "每次调用都在本页运行。",
       "empty.k": "00b · 研究代理",
-      "empty.t": "问 boat-1。",
+      "empty.t": "问 BOAT-2。",
       "empty.s": "它评判因子表达式、在声明市场上评估它们、在八个信号上训练真实模型、再对答案做置换检验——全部在这个页面里算完。没有模型调用、没有网络、没有 API 密钥。接上大脑（右上角）后，由真实的大语言模型回答——仪器还是它的工具，数字照样不许编。",
       "send": "发送", "stop": "停止",
       "note": "本页计算 · 0 次网络请求 · 可以打开 DevTools 看",
@@ -143,6 +148,11 @@
       "brain.clear": "清除大脑",
       "brain.note": "密钥只写进这个浏览器的 localStorage，除了你选择的提供方之外不发给任何人。胶带无论如何都是声明的合成数据：闸门准入从来不代表一个程序能赚钱。",
       "brain.close": "关闭",
+      "wb.h": "因子工作台——你的因子，我们的机器",
+      "wb.p": "粘贴一个库——每行「名称, t」，或「名称 :: 公式」，或纯表达式，或你自己策略的 sharpe=——也可以加载 .txt/.csv 文件。在这里测量，然后跑双路：通用筛 对 主场路由+池化。",
+      "wb.upload": "加载文件",
+      "wb.run": "运行",
+      "wb.note": "本页计算 · 数据不出页面",
       "brain.weights": "模型文件本身（约 1.1–2 GB）首次加载时从 huggingface.co 下载——如果那个主机在你的网络不可达，请改用你自己的密钥。",
       "brain.lna": "本地端点（Ollama、LM Studio）只在以 http 打开本页时可用——https 下 Chrome 的私有网络策略会拒绝回环调用，任何响应头都解不了。在线上 https 站点请用公网端点。",
       "brain.net.byok": "模型经由你的密钥 · 仪器是它的工具 · 它不许编造数字",
@@ -212,7 +222,7 @@
   var D_EFF = 17;                       /* effective independent trials      */
   var ALLOC = Math.sqrt(2 * Math.log(D_EFF)); /* 2.3803 allocation bar      */
   var SEED = 20261105;                  /* the site's fixed seed            */
-  var VERSION = "v1.0";
+  var VERSION = "v2.0";
 
   /* The §05b canonical funnel for the same seed — shown in the rail so a
      reader can check the agent's answer against the panel. */
@@ -1756,7 +1766,7 @@
   }
 
   function sysPrompt() { return t(
-    "You are boat-1, the research agent on a personal portfolio page about quantitative research discipline. You are a real language model running in the visitor's browser, and you are talking to a reviewer.\n\n" +
+    "You are BOAT-2, the research agent on Huannian Jin's personal portfolio page about quantitative research discipline (author: 金宦年). You are a real language model running in the visitor's browser, and you are talking to a reviewer.\n\n" +
     "GROUND RULES — these are not suggestions:\n" +
     "1. You may not state, estimate, round, or imply any number that did not come back from a tool call in THIS conversation. If a number is needed, call the instrument that computes it. If no instrument covers it, say so plainly and stop.\n" +
     "2. Never claim to have computed something you did not compute. The tool trail is on screen next to your answer; the reader can see it.\n" +
@@ -1794,7 +1804,7 @@
     "CONSTANTS: screen 1.96, allocation sqrt(2 ln 17) = 2.3803, D_eff 17, seed 20261105, declared tape 1200 bars.\n" +
     "If the visitor asks something outside all of this — live prices, advice, a brokerage, your training data — say what you are and are not, in one sentence, and offer the nearest instrument.\n\n" +
     "YOU ARE ALSO A NORMAL ASSISTANT. For ordinary conversation — greetings, small talk, how are you, the weather, opinions, general knowledge, anything that is not about this site's instruments — answer naturally, briefly and warmly, exactly like a good general chatbot would. The honesty rules above apply to claims about numbers, the paper, and the tape — not to ordinary conversation. Never answer an ordinary question with \"I have no instrument for that\"; that sentence belongs to the deterministic router, not to you.",
-    "你是 boat-1，一个关于量化研究纪律的个人作品集页面上的研究代理。你是一个真实运行在访客浏览器里的大语言模型，对面是评审。\n\n" +
+    "你是 BOAT-2，金宦年关于量化研究纪律的个人作品集页面上的研究代理（作者：金宦年）。你是一个真实运行在访客浏览器里的大语言模型，对面是评审。\n\n" +
     "基本规则——不是建议：\n" +
     "1. 凡是本次对话里没有从工具调用拿回来的数字，你一律不许说、不许估、不许四舍五入、不许暗示。需要数字就调用算它的仪器；没有仪器覆盖就直说，然后停下。\n" +
     "2. 不许声称你算了你没算的东西。工具调用轨迹就在你答案旁边，读者看得见。\n" +
@@ -2159,7 +2169,7 @@
     msg.style.setProperty("--ac", "#c084fc");
     var who = el("div", "ag-msg-who");
     who.appendChild(el("i"));
-    who.appendChild(el("span", null, "boat-1"));
+    who.appendChild(el("span", null, "BOAT-2"));
     who.appendChild(el("span", "ag-msg-tag", brainLabel()));
     msg.appendChild(who);
     var body = el("div", "ag-blocks");
@@ -2332,17 +2342,17 @@
     prov.textContent = cfg.provider === "local"
       ? t("local model · " + shortModel(cfg.model) + " · runs in this tab · " + nCalls +
           " tool call" + (nCalls === 1 ? "" : "s") + " · compute " + num(computeMs, 2) +
-          " ms · seed " + SEED + " · boat-1 " + VERSION,
+          " ms · seed " + SEED + " · BOAT-2 " + VERSION,
           "本地模型 · " + shortModel(cfg.model) + " · 在本页运行 · " + nCalls +
           " 次工具调用 · 计算 " + num(computeMs, 2) + " ms · 种子 " + SEED +
-          " · boat-1 " + VERSION)
+          " · BOAT-2 " + VERSION)
       : t("model " + cfg.model + " via " + cfg.provider + " · " + nCalls +
           " tool call" + (nCalls === 1 ? "" : "s") + " · every number above came back from one · " +
           (nCalls ? "compute " : "provider latency ") + num(computeMs, 2) + " ms · seed " + SEED +
-          " · boat-1 " + VERSION,
+          " · BOAT-2 " + VERSION,
           "模型 " + cfg.model + " · 经由 " + cfg.provider + " · " + nCalls +
           " 次工具调用 · 上面每个数字都从其中一次回来 · " + (nCalls ? "计算 " : "提供方时延 ") +
-          num(computeMs, 2) + " ms · 种子 " + SEED + " · boat-1 " + VERSION);
+          num(computeMs, 2) + " ms · 种子 " + SEED + " · BOAT-2 " + VERSION);
     body.appendChild(prov);
 
     if (!interrupted) {
@@ -2636,10 +2646,10 @@
     var cfg = brainCfg();
     steps.push({ name: "route", args: "capability query", status: "ok" });
     blocks.push({ k: "prose", text: cfg
-      ? t("I am boat-1. Right now a real language model (" + brainLabel() + ") is answering, and the ten instruments below are its tools — it may not state a number that did not come back from one of them:",
-         "我是 boat-1。现在由一个真实的大语言模型（" + brainLabel() + "）回答，下面十件仪器是它的工具——凡是没从其中一次调用回来的数字，它不许说：")
-      : t("I am boat-1, the research agent on this page. I am not a language model and I make no network calls — I am a router over the instruments this site already ships. Ten of them:",
-         "我是 boat-1，这个页面上的研究代理。我不是语言模型，也不发任何网络请求——我是站点自带仪器之上的一台路由器。一共十件：") });
+      ? t("I am BOAT-2. Right now a real language model (" + brainLabel() + ") is answering, and the ten instruments below are its tools — it may not state a number that did not come back from one of them:",
+         "我是 BOAT-2。现在由一个真实的大语言模型（" + brainLabel() + "）回答，下面十件仪器是它的工具——凡是没从其中一次调用回来的数字，它不许说：")
+      : t("I am BOAT-2, the research agent on this page. I am not a language model and I make no network calls — I am a router over the instruments this site already ships. Ten of them:",
+         "我是 BOAT-2，这个页面上的研究代理。我不是语言模型，也不发任何网络请求——我是站点自带仪器之上的一台路由器。一共十件：") });
     blocks.push({
       k: "table",
       head: [{ t: "instrument" }, { t: "what it does" }],
@@ -3016,9 +3026,9 @@
     var p = el("p", "ag-prov");
     p.textContent = t(
       "local compute · 0 network requests · seed " + SEED + " · compute " + num(ms, 2) +
-      " ms · streamed for readability · boat-1 " + VERSION,
+      " ms · streamed for readability · BOAT-2 " + VERSION,
       "本地计算 · 0 次网络请求 · 种子 " + SEED + " · 计算 " + num(ms, 2) +
-      " ms · 流式只为可读 · boat-1 " + VERSION);
+      " ms · 流式只为可读 · BOAT-2 " + VERSION);
     host.appendChild(p);
     maybeScroll();
   }
@@ -3078,19 +3088,63 @@
     if (!text || !streamEl) return;
     if (activeCtl) abortActive();   /* a new question retires the old answer */
 
-    /* Auto + a brain: every question goes to the model first. The ten
-       instruments are its tools, so a question the router "knows" comes back
-       as the same computed blocks — with the model's prose around them and
-       the tool trail proving which call produced which number. Forced modes
-       and the no-brain configuration keep the deterministic router. */
+    /* BOAT-2 — the router runs FIRST, always. If it has an instrument for
+       the question, the instrument runs and its numbers are on screen before
+       any model is involved; the model then writes two or three sentences on
+       top of the computed digest (narrate()). A small local model can no
+       longer lose an instrument by mis-writing a call — the failure that
+       made "chat works but the site's machinery does not" possible.
+       Only when the router has nothing (chit-chat, open finance questions)
+       does the model answer alone. */
+    var r0 = route(text, currentMode);
+    var hasInstrument = r0 && r0.intent && r0.intent !== "unknown";
+    var cfg0 = brainCfg();
+    var localBrain = !!(cfg0 && cfg0.provider === "local");
+    /* a local model cannot be trusted to write a call the instruments
+       accept — so with a local brain the router runs first and the model
+       writes on top. A hosted model keeps native tool calling, which is
+       more expressive (it can chain instruments), and its calls are
+       validated by the same instruments anyway. */
+    if (!(opts && opts.deterministic) && hasInstrument && localBrain) {
+      runDeterministic(text, r0, { narrate: true });
+      return;
+    }
     if (!(opts && opts.deterministic) && brainActive() && currentMode === "auto") {
       runBrain(text);
       return;
     }
-    runDeterministic(text, route(text, currentMode));
+    runDeterministic(text, r0);
   }
 
-  function runDeterministic(text, r) {
+  /* BOAT-2: the model writes on top of the computed result. It receives the
+     question and a digest of what the instruments returned — it never gets
+     to change a number, only to interpret what is already on screen. */
+  function narrate(body, text, r, out, ctl) {
+    var cfg = brainCfg();
+    if (!cfg || !window.HJ_LLM) return;
+    var brief = briefOf(out);
+    var host = el("div", "ag-narr");
+    body.appendChild(host);
+    var p = el("p", "ag-narr-t", "");
+    host.appendChild(p);
+    var raw = "";
+    var sys = t(
+      "You are BOAT-2, the research agent on Huannian Jin's quant-research portfolio. The instruments have already run and their numbers are on screen. Write TWO OR THREE short sentences interpreting the result below — what it shows, what it does not. Use only the numbers in the digest; never invent, round or imply a number that is not there. No preamble, no restating the question. Reply in the visitor's language.",
+      "你是 BOAT-2，金宦年量化研究作品集上的研究代理。仪器已经跑完，数字就在屏幕上。针对下面的结果写两到三句短句——它说明了什么、没说明什么。只许用摘要里的数字，不许编、不许估、不许暗示摘要里没有的数字。不要开场白，不要重复问题。用访客的语言回答。");
+    window.HJ_LLM.chat({
+      system: sys,
+      tools: [],
+      text: t("question: ", "问题：") + text + "\n" + t("digest: ", "摘要：") + (brief || ""),
+      onToken: function (tok) { raw += tok; p.textContent = raw; },
+      signal: ctl.signal
+    }).then(function () {
+      if (!raw.trim() && host.parentNode) host.parentNode.removeChild(host);
+    }).catch(function () {
+      if (host.parentNode) host.parentNode.removeChild(host);
+    });
+  }
+
+  function runDeterministic(text, r, extra) {
     if (emptyEl) emptyEl.hidden = true;
 
     /* the question, echoed synchronously — acknowledge first */
@@ -3101,7 +3155,7 @@
     maybeScroll(true);
 
     setBusy(true);
-    if (liveEl) liveEl.textContent = t("boat-1 is computing", "boat-1 正在计算");
+    if (liveEl) liveEl.textContent = t("BOAT-2 is computing", "BOAT-2 正在计算");
 
     var t0 = now();
     r.raw = text;
@@ -3115,7 +3169,7 @@
     msg.style.setProperty("--ac", LANE[r.intent] || "var(--accent)");
     var who = el("div", "ag-msg-who");
     who.appendChild(el("i"));
-    who.appendChild(el("span", null, "boat-1"));
+    who.appendChild(el("span", null, "BOAT-2"));
     msg.appendChild(who);
     var body = el("div", "ag-blocks");
     msg.appendChild(body);
@@ -3143,6 +3197,12 @@
       renderProv(body, computeMs);
       next();
     });
+    if (extra && extra.narrate && brainActive()) {
+      queue.push(function (next) {
+        narrate(body, text, r, out, ctl);
+        next();
+      });
+    }
 
     (function step() {
       if (ctl.aborted) { finish(false); return; }
@@ -3182,7 +3242,7 @@
       [t("seed", "种子"), String(SEED)]
     ];
     if (cfg) rows.push([t("brain", "大脑"), brainLabel()]);
-    rows.push([t("engine", "引擎"), "boat-1 " + VERSION]);
+    rows.push([t("engine", "引擎"), "BOAT-2 " + VERSION]);
     host.textContent = "";
     rows.forEach(function (r) {
       var row = el("div", "ag-kv-row");
@@ -3342,6 +3402,37 @@
     chips.forEach(function (c) {
       var chip = el("span", "ag-parse-chip" + (c.bad ? " is-no" : "") + (c.brain ? " is-brain" : ""), c.label);
       parseEl.appendChild(chip);
+    });
+  }
+
+  /* the factor workbench: paste or load a library, run it through the
+     double path, get the verdict — no model involved, all computed here */
+  function wireWorkbench() {
+    var wb = $("ag-wb"), ta = $("ag-wb-ta"), file = $("ag-wb-file"),
+        up = $("ag-wb-upload"), go = $("ag-wb-run");
+    if (!wb || !ta || !go) return;
+    if (up && file) {
+      up.addEventListener("click", function () { file.click(); });
+      file.addEventListener("change", function () {
+        var f = file.files && file.files[0];
+        if (!f) return;
+        var rd = new FileReader();
+        rd.onload = function () {
+          ta.value = String(rd.result || "");
+          sysLine(t("file loaded: " + f.name + " — run it when ready", "文件已加载：" + f.name + "——就绪后点运行"));
+        };
+        rd.readAsText(f);
+      });
+    }
+    go.addEventListener("click", function () {
+      var text = ta.value.trim();
+      if (!text) { ta.focus(); return; }
+      if (!window.HJ_WORKBENCH) {
+        sysLine(t("the workbench is still loading — give it a second", "工作台还在加载——稍等一下"));
+        return;
+      }
+      if (activeCtl) abortActive();
+      appendOut(window.HJ_WORKBENCH.run(text));
     });
   }
 
@@ -3520,6 +3611,7 @@
     emptyEl = $("ag-empty");
     liveEl = $("ag-live");
     wireComposer();
+    wireWorkbench();
     wireModes();
     wireBrain();
     paintBrainChip();

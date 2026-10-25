@@ -899,3 +899,76 @@
 
   .ag-bar-fill { transition: none; }
 }
+
+/* ------------------------------------------------- BOAT-2 · narration layer */
+/* the model's two or three sentences on top of the computed result — it
+   interprets what is already on screen, it never adds a number */
+.ag-narr {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border-left: 2px solid var(--accent);
+  background: var(--accent-soft);
+  border-radius: 0 8px 8px 0;
+}
+.ag-narr-t {
+  margin: 0;
+  font-size: .84rem;
+  line-height: 1.75;
+  color: var(--ink-2);
+}
+
+/* ---------------------------------------------- BOAT-2 · factor workbench */
+.ag-wb {
+  margin-top: 18px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper-2, rgba(255, 255, 255, .02));
+}
+.ag-wb summary {
+  cursor: pointer;
+  padding: 12px 14px;
+  font: 600 .76rem/1.4 var(--mono);
+  letter-spacing: .02em;
+  color: var(--ink-2);
+  list-style: none;
+}
+.ag-wb summary::-webkit-details-marker { display: none; }
+.ag-wb summary::before {
+  content: "+";
+  display: inline-block;
+  width: 14px;
+  color: var(--accent);
+  font-weight: 700;
+}
+.ag-wb[open] summary::before { content: "–"; }
+.ag-wb[open] summary { border-bottom: 1px solid var(--line); }
+.ag-wb-p {
+  margin: 12px 14px 8px;
+  font-size: .78rem;
+  color: var(--ink-3);
+  line-height: 1.65;
+}
+.ag-wb-ta {
+  display: block;
+  width: calc(100% - 28px);
+  margin: 0 14px;
+  background: var(--bg, #0d1420);
+  color: var(--ink-1);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font: .76rem/1.6 var(--mono);
+  resize: vertical;
+}
+.ag-wb-ta:focus { outline: 1px solid var(--accent); }
+.ag-wb-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 14px 14px;
+  flex-wrap: wrap;
+}
+.ag-wb-note {
+  font: .68rem/1.4 var(--mono);
+  color: var(--ink-3);
+}
