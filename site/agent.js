@@ -1193,6 +1193,23 @@
       "这个因子在声明胶带上逐根求值，然后对下一根的收益做测量：") });
     blocks.push({ k: "chart", variant: "line", label: expr, series: sig });
 
+    /* IC decay: the same factor against 1/2/5/10/20/60-bar forward returns —
+       a single IC is one photograph; the decay is the film */
+    try {
+      var px = M0.signals.MidPrice, hs = [1, 2, 5, 10, 20, 60], decay = [];
+      hs.forEach(function (h) {
+        if (h >= M0.n - 2) return;
+        var fw = [];
+        for (var i = 0; i < M0.n; i++) fw.push(i + h < M0.n ? (px[i + h] - px[i]) / px[i] : 0);
+        var st2 = M.stats(sig.slice(0, M0.n - h), fw.slice(0, M0.n - h));
+        decay.push({ h: h, ic: st2.ic });
+      });
+      if (decay.length >= 3) {
+        blocks.push({ k: "chart", variant: "line", label: t("IC decay across forward horizons", "IC 跨前向窗口的衰减"), series: decay.map(function (d) { return d.ic; }) });
+        blocks.push({ k: "kv", items: decay.map(function (d) { return { k: "IC @" + d.h + " bars", v: num(d.ic, 4) }; }) });
+      }
+    } catch (e) {}
+
     var at = Math.abs(st.icT);
     blocks.push({ k: "kv", items: [
       { k: "IC", v: num(st.ic, 4) },
@@ -3203,9 +3220,11 @@
     if (activeCtl.ctl) { try { activeCtl.ctl.abort(); } catch (e) {} }
   }
 
+  var LAST_ASK = "";
   function run(raw, opts) {
     var text = String(raw == null ? "" : raw).trim();
     if (!text || !streamEl) return;
+    LAST_ASK = text;
     if (activeCtl) abortActive();   /* a new question retires the old answer */
 
     /* BOAT-3 — the router runs FIRST, always. If it has an instrument for
@@ -3333,6 +3352,10 @@
 
     function finish(complete) {
       if (activeCtl === ctl) activeCtl = null;
+      /* the digest of what was computed joins the conversation context */
+      if (complete && window.HJ_LLM && window.HJ_LLM.pushContext) {
+        try { window.HJ_LLM.pushContext(briefOf(out) || ""); } catch (e) {}
+      }
       setBusy(false);
       if (liveEl) {
         liveEl.textContent = complete
@@ -3564,6 +3587,27 @@
     stopBtn = $("ag-stop");
     statusEl = $("ag-status");
     if (!formEl || !inputEl) return;
+
+    /* keyboard: / jumps to the input, Esc clears it, ArrowUp recalls the last ask */
+    document.addEventListener("keydown", function (e) {
+      var tag = (e.target && e.target.tagName) || "";
+      if (e.key === "/" && tag !== "INPUT" && tag !== "TEXTAREA") {
+        e.preventDefault();
+        inputEl.focus();
+        return;
+      }
+      if (e.key === "Escape" && document.activeElement === inputEl) {
+        inputEl.value = "";
+        autogrow();
+        return;
+      }
+      if (e.key === "ArrowUp" && document.activeElement === inputEl && !inputEl.value && LAST_ASK) {
+        e.preventDefault();
+        inputEl.value = LAST_ASK;
+        autogrow();
+        inputEl.setSelectionRange(LAST_ASK.length, LAST_ASK.length);
+      }
+    });
 
     formEl.addEventListener("submit", function (e) {
       e.preventDefault();

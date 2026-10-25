@@ -94,6 +94,13 @@
   }
   function resetChat() { history = []; }
   function context() { return history.slice(); }
+  /* BOAT-3: instrument results join the conversation, so a follow-up like
+     "and that factor you just measured?" has something to point at. */
+  function pushContext(text) {
+    var c = String(text || "").trim();
+    if (!c) return;
+    remember("assistant", "[" + t("instrument result", "仪器结果") + "] " + c.slice(0, 400));
+  }
 
   /* ------------------------------------------------------------ webllm */
   var mlc = null, mlcLoading = null;
@@ -506,6 +513,7 @@
     chat: chat,
     resetChat: resetChat,
     context: context,
+    pushContext: pushContext,
     MAX_ROUNDS: MAX_ROUNDS
   };
 })();

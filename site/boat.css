@@ -20,8 +20,8 @@ html[data-theme="light"] {
   --glow-b: rgba(196, 92, 38, 0.07);
   --shadow: rgba(10, 16, 24, 0.08);
   --mono: "IBM Plex Mono", ui-monospace, monospace;
-  --sans: "IBM Plex Sans", "Noto Sans SC", system-ui, sans-serif;
-  --display: "Fraunces", "Syne", "Noto Sans SC", Georgia, serif;
+  --sans: "IBM Plex Sans", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --display: "Fraunces", "Syne", "PingFang SC", "Microsoft YaHei", Georgia, serif;
 }
 
 html[data-theme="dark"] {
@@ -2036,8 +2036,8 @@ h1, h2, h3, .brand, .paper-tab b, .tour-stage h3, .agency-panel h3 {
 
 /* --- v2: CJK + Field/Stack deluxe --- */
 :root {
-  --sans: "IBM Plex Sans", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
-  --display: "Fraunces", "Syne", "Noto Sans SC", Georgia, serif;
+  --sans: "IBM Plex Sans", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --display: "Fraunces", "Syne", "PingFang SC", "Microsoft YaHei", Georgia, serif;
 }
 body.lang-zh {
   letter-spacing: 0.01em;
@@ -6495,3 +6495,51 @@ html { overflow-x: clip; }
   .ag-c-p-fill { transition: none; }
   .ag-c-p-speech.is-live .ag-c-p-speech-b::after { animation: none; }
 }
+
+/* --------------------------------------------------- 00a · Why H panel */
+.whyh-cta { box-shadow: 0 0 0 1px var(--accent) inset, 0 10px 30px -12px var(--accent); }
+.whyh-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.1rem;
+  margin: 1.6rem 0 1.2rem;
+}
+.whyh-card {
+  position: relative;
+  padding: 1.15rem 1.15rem 1rem;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.whyh-no {
+  display: inline-block;
+  font: 700 .72rem/1 var(--mono);
+  letter-spacing: .12em;
+  color: var(--accent);
+  margin-bottom: .55rem;
+}
+.whyh-card h3 { margin: 0 0 .5rem; font: 600 1.02rem/1.3 var(--display); }
+.whyh-card p { margin: 0 0 .6rem; font-size: .84rem; line-height: 1.65; color: var(--ink-2); }
+.whyh-card code { font: .78rem/1 var(--mono); color: var(--accent); }
+.whyh-joke {
+  padding-top: .55rem;
+  border-top: 1px dashed var(--line);
+  font-style: italic;
+  color: var(--ink-3) !important;
+  font-size: .8rem !important;
+}
+.whyh-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5rem .9rem;
+  padding: .85rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--accent-soft);
+  font: .78rem/1.4 var(--mono);
+  color: var(--ink-2);
+}
+.whyh-strip a { color: var(--accent); text-decoration: none; border-bottom: 1px solid currentColor; }
+.whyh-strip-l { font-weight: 700; letter-spacing: .02em; }
+.whyh-strip-end { margin-left: auto; color: var(--ink-3); }

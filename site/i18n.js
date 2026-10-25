@@ -1,7 +1,7 @@
 /* EN / ZH — full site · edit only via UTF-8 tools */
 window.I18N = {
   en: {
-    "nav.terminal": "Terminal",
+    "nav.terminal": "Agent",
     "term.beacon": "DESK LIVE · BOAT-1 AGENT · 600519.SH",
     "term.tick.tf": "Daily",
     "term.tick.book": "¥50k → ~¥1.00M",
@@ -18,9 +18,9 @@ window.I18N = {
     "term.c4t": "Research agent",
     "term.c4p": "boat-1 judges factors, evaluates them on a declared market, trains real models on them and permutation-tests the result — every number computed in this tab. Try it below.",
     "term.fig.sub": "Click any panel to expand. Same tape boat-1 reasons over.",
-    "hero.cta.term": "Open BOAT Terminal ↓",
+    "hero.cta.term": "Open the BOAT Agent ↓",
     "hero.chip.term": "BOAT Terminal · multi-agent desk",
-    "term.kicker": "00 · BOAT Terminal",
+    "term.kicker": "00 · BOAT Agent",
     "term.title": "A full-stack quant desk — Chanlun · physics · factors · a research agent that computes",
     "term.lede": "Nearly one year of nights shipping a usable terminal: Rust for the compute core, Python for strategies and AI, Flutter for the desk UI. Walkthrough lens is 600519.SH (Moutai). Posted to learn in public — backtests labeled as backtests, personal A-share book labeled separately from the JF paper track.",
     "term.m1s": "Stack",
@@ -481,7 +481,7 @@ window.I18N = {
   
   },
   zh: {
-    "nav.terminal": "终端",
+    "nav.terminal": "智能体",
     "term.beacon": "DESK LIVE · BOAT-1 代理 · 600519.SH",
     "term.tick.tf": "日线",
     "term.tick.book": "¥5万 → 约¥100万",
@@ -498,9 +498,9 @@ window.I18N = {
     "term.c4t": "研究代理",
     "term.c4p": "boat-1 评判因子、在声明市场上评估它、在信号上训练真实模型、再对结果做置换检验——每个数都在本页算完。下面可以试。",
     "term.fig.sub": "点击放大。boat-1 推演的就是同一卷盘口。",
-    "hero.cta.term": "打开 BOAT 终端 ↓",
+    "hero.cta.term": "打开 BOAT 智能体 ↓",
     "hero.chip.term": "BOAT 终端 · 多智能体工作台",
-    "term.kicker": "00 · BOAT 终端",
+    "term.kicker": "00 · BOAT 智能体",
     "term.title": "全栈量化工作台 — 缠论 · 物理 · 因子 · 会计算的研究代理",
     "term.lede": "将近一年的夜晚把可用终端搭出来：Rust 做计算内核，Python 跑策略与 AI，Flutter 画桌面。阐述标的是贵州茅台 600519.SH。发出来是为了公开学习——回测标成回测，个人 A 股账户与 JF 论文轨道分开标注。",
     "term.m1s": "技术栈",
