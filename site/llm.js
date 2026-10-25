@@ -275,11 +275,20 @@
     }
 
     var round = 0;
+    /* WebLLM 0.2.86 supports native function calling ONLY on the Hermes
+       family. Every other local model runs the intent bridge instead —
+       its system prompt carries the [instrument: ...] protocol, so tools
+       are stripped from its request entirely: sending them makes WebLLM
+       reject the whole call before the model says a word. */
+    function localSupportsTools() {
+      return /Hermes/i.test(a.model || "");
+    }
     function oneRound() {
       round += 1;
       /* past MAX_ROUNDS the model stops getting tools: it must answer with
          what the instruments already returned, or say it cannot. */
-      var allowTools = tools.length > 0 && round <= MAX_ROUNDS;
+      var allowTools = tools.length > 0 && round <= MAX_ROUNDS &&
+        (a.provider !== "local" || localSupportsTools());
       var handlers = { onToken: onToken, signal: opts.signal };
       var req;
       if (a.provider === "local") {
