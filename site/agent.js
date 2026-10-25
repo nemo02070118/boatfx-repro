@@ -1228,6 +1228,40 @@
       { label: "alloc 2.3803", value: ALLOC, max: Math.max(ALLOC, at) * 1.15 }
     ] });
 
+    /* ② the mechanism, drawn: the dilution waterfall (t -> t*sqrt(pi) ->
+       screen) and the segment heatmap (which quarter of the tape pays) */
+    blocks.push({ k: "bars", items: [
+      { label: t("unconditional t", "无条件 t"), value: at, max: Math.max(ALLOC, at) * 1.2, tone: at >= ALLOC ? "" : "cut" },
+      { label: t("diluted t = t·√π", "稀释 t = t·√π"), value: Math.abs(st.dilutedT), max: Math.max(ALLOC, at) * 1.2, tone: Math.abs(st.dilutedT) >= SCREEN ? "ok" : "cut", delta: "π = " + num(st.pi, 2) },
+      { label: t("screen 1.96", "筛线 1.96"), value: SCREEN, max: Math.max(ALLOC, at) * 1.2 },
+      { label: t("alloc 2.3803", "配置线 2.3803"), value: ALLOC, max: Math.max(ALLOC, at) * 1.2 }
+    ] });
+    try {
+      var segs2 = [], E0 = window.HJ_ENGINES, M00 = E0.helpers.market();
+      var segLen2 = Math.floor(Math.min(sig.length, M00.n) / 4), i2;
+      for (i2 = 0; i2 < 4; i2++) {
+        var a2 = i2 * segLen2, b2 = (i2 === 3) ? M00.n : a2 + segLen2;
+        var bt2 = E0.helpers.blockT(sig.slice(a2, b2), M00.fwd.slice(a2, b2));
+        segs2.push(bt2);
+      }
+      blocks.push({ k: "table",
+        head: [{ t: "quarter" }, { t: "block t", num: true }, { t: "pays ≥ 1.5" }, { t: "verdict" }],
+        rows: segs2.map(function (g, i3) {
+          var pays = g.t >= 1.5;
+          return [
+            { t: "Q" + (i3 + 1) },
+            { t: num(g.t, 2), num: true },
+            { t: pays ? t("yes", "兑现") : t("no", "不兑现"), tone: pays ? "ok" : "no" },
+            { t: pays ? t("the home of the edge", "边缘的主场") : t("the screen sees only this", "筛子只看得到这里") }
+          ];
+        }) });
+      var nPay = segs2.filter(function (g) { return g.t >= 1.5; }).length;
+      blocks.push({ k: "kv", items: [
+        { k: "quarters paying", v: nPay + " / 4", tone: nPay ? "ok" : "no" },
+        { k: "π implied", v: num(nPay / 4, 2) + " ≈ " + num(st.pi, 2) + " " + t("measured", "实测") }
+      ] });
+    } catch (e) {}
+
     var dir = st.ic >= 0 ? t("positive", "正") : t("negative", "负");
     var head = at >= ALLOC
       ? t("clears the allocation bar", "过了配置线")
@@ -3221,6 +3255,14 @@
   }
 
   var LAST_ASK = "";
+  /* a stable fingerprint for an answer: seed + intent + question + digest */
+  function fingerprint(text, r, out) {
+    var src = SEED + "|" + (r && r.intent || "") + "|" + String(text || "").slice(0, 96) +
+      "|" + (briefOf(out) || "").slice(0, 140);
+    var h = 0;
+    for (var i = 0; i < src.length; i++) h = (h * 31 + src.charCodeAt(i)) | 0;
+    return ("0000000" + ((h >>> 0).toString(16))).slice(-8);
+  }
   function run(raw, opts) {
     var text = String(raw == null ? "" : raw).trim();
     if (!text || !streamEl) return;
@@ -3355,6 +3397,15 @@
       /* the digest of what was computed joins the conversation context */
       if (complete && window.HJ_LLM && window.HJ_LLM.pushContext) {
         try { window.HJ_LLM.pushContext(briefOf(out) || ""); } catch (e) {}
+      }
+      /* ④ every answer carries a stable fingerprint: same question + same
+         seed + same digest -> same hash. The chip re-runs it; the hash is
+         what makes "you can verify this" literal rather than a slogan. */
+      if (complete) {
+        var fp = fingerprint(text, r, out);
+        renderBlock(body, { k: "actions", items: [
+          { label: t("verify · " + fp, "复核 · " + fp), fn: function () { run(text); } }
+        ] }, ctl, function () {});
       }
       setBusy(false);
       if (liveEl) {

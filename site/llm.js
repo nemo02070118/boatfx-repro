@@ -488,7 +488,9 @@
       return { call: s.name, args: s.args, ms: s.ms, status: s.status, detail: s.detail };
     }) };
     (out.blocks || []).forEach(function (b) {
-      if (b.k === "kv") facts[b.k] = b.items;
+      /* several kv blocks can appear in one answer (the mechanism view, the
+         paper checkup) — accumulate, never overwrite */
+      if (b.k === "kv") facts.kv = (facts.kv || []).concat(b.items || []);
       else if (b.k === "table") facts.table = { head: (b.head || []).map(function (h) { return h.t; }),
         rows: (b.rows || []).map(function (r) { return r.map(function (c) { return c.t; }); }) };
       else if (b.k === "verdict") facts.verdict = { tone: b.tone, headline: b.h, body: b.b };

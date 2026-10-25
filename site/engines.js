@@ -653,6 +653,35 @@
         ? t("Trading this factor only where it pays beats trading it everywhere.", "只在这个因子兑现的地方交易它，胜过到处交易它。")
         : t("On this tape, trading it everywhere was simply better.", "在这条胶带上，到处交易它反而更好。") });
 
+    /* A2 — the paper's checkup: what would the universal screen do to this
+       factor, and how much of its edge is even recoverable? This is what
+       makes it the paper's strategy rather than a generic one. */
+    try {
+      var P2 = window.HJ_PAPER;
+      var EC = window.HJ_ENGINES.constants;
+      var M2 = window.HJ_ML, H2 = window.HJ_ENGINES.helpers, M3 = H2.market();
+      if (P2 && M2 && M3) {
+        var stP = M2.stats(sig, M3.fwd);
+        var segsP = [], segLenP = Math.floor(Math.min(sig.length, M3.n) / SEGMENTS), iP;
+        for (iP = 0; iP < SEGMENTS; iP++) {
+          var aP = iP * segLenP, bP = (iP === SEGMENTS - 1) ? M3.n : aP + segLenP;
+          segsP.push(H2.blockT(sig.slice(aP, bP), M3.fwd.slice(aP, bP)));
+        }
+        var nPayP = segsP.filter(function (g) { return g.t >= PAY_T; }).length;
+        var atP = Math.abs(stP.icT), dtP = Math.abs(stP.dilutedT);
+        blocks.push({ k: "kv", items: [
+          { k: t("quarters paying", "兑现的段"), v: nPayP + " / " + SEGMENTS, tone: nPayP ? "ok" : "no" },
+          { k: "π (paying share)", v: num(stP.pi, 2) },
+          { k: t("the universal screen would", "通用筛会"), v: dtP < EC.SCREEN
+            ? (atP >= EC.ALLOC
+              ? t("mis-kill it — diluted t = " + num(dtP, 2) + " under the screen", "误杀它——稀释 t = " + num(dtP, 2) + " 低于筛线")
+              : t("discard it as weak", "当弱扔掉"))
+            : t("keep it — diluted t = " + num(dtP, 2), "留下它——稀释 t = " + num(dtP, 2)) },
+          { k: t("recovery ceiling", "可回收上限"), v: num(P2.ceiling(stP.pi).q2 * 100, 1) + "%" }
+        ] });
+      }
+    } catch (e) {}
+
     blocks.push({ k: "note", text: t(
       "Declared: positions = clip(z, ±2.5)/2.5 with no fitted parameters; vol target " + num(TARGET_VOL * 100, 0) +
       "% annual calibrated on the train block only, scale capped at ×2; venue mask from " + SEGMENTS +
