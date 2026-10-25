@@ -474,6 +474,12 @@
     if (/(zoo|动物园|因子库|public factor|公开因子|有哪些因子|what factors)/i.test(low)) {
       return { intent: "zoo", slots: {} };
     }
+    if (/(what.?if|如果|要是|反事实|假如|suppose|换成|改成)/i.test(low)) {
+      return { intent: "whatif", slots: parseWhatIf(s) };
+    }
+    if (/(validate|检验|验一下|我的因子|我的策略|verify my|check my|对赌)/i.test(low)) {
+      return { intent: "validate", slots: { text: s } };
+    }
     if (/(fetch|拉取|加载.*url|from a url)/i.test(low) || /https?:\/\//.test(s)) {
       var um = /(https?:\/\/\S+)/.exec(s);
       return { intent: "fetch", slots: { url: um ? um[1] : null } };
@@ -1599,6 +1605,35 @@
   }
 
   /* -------------------------------------------- the zoo and the experiment */
+  /* natural-language knobs for the what-if engine: "如果 π 只有 0.1 会怎样",
+     "N = 5000 会怎样", "只留 Q1 段", "筛子放到 2.38" */
+  function parseWhatIf(s) {
+    var out = {};
+    var e = extractExpr(s);
+    if (e) out.expr = e;
+    var pi = /(?:π|pi)\s*(?:=|＝|是|为|只有|降到|变成|到)?\s*(0?\.\d+)/i.exec(s);
+    if (pi) out.pi = parseFloat(pi[1]);
+    var n = /\bN\s*(?:=|＝|是|为|只有|降到|变成|到)?\s*(\d{2,6})\b/i.exec(s);
+    if (n) out.N = parseInt(n[1], 10);
+    var sc = /(?:screen|筛|线|门槛)\s*(?:=|＝|是|为|放到|降到|变成|到)?\s*(\d\.\d+)/i.exec(s);
+    if (sc) out.screen = parseFloat(sc[1]);
+    var v = /\bQ([1-4])\b|第([一二三四1-4])段/.exec(s);
+    if (v) out.venue = v[1] ? parseInt(v[1], 10) : ("一二三四".indexOf(v[2]) >= 0 ? "一二三四".indexOf(v[2]) + 1 : parseInt(v[2], 10));
+    return out;
+  }
+  function instWhatIf(slots) {
+    var W = window.HJ_WHATIF;
+    if (!W) return mlMissing();
+    var out = W.whatIf(slots || {});
+    return { steps: out.steps, blocks: out.blocks };
+  }
+  function instValidate(slots) {
+    var W = window.HJ_WHATIF;
+    if (!W) return mlMissing();
+    var out = W.validate({ lib: (slots || {}).text || "" });
+    return { steps: out.steps, blocks: out.blocks };
+  }
+
   function instZoo() {
     var Z = window.HJ_ZOO;
     if (!Z) return mlMissing();
@@ -1752,10 +1787,13 @@
     "- run_experiment(source | lib): the paper's experiment — the normal screen against home-venue routing plus pooling, adjudicated by the council.\n" +
     "- fetch_library(url): fetch a public factor library from a URL, compile-validate every formula, report kept and skipped.\n" +
     "- mine_factors(): the machine-enumerated zoo over the DSL whitelist.\n" +
-    "- strategy_guide(expr): the step-by-step strategy builder.\n\n" +
+    "- strategy_guide(expr): the step-by-step strategy builder.\n" +
+    "- what_if(expr, pi, N, screen, venue): the counterfactual engine — re-run the pipeline with one changed parameter and report what changes, before/after.\n" +
+    "- validate_own(lib, sharpe, maxDD, turnover): the visitor's own factors or strategy metrics, measured against our method.\n\n" +
     "FACTOR GRAMMAR: Mean[w] Zscore[w] Slope[w] Std[w] Rank Abs Sign Diff Neg Log Sqrt over signals BidSize AskSize BestBid BestAsk MidPrice Volume TradeSide TradeSize, combined with Add Sub Mul Div Min Max Pow, e.g. Rank(Mean[10](BestAsk - BestBid) / MidPrice).\n" +
     "CONSTANTS: screen 1.96, allocation sqrt(2 ln 17) = 2.3803, D_eff 17, seed 20261105, declared tape 1200 bars.\n" +
-    "If the visitor asks something outside all of this — live prices, advice, a brokerage, your training data — say what you are and are not, in one sentence, and offer the nearest instrument.",
+    "If the visitor asks something outside all of this — live prices, advice, a brokerage, your training data — say what you are and are not, in one sentence, and offer the nearest instrument.\n\n" +
+    "YOU ARE ALSO A NORMAL ASSISTANT. For ordinary conversation — greetings, small talk, how are you, the weather, opinions, general knowledge, anything that is not about this site's instruments — answer naturally, briefly and warmly, exactly like a good general chatbot would. The honesty rules above apply to claims about numbers, the paper, and the tape — not to ordinary conversation. Never answer an ordinary question with \"I have no instrument for that\"; that sentence belongs to the deterministic router, not to you.",
     "你是 boat-1，一个关于量化研究纪律的个人作品集页面上的研究代理。你是一个真实运行在访客浏览器里的大语言模型，对面是评审。\n\n" +
     "基本规则——不是建议：\n" +
     "1. 凡是本次对话里没有从工具调用拿回来的数字，你一律不许说、不许估、不许四舍五入、不许暗示。需要数字就调用算它的仪器；没有仪器覆盖就直说，然后停下。\n" +
@@ -1787,10 +1825,13 @@
     "- run_experiment(source | lib)：论文的实验——正常筛选对主场路由加池化，议会终审。\n" +
     "- fetch_library(url)：从 URL 拉取公开因子库，逐公式编译校验，报告收录与跳过。\n" +
     "- mine_factors()：DSL 白名单上的机器枚举动物园。\n" +
-    "- strategy_guide(expr)：分步策略构建向导。\n\n" +
+    "- strategy_guide(expr)：分步策略构建向导。\n" +
+    "- what_if(expr, pi, N, screen, venue)：反事实引擎——改一个参数重跑整条流水线，报告前后变化。\n" +
+    "- validate_own(lib, sharpe, maxDD, turnover)：访客自己的因子或策略数字，用我们的方法检验。\n\n" +
     "因子文法：Mean[w] Zscore[w] Slope[w] Std[w] Rank Abs Sign Diff Neg Log Sqrt，作用于信号 BidSize AskSize BestBid BestAsk MidPrice Volume TradeSide TradeSize，用 Add Sub Mul Div Min Max Pow 组合，例如 Rank(Mean[10](BestAsk - BestBid) / MidPrice)。\n" +
     "常数：筛选线 1.96，配置线 sqrt(2 ln 17) = 2.3803，D_eff 17，种子 20261105，声明胶带 1200 根。\n" +
-    "如果访客问的是这些之外的事——实时行情、投资建议、券商、你的训练数据——用一句话说清你是什么、不是什么，然后指给最近的仪器。"); }
+    "如果访客问的是这些之外的事——实时行情、投资建议、券商、你的训练数据——用一句话说清你是什么、不是什么，然后指给最近的仪器。\n\n" +
+    "你同时也是一个正常的助手。普通对话——打招呼、闲聊、你好吗、天气、观点、常识、任何与本页仪器无关的事——像一个好的通用聊天机器人那样自然、简短、温和地回答。上面的诚实规则只约束关于数字、论文和胶带的主张，不约束普通对话。永远不要用「我没有对应的仪器」来回答普通问题——那句话属于确定性路由器，不属于你。"); }
 
   /* every instrument, in the shape a model can call */
   function buildTools() {
@@ -1933,7 +1974,26 @@
         parameters: S("", {
           expr: { type: "string", description: "optional starting factor expression" }
         }),
-        run: function (a) { return instGuide({ expr: a.expr }); } }
+        run: function (a) { return instGuide({ expr: a.expr }); } },
+      { name: "what_if",
+        description: "The counterfactual engine: re-run the measurement pipeline with a changed parameter and show what changes. Use for any question of the form 'what if ...' — pi override, N override, screen level, venue restriction. Reports before/after verdicts with a council adjudication.",
+        parameters: S("", {
+          expr: { type: "string", description: "optional factor expression (omit for the builtin zoo)" },
+          pi: { type: "number", description: "override the paying-state frequency, e.g. 0.1" },
+          N: { type: "number", description: "override the candidate count, e.g. 5000" },
+          screen: { type: "number", description: "override the screen line, e.g. 2.38" },
+          venue: { type: "integer", description: "restrict the home venue to segment 1-4" }
+        }),
+        run: function (a) { return instWhatIf(a); } },
+      { name: "validate_own",
+        description: "Validate the visitor's own numbers with our method: a pasted factor library ('name, t' or 'name :: formula' lines) or their own strategy metrics (sharpe, maxDD, turnover). Returns the double-path comparison — the normal way against home-venue routing plus pooling — with an explicit verdict on where each way wins.",
+        parameters: S("", {
+          lib: { type: "string", description: "the pasted factor library, one entry per line" },
+          sharpe: { type: "number", description: "the visitor's own strategy Sharpe, if they have one" },
+          maxDD: { type: "number", description: "the visitor's own strategy max drawdown" },
+          turnover: { type: "number", description: "the visitor's own strategy turnover" }
+        }, ["lib"]),
+        run: function (a) { return instValidate({ text: a.lib }); } }
     ];
   }
 
@@ -2236,6 +2296,25 @@
     return msg;
   }
 
+  /* follow-up suggestions — an answer that brings no actions of its own
+     still ends with somewhere to go next */
+  var FOLLOWUPS = {
+    council: [t("placebo-test the evidence", "对证据做置换检验"), t("find its home venue", "找它的主场"), t("build a strategy on it", "以它建策略")],
+    venue: [t("build a strategy on it", "以它建策略"), t("council the factor", "让议会裁决它"), t("run the experiment", "跑双路对比实验")],
+    resurrect: [t("run the experiment", "跑双路对比实验"), t("council the library", "让议会裁决这个库"), t("open the bench", "打开解剖台")],
+    strategy: [t("run the experiment", "跑双路对比实验"), t("council the factor", "让议会裁决它"), t("guide me step by step", "带我分步建策略")],
+    foundry: [t("evaluate it on the declared market", "在声明市场上评估它"), t("council it", "让议会裁决它"), t("build a strategy on it", "以它建策略")],
+    zoo: [t("run the experiment on the zoo", "对动物园跑实验"), t("mine the zoo", "机器枚举动物园"), t("fetch a public library", "拉取公开因子库")],
+    experiment: [t("what if pi were 0.1", "如果 π 只有 0.1 会怎样"), t("guide me through a strategy", "带我分步建策略"), t("resurrect the sample library", "复活样本库")],
+    guide: [t("run the experiment", "跑双路对比实验"), t("council the factor", "让议会裁决它"), t("open the bench", "打开解剖台")],
+    whatif: [t("validate my own factors", "检验我自己的因子"), t("run the experiment", "跑双路对比实验"), t("guide me through a strategy", "带我分步建策略")],
+    validate: [t("run the experiment", "跑双路对比实验"), t("what if pi were 0.1", "如果 π 只有 0.1 会怎样"), t("open the bench", "打开解剖台")],
+    _default: [t("run the experiment — both ways", "跑双路对比实验"), t("guide me through building a strategy", "带我分步建策略"), t("what can't you answer?", "有什么你答不了？")]
+  };
+  function followUps(intent) {
+    return FOLLOWUPS[intent] || FOLLOWUPS._default;
+  }
+
   function actionsOf(items) {
     var node = el("div", "ag-actions");
     items.forEach(function (a) {
@@ -2267,12 +2346,17 @@
     body.appendChild(prov);
 
     if (!interrupted) {
-      body.appendChild(actionsOf([
-        { label: t("new topic", "新话题"), fn: function () {
-          if (window.HJ_LLM) window.HJ_LLM.resetChat();
-          sysLine(t("conversation cleared — the model starts fresh", "对话已清空——模型重新开始"));
-        } }
-      ]));
+      var items = [];
+      if (!body.querySelector(".ag-act")) {
+        followUps(route(text, null).intent).forEach(function (q) {
+          items.push({ label: q, fn: function () { run(q); } });
+        });
+      }
+      items.push({ label: t("new topic", "新话题"), fn: function () {
+        if (window.HJ_LLM) window.HJ_LLM.resetChat();
+        sysLine(t("conversation cleared — the model starts fresh", "对话已清空——模型重新开始"));
+      } });
+      body.appendChild(actionsOf(items));
     } else {
       body.appendChild(el("p", "ag-prov", t("interrupted — the partial answer stays above",
         "已中断——部分答案保留在上面")));
@@ -2961,6 +3045,8 @@
       case "about": return instAbout(r.slots || {});
       case "research": return instResearch(r.slots || {});
       case "zoo": return instZoo();
+      case "whatif": return instWhatIf(r.slots || {});
+      case "validate": return instValidate(r.slots || {});
       case "experiment": return instExperiment(r.slots || {});
       case "fetch": return instFetch(r.slots || {});
       case "guide": return instGuide(r.slots || {});
@@ -3045,6 +3131,14 @@
     (out.blocks || []).forEach(function (b) {
       queue.push(function (next) { renderBlock(body, b, ctl, next); });
     });
+    if (!(out.blocks || []).some(function (b) { return b.k === "actions"; })) {
+      queue.push(function (next) {
+        var fu = { k: "actions", items: followUps(r.intent).map(function (q) {
+          return { label: q, fn: function () { run(q); } };
+        }) };
+        renderBlock(body, fu, ctl, next);
+      });
+    }
     queue.push(function (next) {
       renderProv(body, computeMs);
       next();

@@ -52,7 +52,7 @@
      natural-language instrument calls parsed by this page's own router.
      VRAM numbers are WebLLM's own prebuilt config. */
   var LOCAL_MODELS = [
-    { id: "Qwen3-4B-Instruct-q4f16_1-MLC", label: "Qwen3 4B · ~3.4 GB · chat + intent bridge", tier: "mid" },
+    { id: "Qwen2.5-7B-Instruct-q4f16_1-MLC", label: "Qwen2.5 7B · ~5.1 GB · chat + intent bridge · strongest", tier: "heavy" },
     { id: "Phi-4-mini-instruct-q4f16_1-MLC", label: "Phi-4-mini · ~3.4 GB · chat + intent bridge", tier: "mid" },
     { id: "Qwen2.5-3B-Instruct-q4f16_1-MLC", label: "Qwen2.5 3B · ~2.5 GB · chat + intent bridge", tier: "mid" },
     { id: "Qwen2.5-1.5B-Instruct-q4f16_1-MLC", label: "Qwen2.5 1.5B · ~1.6 GB · chat + intent bridge", tier: "light" },
@@ -124,6 +124,68 @@
     return next();
   }
 
+  /* China-reachable copies of the same models. The default sources —
+     huggingface.co for the weights, raw.githubusercontent.com for the WASM
+     libs — are blocked on some networks, so when the engine fails to start
+     we retry once from these mirrors: hf-mirror.com (HuggingFace, same file
+     layout, /resolve/main/ paths appended by WebLLM) and cdn.jsdelivr.net/gh
+     (GitHub). Each record is the prebuiltAppConfig entry of
+     @mlc-ai/web-llm@0.2.86 with ONLY the two URLs swapped — model_id,
+     low_resource_required, vram_required_MB, overrides and required_features
+     are the prebuilt values, untouched. A custom appConfig replaces the
+     prebuilt list wholesale, so it must cover every model above — it does. */
+  var CN_MIRROR_MODELS = [
+    {
+      model: "https://hf-mirror.com/mlc-ai/Qwen2.5-7B-Instruct-q4f16_1-MLC",
+      model_id: "Qwen2.5-7B-Instruct-q4f16_1-MLC",
+      model_lib: "https://cdn.jsdelivr.net/gh/mlc-ai/binary-mlc-llm-libs@main/web-llm-models/v0_2_86/base/Qwen2-7B-Instruct-q4f16_1_cs1k-webgpu.wasm",
+      vram_required_MB: 5106.67,
+      low_resource_required: false,
+      overrides: { context_window_size: 4096 }
+    },
+    {
+      model: "https://hf-mirror.com/mlc-ai/Phi-4-mini-instruct-q4f16_1-MLC",
+      model_id: "Phi-4-mini-instruct-q4f16_1-MLC",
+      model_lib: "https://cdn.jsdelivr.net/gh/mlc-ai/binary-mlc-llm-libs@main/web-llm-models/v0_2_86/base/Phi-4-mini-instruct-q4f16_1_cs1k-webgpu.wasm",
+      vram_required_MB: 3437.58,
+      low_resource_required: false,
+      overrides: { context_window_size: 4096 }
+    },
+    {
+      model: "https://hf-mirror.com/mlc-ai/Qwen2.5-3B-Instruct-q4f16_1-MLC",
+      model_id: "Qwen2.5-3B-Instruct-q4f16_1-MLC",
+      model_lib: "https://cdn.jsdelivr.net/gh/mlc-ai/binary-mlc-llm-libs@main/web-llm-models/v0_2_86/base/Qwen2.5-3B-Instruct-q4f16_1_cs1k-webgpu.wasm",
+      vram_required_MB: 2504.76,
+      low_resource_required: true,
+      overrides: { context_window_size: 4096 }
+    },
+    {
+      model: "https://hf-mirror.com/mlc-ai/Qwen2.5-1.5B-Instruct-q4f16_1-MLC",
+      model_id: "Qwen2.5-1.5B-Instruct-q4f16_1-MLC",
+      model_lib: "https://cdn.jsdelivr.net/gh/mlc-ai/binary-mlc-llm-libs@main/web-llm-models/v0_2_86/base/Qwen2-1.5B-Instruct-q4f16_1_cs1k-webgpu.wasm",
+      vram_required_MB: 1629.75,
+      low_resource_required: true,
+      overrides: { context_window_size: 4096 }
+    },
+    {
+      model: "https://hf-mirror.com/mlc-ai/SmolLM2-1.7B-Instruct-q4f16_1-MLC",
+      model_id: "SmolLM2-1.7B-Instruct-q4f16_1-MLC",
+      model_lib: "https://cdn.jsdelivr.net/gh/mlc-ai/binary-mlc-llm-libs@main/web-llm-models/v0_2_86/base/SmolLM2-1.7B-Instruct-q4f16_1_cs1k-webgpu.wasm",
+      vram_required_MB: 1774.19,
+      low_resource_required: true,
+      required_features: ["shader-f16"],
+      overrides: { context_window_size: 4096 }
+    },
+    {
+      model: "https://hf-mirror.com/mlc-ai/Hermes-3-Llama-3.1-8B-q4f16_1-MLC",
+      model_id: "Hermes-3-Llama-3.1-8B-q4f16_1-MLC",
+      model_lib: "https://cdn.jsdelivr.net/gh/mlc-ai/binary-mlc-llm-libs@main/web-llm-models/v0_2_86/base/Llama-3_1-8B-Instruct-q4f16_1_cs1k-webgpu.wasm",
+      vram_required_MB: 4876.13,
+      low_resource_required: false,
+      overrides: { context_window_size: 4096 }
+    }
+  ];
+
   function loadLocal(modelId, onProgress) {
     var M = window.HJ_ML;
     if (!localSupported()) {
@@ -133,7 +195,21 @@
     if (mlcLoading) return mlcLoading;
     mlcLoading = importWebLLM()
       .then(function (mod) {
-        return mod.CreateMLCEngine(modelId, { initProgressCallback: onProgress });
+        /* default sources first (huggingface.co + raw.githubusercontent.com);
+           if the engine fails to start, one retry from the China mirrors. */
+        return mod.CreateMLCEngine(modelId, { initProgressCallback: onProgress })
+          .catch(function (first) {
+            return mod.CreateMLCEngine(modelId, {
+              initProgressCallback: onProgress,
+              appConfig: { model_list: CN_MIRROR_MODELS }
+            }).catch(function () {
+              throw new Error(
+                "the model could not start from either source: the default weights (huggingface.co) and WASM libs (raw.githubusercontent.com) failed — " +
+                String((first && first.message) || first) +
+                " — and the China mirrors (hf-mirror.com, cdn.jsdelivr.net) failed too, so your network appears to block both. " +
+                "The instruments still run and your own key is unaffected — the local model just cannot download here.");
+            });
+          });
       })
       .then(function (engine) {
         engine._id = modelId;
@@ -145,9 +221,10 @@
         mlcLoading = null;
         var msg = String((e && e.message) || e);
         if (/could not be fetched from any CDN/.test(msg)) throw new Error(msg);
+        if (/either source/.test(msg)) throw e; /* the mirror retry already named both */
         /* the module loaded; what failed is the weights */
         throw new Error("the model could not start: " + msg +
-          " · the model file itself (~1.1–2 GB) downloads from huggingface.co when the engine starts — if that host is unreachable on your network, the local model cannot run here. Your own key is unaffected.");
+          " · the instruments still run and your own key is unaffected.");
       });
     return mlcLoading;
   }

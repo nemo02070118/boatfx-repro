@@ -723,7 +723,8 @@
     };
 
     /* wrap the agent-dependent commands so they wait for the dynamic stack */
-    ["council", "ask", "agents", "venue", "strategy", "resurrect", "research"].forEach(function (name) {
+    ["council", "ask", "agents", "venue", "strategy", "resurrect", "research",
+     "zoo", "experiment", "guide", "whatif", "validate"].forEach(function (name) {
       var inner = CMD[name];
       if (!inner) return;
       CMD[name] = {
@@ -747,6 +748,20 @@
       desc: t("the step-by-step strategy builder", "分步策略构建向导"),
       run: function () {
         whenAgent(function () { agentAsk("guide me through building a strategy", t("sending to the guide →", "送入向导 →")); });
+      }
+    };
+    CMD.whatif = {
+      desc: t("the counterfactual engine — change one parameter, re-run everything", "反事实引擎——改一个参数，全部重跑"),
+      run: function (a) {
+        var raw = a.join(" ").trim();
+        whenAgent(function () { agentAsk("what if " + (raw || "pi = 0.1"), t("sending to the counterfactual engine →", "送入反事实引擎 →")); });
+      }
+    };
+    CMD.validate = {
+      desc: t("validate your own factors or strategy with our method", "用我们的方法检验你自己的因子或策略"),
+      run: function (a) {
+        var raw = a.join(" ").trim();
+        whenAgent(function () { agentAsk("validate " + (raw || "my factors"), t("sending to the validation bench →", "送入检验台 →")); });
       }
     };
 
@@ -1666,6 +1681,8 @@
         line("  " + pad("zoo", 32) + t("the public factor library", "公开因子库"));
         line("  " + pad("experiment", 32) + t("the paper's experiment, both ways", "论文实验，双路对比"));
         line("  " + pad("guide", 32) + t("the step-by-step strategy builder", "分步策略构建向导"));
+        line("  " + pad("whatif", 32) + t("the counterfactual engine — change one parameter", "反事实引擎——改一个参数全部重跑"));
+        line("  " + pad("validate", 32) + t("validate your own factors or strategy, our way", "用我们的方法检验你自己的因子或策略"));
         line("  " + pad("agents", 32) + t("the council roster", "议会花名册"));
         line("  " + pad("ask", 32) + t("ask about the author — record only", "问作者的事——只按记录"));
         line("  " + pad("help", 32) + t("full command list", "全部命令"));

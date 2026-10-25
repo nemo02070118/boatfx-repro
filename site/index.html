@@ -394,17 +394,17 @@
           <div class="ag-bp-local" id="ag-bp-local" hidden>
             <label class="ag-bp-field"><span data-ag-i18n="brain.model">model</span>
               <select id="ag-bp-model-l">
-                <optgroup label="mid · ~3.4 GB · chat + intent bridge">
-                  <option value="Qwen3-4B-Instruct-q4f16_1-MLC">Qwen3 4B · ~3.4 GB · chat + intent bridge</option>
+                <optgroup label="heavy · strongest chat · ~5.1 GB">
+                  <option value="Qwen2.5-7B-Instruct-q4f16_1-MLC">Qwen2.5 7B · ~5.1 GB · chat + intent bridge · strongest</option>
+                  <option value="Hermes-3-Llama-3.1-8B-q4f16_1-MLC">Hermes-3 Llama-3.1 8B · ~4.9 GB · native tool calling</option>
+                </optgroup>
+                <optgroup label="mid · ~2.5–3.4 GB · chat + intent bridge">
                   <option value="Phi-4-mini-instruct-q4f16_1-MLC">Phi-4-mini · ~3.4 GB · chat + intent bridge</option>
                   <option value="Qwen2.5-3B-Instruct-q4f16_1-MLC">Qwen2.5 3B · ~2.5 GB · chat + intent bridge</option>
                 </optgroup>
                 <optgroup label="light · <1.7 GB · chat + intent bridge">
                   <option value="Qwen2.5-1.5B-Instruct-q4f16_1-MLC">Qwen2.5 1.5B · ~1.6 GB · chat + intent bridge</option>
                   <option value="SmolLM2-1.7B-Instruct-q4f16_1-MLC">SmolLM2 1.7B · ~1.1 GB · chat + intent bridge</option>
-                </optgroup>
-                <optgroup label="heavy · ~4.9 GB · native tool calling">
-                  <option value="Hermes-3-Llama-3.1-8B-q4f16_1-MLC">Hermes-3 Llama-3.1 8B · ~4.9 GB · native tool calling</option>
                 </optgroup>
               </select></label>
             <div class="ag-bp-loadrow">
@@ -1701,13 +1701,15 @@
        first. Terminal commands that need it wait for it (whenAgent). -->
   <script>
   (function () {
-    var files = ["engines.js?v=1", "council.js?v=1", "zoo.js?v=1", "guide.js?v=1", "llm.js?v=1", "agent.js?v=1"];
+    var files = ["engines.js?v=1", "council.js?v=1", "zoo.js?v=1", "guide.js?v=1", "whatif.js?v=1", "llm.js?v=1", "agent.js?v=1"];
     var done = false;
     function load(i) {
       if (i >= files.length) return;
       var s = document.createElement("script");
       s.src = files[i];
+      /* chain on error too: a missing file must not break the stack */
       s.onload = function () { load(i + 1); };
+      s.onerror = function () { load(i + 1); };
       document.head.appendChild(s);
     }
     function go() { if (done) return; done = true; load(0); }
