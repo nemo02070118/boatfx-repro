@@ -74,6 +74,7 @@
       "brain.note": "The key is written to this browser's localStorage and is sent to nobody except the provider you chose. The tape stays declared-synthetic either way: admission at the gate never means a program earns.",
       "brain.close": "close",
       "brain.weights": "The model file itself (~1.1–2 GB) downloads from huggingface.co the first time — if that host is unreachable on your network, use your own key instead.",
+      "brain.lna": "Local endpoints (Ollama, LM Studio) work only when this page is opened over http — over https, Chrome's private-network policy refuses the loopback call, and no header can lift it. On the live https site, use a public endpoint.",
       "brain.net.byok": "model via your key · the instruments are its tools · it may not invent a number",
       "brain.net.local": "local model in this tab · the instruments are its tools · it may not invent a number",
       "rail.session": "Session",
@@ -143,6 +144,7 @@
       "brain.note": "密钥只写进这个浏览器的 localStorage，除了你选择的提供方之外不发给任何人。胶带无论如何都是声明的合成数据：闸门准入从来不代表一个程序能赚钱。",
       "brain.close": "关闭",
       "brain.weights": "模型文件本身（约 1.1–2 GB）首次加载时从 huggingface.co 下载——如果那个主机在你的网络不可达，请改用你自己的密钥。",
+      "brain.lna": "本地端点（Ollama、LM Studio）只在以 http 打开本页时可用——https 下 Chrome 的私有网络策略会拒绝回环调用，任何响应头都解不了。在线上 https 站点请用公网端点。",
       "brain.net.byok": "模型经由你的密钥 · 仪器是它的工具 · 它不许编造数字",
       "brain.net.local": "本页运行本地模型 · 仪器是它的工具 · 它不许编造数字",
       "rail.session": "本次会话",
@@ -451,6 +453,9 @@
       var rs = libSlots(s);
       return { intent: "resurrect", slots: rs };
     }
+    if (/(guide|向导|一步步|分步|step by step|walk me through)/i.test(low)) {
+      return { intent: "guide", slots: { expr: expr } };
+    }
     if (/(strategy|策略|仓位规则|建仓|build a (strategy|book)|trade it)/i.test(low)) {
       return { intent: "strategy", slots: { expr: expr } };
     }
@@ -465,6 +470,20 @@
     }
     if (/(research|full pipeline|全流程|跑全程|完整审判|跑一遍)/i.test(low)) {
       return { intent: "research", slots: { expr: expr } };
+    }
+    if (/(zoo|动物园|因子库|public factor|公开因子|有哪些因子|what factors)/i.test(low)) {
+      return { intent: "zoo", slots: {} };
+    }
+    if (/(fetch|拉取|加载.*url|from a url)/i.test(low) || /https?:\/\//.test(s)) {
+      var um = /(https?:\/\/\S+)/.exec(s);
+      return { intent: "fetch", slots: { url: um ? um[1] : null } };
+    }
+    if (/(mine|挖掘|枚举|机器生成因子|machine.?mined)/i.test(low)) {
+      return { intent: "experiment", slots: { mined: true } };
+    }
+    if (/(experiment|对比|双路|normal way|我们的方式|筛.*池化|run the zoo)/i.test(low)) {
+      var es = libSlots(s);
+      return { intent: "experiment", slots: { lib: es.lib } };
     }
 
     if (tStat != null || (F === "paper" && /(π|pi|dilut|稀释|命题|prop)/i.test(low))) {
@@ -1579,6 +1598,128 @@
     return { steps: [].concat(ev.steps, ve.steps, co.steps), blocks: blocks, council: co.council };
   }
 
+  /* -------------------------------------------- the zoo and the experiment */
+  function instZoo() {
+    var Z = window.HJ_ZOO;
+    if (!Z) return mlMissing();
+    var steps = [{ name: "zoo.list", args: "(" + Z.builtin.length + " public factors)", status: "ok",
+      detail: t("every one carries its citation", "每一个都带文献出处") }];
+    var blocks = [
+      { k: "prose", text: t(
+        "The public library, organised by anomaly family. Every factor is a legal expression in the gate's grammar with a real citation — pick one, or run the whole zoo through the experiment.",
+        "公开因子库，按异象族组织。每个因子都是闸门文法下的合法表达式，带真实引用——挑一个，或者把整个动物园跑进实验。") },
+      { k: "table",
+        head: [{ t: "factor" }, { t: "family" }, { t: "citation" }],
+        rows: Z.builtin.map(function (f) {
+          return [
+            { t: f.id },
+            { t: f.family },
+            { t: f.cite }
+          ];
+        }) },
+      { k: "actions", items: [
+        { label: t("run the experiment on the builtin zoo", "对内置动物园跑实验"), fn: function () { run("run the experiment"); } },
+        { label: t("mine the machine zoo", "跑机器枚举动物园"), fn: function () { run("mine the factor zoo"); } },
+        { label: t("council the order-book imbalance", "让议会裁决盘口失衡"), fn: function () { run("council (BidSize - AskSize) / (BidSize + AskSize)"); } }
+      ] }
+    ];
+    return { steps: steps, blocks: blocks };
+  }
+
+  function instExperiment(slots) {
+    var Z = window.HJ_ZOO;
+    if (!Z) return mlMissing();
+    var s = slots || {};
+    var opts = { builtin: s.builtin !== false, mined: !!s.mined, expr: s.expr };
+    if (s.lib) {
+      var rows = Z.parseLibraryText(s.lib).filter(function (r) { return /[A-Za-z]/.test(r.expr || ""); });
+      if (!rows.length) {
+        return {
+          steps: [{ name: "route", args: "experiment", status: "fail" }],
+          blocks: [{ k: "verdict", tone: "no",
+            h: t("The experiment needs expressions, not t-stats", "实验需要表达式，不是 t 值"),
+            b: t("A pasted “name, t” library feeds the resurrection bench. For the experiment, paste “name :: formula” lines — or just say “run the experiment” for the builtin zoo.",
+              "粘贴的「名称, t」库喂给复活台。实验请粘贴「名称 :: 公式」行——或者说「跑实验」用内置动物园。") }]
+        };
+      }
+      opts.rows = rows;
+    }
+    if (s.fetched) opts.fetched = s.fetched;
+    var out = Z.experiment(opts);
+    return { steps: out.steps, blocks: out.blocks, experiment: out.experiment, council: out.council };
+  }
+
+  function fetchBlocks(res) {
+    var blocks = [];
+    if (!res.ok) {
+      blocks.push({ k: "verdict", tone: "no",
+        h: t("the fetch failed", "拉取失败"),
+        b: t("The source could not be read: " + (res.why || "unknown") + ". GitHub links are rewritten to the jsdelivr mirror; if your network blocks that too, paste the library text instead.",
+          "来源读不出来：" + (res.why || "未知") + "。GitHub 链接会改写为 jsdelivr 镜像；如果你的网络连它也挡，就直接粘贴库文本。") });
+      return blocks;
+    }
+    blocks.push({ k: "prose", text: t(
+      "Fetched " + res.total + " lines from " + res.source + " at " + res.at + ". Compiled each formula under the gate's grammar: " +
+      res.kept.length + " kept, " + res.skipped.length + " skipped.",
+      "从 " + res.source + " 拉取 " + res.total + " 行（" + res.at + "）。按闸门文法逐公式编译：收录 " + res.kept.length + " 个，跳过 " + res.skipped.length + " 个。") });
+    if (res.kept.length) {
+      blocks.push({ k: "table",
+        head: [{ t: "kept" }, { t: "expression" }],
+        rows: res.kept.slice(0, 24).map(function (r) { return [{ t: r.name }, { t: r.expr }]; }) });
+    }
+    if (res.skipped.length) {
+      blocks.push({ k: "table",
+        head: [{ t: "skipped" }, { t: "why" }],
+        rows: res.skipped.slice(0, 12).map(function (r) { return [{ t: r.name }, { t: r.why }]; }) });
+    }
+    blocks.push({ k: "verdict", tone: res.kept.length ? "ok" : "warn",
+      h: res.kept.length
+        ? t(res.kept.length + " factors compiled", res.kept.length + " 个因子编译成功")
+        : t("nothing compiled", "没有编译成功的"),
+      b: res.kept.length
+        ? t("The kept set is measured, not trusted — run the experiment on it and the council adjudicates.", "收录集是被测量的，不是被信任的——对它跑实验，让议会裁决。")
+        : t("Every formula was rejected by the grammar. Check the format: “name :: formula”, one per line.", "每个公式都被文法拒了。检查格式：「名称 :: 公式」，每行一个。"),
+      plain: res.kept.length ? t("The library is in — now measure it.", "库进来了——现在测量它。") : t("Nothing usable in that file.", "那个文件里没有能用的。") });
+    if (res.kept.length) {
+      blocks.push({ k: "actions", items: [
+        { label: t("run the experiment on the fetched set", "对拉取集跑实验"), fn: function () {
+          run("run the experiment on the fetched library");
+        } }
+      ] });
+    }
+    return blocks;
+  }
+
+  function instFetch(slots) {
+    var Z = window.HJ_ZOO;
+    if (!Z) return mlMissing();
+    var url = (slots || {}).url;
+    if (!url) {
+      return {
+        steps: [{ name: "route", args: "fetch", status: "fail" }],
+        blocks: [{ k: "verdict", tone: "no",
+          h: t("The fetch needs a URL", "拉取需要一个 URL"),
+          b: t("Paste a link to a public factor library — one “name :: formula” per line. GitHub links are rewritten to the jsdelivr mirror, reachable where raw.githubusercontent is not.",
+            "粘贴一个公开因子库链接——每行「名称 :: 公式」。GitHub 链接会改写为 jsdelivr 镜像，在 raw.githubusercontent 不通的网络也能拉。") }]
+      };
+    }
+    var steps = [{ name: "zoo.fetch", args: Z.rewriteUrl(url), status: "ok",
+      detail: t("GitHub links are rewritten to the jsdelivr mirror", "GitHub 链接已改写为 jsdelivr 镜像") }];
+    var blocks = [{ k: "prose", text: t(
+      "Fetching " + Z.rewriteUrl(url) + " — every formula is compiled as it lands.",
+      "正在拉取 " + Z.rewriteUrl(url) + "——每个公式现场编译。") }];
+    Z.fetchLibrary(url).then(function (res) {
+      appendOut({ steps: [], blocks: fetchBlocks(res) });
+    });
+    return { steps: steps, blocks: blocks };
+  }
+
+  function instGuide(slots) {
+    var G = window.HJ_GUIDE;
+    if (!G) return mlMissing();
+    return G.start(slots || {});
+  }
+
   function sysPrompt() { return t(
     "You are boat-1, the research agent on a personal portfolio page about quantitative research discipline. You are a real language model running in the visitor's browser, and you are talking to a reviewer.\n\n" +
     "GROUND RULES — these are not suggestions:\n" +
@@ -1587,7 +1728,8 @@
     "3. The tape the instruments run on is a DECLARED SYNTHETIC market, not real market data. Never present its results as live, real, or tradeable.\n" +
     "4. Admission at the gate means a program is executable, dispersed and argued — never that it earns. Keep that distinction in every sentence.\n" +
     "5. Be brief and concrete. Two short paragraphs beat eight. No filler, no restating the question.\n" +
-    "6. Reply in the language the visitor used (English or simplified Chinese).\n\n" +
+    "6. Reply in the language the visitor used (English or simplified Chinese).\n" +
+    "7. If you cannot call tools directly — you are a local model — express each instrument call on its own line, exactly in this shape: [instrument: the words a visitor would type]. The page parses those lines and runs the instruments itself; you still may not invent the numbers they return.\n\n" +
     "INSTRUMENTS — each runs in this tab, no network, deterministic under seed 20261105:\n" +
     "- judge_factor(expr, why): run a factor expression through the page's nine gates.\n" +
     "- evaluate_factor(expr): evaluate an expression on the declared tape; returns IC, t over non-overlapping blocks, Sharpe, turnover, drawdown, pi, diluted t.\n" +
@@ -1598,7 +1740,19 @@
     "- hurdle(N): the discovery wall sqrt(2 ln N).\n" +
     "- pool(vals): Stouffer pooled t.\n" +
     "- run_funnel(n): the seeded proposal funnel.\n" +
-    "- bench_stats(): the last numbers the autopsy bench computed in this tab.\n\n" +
+    "- bench_stats(): the last numbers the autopsy bench computed in this tab.\n" +
+    "- council_run(expr | t,pi,N | lib): convene the seven-persona council — six voters, a devil's advocate, a captain — on the same computed facts.\n" +
+    "- venue_find(expr): find a factor's home venue on the declared tape, with pi measured, not assumed.\n" +
+    "- resurrect(lib): the resurrection bench — the mis-killed set pooled with Stouffer.\n" +
+    "- strategy_build(expr): factor to strategy — vol targeting, venue routing vs always-on on the same tape.\n" +
+    "- compose_factor(expr, idea): compile a plain-language idea into a legal expression, re-measured here.\n" +
+    "- about_author(question): the author, from the public record only; unsourced questions are refused.\n" +
+    "- research_pipeline(expr): measure, locate, deliberate in one run.\n" +
+    "- factor_zoo(): the builtin public factor library with literature citations.\n" +
+    "- run_experiment(source | lib): the paper's experiment — the normal screen against home-venue routing plus pooling, adjudicated by the council.\n" +
+    "- fetch_library(url): fetch a public factor library from a URL, compile-validate every formula, report kept and skipped.\n" +
+    "- mine_factors(): the machine-enumerated zoo over the DSL whitelist.\n" +
+    "- strategy_guide(expr): the step-by-step strategy builder.\n\n" +
     "FACTOR GRAMMAR: Mean[w] Zscore[w] Slope[w] Std[w] Rank Abs Sign Diff Neg Log Sqrt over signals BidSize AskSize BestBid BestAsk MidPrice Volume TradeSide TradeSize, combined with Add Sub Mul Div Min Max Pow, e.g. Rank(Mean[10](BestAsk - BestBid) / MidPrice).\n" +
     "CONSTANTS: screen 1.96, allocation sqrt(2 ln 17) = 2.3803, D_eff 17, seed 20261105, declared tape 1200 bars.\n" +
     "If the visitor asks something outside all of this — live prices, advice, a brokerage, your training data — say what you are and are not, in one sentence, and offer the nearest instrument.",
@@ -1609,7 +1763,8 @@
     "3. 仪器运行的是一条声明的合成胶带，不是真实行情。永远不要把它说成实时、真实或可交易。\n" +
     "4. 闸门准入只说明一个程序可执行、有离散、有理由——从不说它能赚钱。每一句话都要守住这个区分。\n" +
     "5. 简短、具体。两小段胜过八大段。不写废话，不重复问题。\n" +
-    "6. 用访客使用的语言回答（英语或简体中文）。\n\n" +
+    "6. 用访客使用的语言回答（英语或简体中文）。\n" +
+    "7. 如果你不能直接调用工具——你是本地模型——把每次仪器调用单独写一行，严格用这个形状：[instrument: 访客会输入的原话]。页面会解析这些行并自己运行仪器；它们返回的数字你照样不许编。\n\n" +
     "仪器——每一个都在本页运行、不走网络、在种子 20261105 下确定：\n" +
     "- judge_factor(expr, why)：把因子表达式过完本页九道闸门。\n" +
     "- evaluate_factor(expr)：在声明胶带上评估表达式；返回 IC、非重叠区块的 t、夏普、换手、回撤、π、稀释 t。\n" +
@@ -1620,7 +1775,19 @@
     "- hurdle(N)：发现之墙 sqrt(2 ln N)。\n" +
     "- pool(vals)：Stouffer 合并 t。\n" +
     "- run_funnel(n)：定种提案漏斗。\n" +
-    "- bench_stats()：解剖台在这个页面里最近算出的数字。\n\n" +
+    "- bench_stats()：解剖台在这个页面里最近算出的数字。\n" +
+    "- council_run(expr | t,pi,N | lib)：召集七智体议会——六个投票者、一个辩手、一个舰长——读同一批算出来的事实。\n" +
+    "- venue_find(expr)：在声明胶带上找因子的主场，π 是实测的不是假设的。\n" +
+    "- resurrect(lib)：复活台——误杀集用 Stouffer 池化。\n" +
+    "- strategy_build(expr)：因子到策略——波动目标、主场路由对常开，同带对比。\n" +
+    "- compose_factor(expr, idea)：把大白话编译成合法表达式，在这里复测。\n" +
+    "- about_author(question)：作者的事，只按公开记录；无来源的问题拒答。\n" +
+    "- research_pipeline(expr)：一次跑完测量、定位、审议。\n" +
+    "- factor_zoo()：内置公开因子库，带文献引用。\n" +
+    "- run_experiment(source | lib)：论文的实验——正常筛选对主场路由加池化，议会终审。\n" +
+    "- fetch_library(url)：从 URL 拉取公开因子库，逐公式编译校验，报告收录与跳过。\n" +
+    "- mine_factors()：DSL 白名单上的机器枚举动物园。\n" +
+    "- strategy_guide(expr)：分步策略构建向导。\n\n" +
     "因子文法：Mean[w] Zscore[w] Slope[w] Std[w] Rank Abs Sign Diff Neg Log Sqrt，作用于信号 BidSize AskSize BestBid BestAsk MidPrice Volume TradeSide TradeSize，用 Add Sub Mul Div Min Max Pow 组合，例如 Rank(Mean[10](BestAsk - BestBid) / MidPrice)。\n" +
     "常数：筛选线 1.96，配置线 sqrt(2 ln 17) = 2.3803，D_eff 17，种子 20261105，声明胶带 1200 根。\n" +
     "如果访客问的是这些之外的事——实时行情、投资建议、券商、你的训练数据——用一句话说清你是什么、不是什么，然后指给最近的仪器。"); }
@@ -1733,7 +1900,40 @@
         parameters: S("", {
           expr: { type: "string", description: "the factor expression in the site grammar" }
         }, ["expr"]),
-        run: function (a) { return instResearch({ expr: a.expr }); } }
+        run: function (a) { return instResearch({ expr: a.expr }); } },
+      { name: "factor_zoo",
+        description: "List the builtin public factor library — factors with literature citations, organised by anomaly family. Use this when the visitor asks what factors exist, what is public, or what to test.",
+        parameters: S("", {}),
+        run: function () { return instZoo(); } },
+      { name: "run_experiment",
+        description: "The paper's experiment on a factor zoo: the normal way (universal |t|<1.96 screen, survivors equal-weighted) against our way (home-venue routing + Stouffer pooling of the mis-killed), both scored on the same holdout, then adjudicated by the council. Sources: the builtin public library, machine-mined combinations, a fetched library, or the visitor's own expressions.",
+        parameters: S("", {
+          source: { type: "string", description: "builtin | mined | own (omit for builtin)" },
+          lib: { type: "string", description: "a pasted library of 'name :: formula' lines, when source is own" }
+        }),
+        run: function (a) {
+          var s = a.source || "builtin";
+          return instExperiment({
+            builtin: s !== "own", mined: s === "mined",
+            rows: a.lib ? (window.HJ_ZOO.parseLibraryText(a.lib).filter(function (r) { return /[A-Za-z]/.test(r.expr || ""); })) : null
+          });
+        } },
+      { name: "fetch_library",
+        description: "Fetch a public factor library from a URL (GitHub links are rewritten to the jsdelivr mirror), compile-validate every formula under the site grammar, and report which were kept or skipped and why. The source URL and fetch time are recorded.",
+        parameters: S("", {
+          url: { type: "string", description: "the public library URL" }
+        }, ["url"]),
+        run: function (a) { return instFetch({ url: a.url }); } },
+      { name: "mine_factors",
+        description: "Enumerate the machine-mined zoo: DSL whitelist operators x input signals x windows x transforms — hundreds of legal expressions, all compiled and measured, then the experiment run on them.",
+        parameters: S("", {}),
+        run: function () { return instExperiment({ mined: true }); } },
+      { name: "strategy_guide",
+        description: "Start the step-by-step strategy builder: factor -> signal processing -> position rule -> risk -> home-venue routing -> backtest -> council. Use this when the visitor wants to build a strategy with our method, one step at a time.",
+        parameters: S("", {
+          expr: { type: "string", description: "optional starting factor expression" }
+        }),
+        run: function (a) { return instGuide({ expr: a.expr }); } }
     ];
   }
 
@@ -1927,11 +2127,29 @@
     function paint() {
       if (painting) return;
       painting = true;
+      /* the intent-bridge lines are protocol, not prose — never shown */
       proseHost.textContent = "";
-      renderMiniMarkdown(proseHost, raw);
+      renderMiniMarkdown(proseHost, raw.replace(/\[instrument:[^\]]*\]/g, ""));
       proseHost.appendChild(caret);
       painting = false;
       maybeScroll();
+    }
+
+    /* the intent bridge: a local model asks for instruments in words, and
+       this page's own router runs them — the protocol is ours, so it is
+       as reliable as the deterministic path it feeds. */
+    function runBridge(rawText) {
+      var re = /\[instrument:\s*([^\]]+)\]/g, m, qs = [];
+      while ((m = re.exec(rawText))) qs.push(m[1].trim());
+      qs.forEach(function (q) {
+        if (ctl.aborted) return;
+        var r = route(q, null);
+        var out = dispatch(r);
+        var box = el("div", "ag-msg-block");
+        body.appendChild(box);
+        (out.blocks || []).forEach(function (b) { renderBlock(box, b, ctl, function () {}); });
+        maybeScroll(true);
+      });
     }
 
     session.calls += 1;
@@ -1977,6 +2195,7 @@
       var computeMs = msOf(t0);
       session.ms += computeMs;
       paintSession();
+      runBridge(raw);
       finishBrain(body, cfg, final, computeMs, text, ctl);
     }).catch(function (err) {
       if (caret.parentNode) caret.parentNode.removeChild(caret);
@@ -1994,16 +2213,27 @@
           "在这一路上除了轨迹里显示的，没有算别的东西。") +
         String(err && err.message || err)));
       body.appendChild(box);
-      body.appendChild(actionsOf([
-        { label: t("try again", "重试"), fn: function () { runBrain(text); } },
-        { label: t("answer with the deterministic router", "用确定性路由器回答"),
-          fn: function () { run(text, { deterministic: true }); } }
-      ]));
-      maybeScroll();
+      body.appendChild(el("p", "ag-prov", t(
+        "the model did not answer — the deterministic router took over. Every number below is computed in this tab.",
+        "模型没有回答——确定性路由器已接管。下面每个数字都在本页计算。")));
+      runDeterministic(text, route(text, currentMode));
       if (activeCtl === ctl) activeCtl = null;
       setBusy(false);
-      if (liveEl) liveEl.textContent = t("the model call failed", "模型调用失败");
+      if (liveEl) liveEl.textContent = t("the model call failed — the router answered", "模型调用失败——路由器已回答");
     });
+  }
+
+  /* append an instrument's blocks as a new message — used by the async
+     fetch and by the guide wizard, neither of which has a caller body */
+  function appendOut(out) {
+    if (!out || !streamEl) return null;
+    var msg = el("div", "ag-msg");
+    var body2 = el("div", "ag-blocks");
+    msg.appendChild(body2);
+    streamEl.appendChild(msg);
+    (out.blocks || []).forEach(function (b) { renderBlock(body2, b, { aborted: false }, function () {}); });
+    maybeScroll(true);
+    return msg;
   }
 
   function actionsOf(items) {
@@ -2730,6 +2960,10 @@
       case "foundry": return instFoundry(r.slots || {});
       case "about": return instAbout(r.slots || {});
       case "research": return instResearch(r.slots || {});
+      case "zoo": return instZoo();
+      case "experiment": return instExperiment(r.slots || {});
+      case "fetch": return instFetch(r.slots || {});
+      case "guide": return instGuide(r.slots || {});
       case "paper": return instPaper();
       case "stack": return instStack();
       case "help": return instHelp();
@@ -3228,6 +3462,7 @@
     route: route,
     run: run,
     ask: function (text) { run(text); },
+    render: function (out) { return appendOut(out); },
     prefill: function (text) {
       if (!inputEl) return;
       inputEl.value = String(text || "");

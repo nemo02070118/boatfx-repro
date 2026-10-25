@@ -342,7 +342,14 @@
               <input type="password" id="ag-bp-key" autocomplete="off" spellcheck="false" data-ag-i18n-ph="brain.keyph" placeholder="sk-…"></label>
             <div class="ag-bp-custom" id="ag-bp-custom" hidden>
               <label class="ag-bp-field"><span data-ag-i18n="brain.base">base URL</span>
-                <input type="text" id="ag-bp-base" autocomplete="off" spellcheck="false" data-ag-i18n-ph="brain.baseph" placeholder="https://…/v1"></label>
+                <input type="text" id="ag-bp-base" list="ag-bp-bases" autocomplete="off" spellcheck="false" data-ag-i18n-ph="brain.baseph" placeholder="https://…/v1">
+                <datalist id="ag-bp-bases">
+                  <option value="http://localhost:11434/v1">Ollama · local</option>
+                  <option value="http://localhost:1234/v1">LM Studio · local</option>
+                  <option value="https://api.deepseek.com/v1">DeepSeek</option>
+                  <option value="https://api.moonshot.cn/v1">Kimi</option>
+                </datalist></label>
+              <p class="ag-bp-weights" data-ag-i18n="brain.lna">Local endpoints (Ollama, LM Studio) work only when this page is opened over http — over https, Chrome's private-network policy refuses the loopback call, and no header can lift it. On the live https site, use a public endpoint.</p>
               <label class="ag-bp-field"><span data-ag-i18n="brain.model">model</span>
                 <input type="text" id="ag-bp-model-c" autocomplete="off" spellcheck="false"></label>
             </div>
@@ -350,9 +357,18 @@
           <div class="ag-bp-local" id="ag-bp-local" hidden>
             <label class="ag-bp-field"><span data-ag-i18n="brain.model">model</span>
               <select id="ag-bp-model-l">
-                <option value="Qwen2.5-1.5B-Instruct-q4f16_1-MLC">Qwen2.5 1.5B · ~1.1 GB · tool calling</option>
-                <option value="Qwen2.5-3B-Instruct-q4f16_1-MLC">Qwen2.5 3B · ~2 GB · tool calling</option>
-                <option value="SmolLM2-1.7B-Instruct-q4f16_1-MLC">SmolLM2 1.7B · ~1.1 GB · chat only</option>
+                <optgroup label="mid · ~3.4 GB · chat + intent bridge">
+                  <option value="Qwen3-4B-Instruct-q4f16_1-MLC">Qwen3 4B · ~3.4 GB · chat + intent bridge</option>
+                  <option value="Phi-4-mini-instruct-q4f16_1-MLC">Phi-4-mini · ~3.4 GB · chat + intent bridge</option>
+                  <option value="Qwen2.5-3B-Instruct-q4f16_1-MLC">Qwen2.5 3B · ~2.5 GB · chat + intent bridge</option>
+                </optgroup>
+                <optgroup label="light · <1.7 GB · chat + intent bridge">
+                  <option value="Qwen2.5-1.5B-Instruct-q4f16_1-MLC">Qwen2.5 1.5B · ~1.6 GB · chat + intent bridge</option>
+                  <option value="SmolLM2-1.7B-Instruct-q4f16_1-MLC">SmolLM2 1.7B · ~1.1 GB · chat + intent bridge</option>
+                </optgroup>
+                <optgroup label="heavy · ~4.9 GB · native tool calling">
+                  <option value="Hermes-3-Llama-3.1-8B-q4f16_1-MLC">Hermes-3 Llama-3.1 8B · ~4.9 GB · native tool calling</option>
+                </optgroup>
               </select></label>
             <div class="ag-bp-loadrow">
               <button type="button" class="ag-bp-load" id="ag-bp-load" data-ag-i18n="brain.load">load the model</button>
@@ -1644,6 +1660,8 @@
   <script src="ml.js?v=1"></script>
   <script src="engines.js?v=1"></script>
   <script src="council.js?v=1"></script>
+  <script src="zoo.js?v=1"></script>
+  <script src="guide.js?v=1"></script>
   <script src="llm.js?v=1"></script>
   <script src="agent.js?v=1"></script>
   <script src="upgrade.js?v=11"></script>

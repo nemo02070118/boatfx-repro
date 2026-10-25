@@ -47,11 +47,17 @@
     local:    { label: "in this browser (WebLLM)", base: "", model: "", byok: false }
   };
 
-  /* small models that WebLLM ships with tool calling; ids are MLC's own */
+  /* Local models, by tier. WebLLM 0.2.86 supports native function calling
+     ONLY on the Hermes family — every other model runs the intent bridge:
+     natural-language instrument calls parsed by this page's own router.
+     VRAM numbers are WebLLM's own prebuilt config. */
   var LOCAL_MODELS = [
-    { id: "Qwen2.5-1.5B-Instruct-q4f16_1-MLC", label: "Qwen2.5 1.5B · ~1.1 GB · tool calling" },
-    { id: "Qwen2.5-3B-Instruct-q4f16_1-MLC", label: "Qwen2.5 3B · ~2 GB · tool calling" },
-    { id: "SmolLM2-1.7B-Instruct-q4f16_1-MLC", label: "SmolLM2 1.7B · ~1.1 GB · chat only" }
+    { id: "Qwen3-4B-Instruct-q4f16_1-MLC", label: "Qwen3 4B · ~3.4 GB · chat + intent bridge", tier: "mid" },
+    { id: "Phi-4-mini-instruct-q4f16_1-MLC", label: "Phi-4-mini · ~3.4 GB · chat + intent bridge", tier: "mid" },
+    { id: "Qwen2.5-3B-Instruct-q4f16_1-MLC", label: "Qwen2.5 3B · ~2.5 GB · chat + intent bridge", tier: "mid" },
+    { id: "Qwen2.5-1.5B-Instruct-q4f16_1-MLC", label: "Qwen2.5 1.5B · ~1.6 GB · chat + intent bridge", tier: "light" },
+    { id: "SmolLM2-1.7B-Instruct-q4f16_1-MLC", label: "SmolLM2 1.7B · ~1.1 GB · chat + intent bridge", tier: "light" },
+    { id: "Hermes-3-Llama-3.1-8B-q4f16_1-MLC", label: "Hermes-3 Llama-3.1 8B · ~4.9 GB · native tool calling", tier: "heavy" }
   ];
 
   function get() { return state; }

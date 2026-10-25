@@ -89,8 +89,10 @@
       f.st = E.helpers.seriesStats(slots.series);
       f.n = f.st.n;
       if (f.t == null) f.t = f.st.t;
-    } else if (slots.lib) {
-      var rows = E.helpers.parseLib(slots.lib);
+    } else if (slots.lib || (slots.rows && slots.rows.length)) {
+      var rows = (slots.rows && slots.rows.length)
+        ? slots.rows.map(function (r) { return { name: r.name || "factor", t: Number(r.t), pi: (r.pi != null && isFinite(r.pi)) ? r.pi : null }; })
+        : E.helpers.parseLib(slots.lib);
       if (rows.length) {
         f.mode = "library";
         f.rows = rows;
@@ -620,7 +622,9 @@
         .then(function (res) {
           slot.host.classList.remove("is-live");
           slot.host.classList.add("is-model");
-          slot.body.textContent = String(res.text || "").trim();
+          /* the intent-bridge protocol belongs to the main channel only —
+             a speech that carries it gets it stripped, never displayed */
+          slot.body.textContent = String(res.text || "").replace(/\[instrument:[^\]]*\]/g, "").trim();
           next();
         })
         .catch(function () {
