@@ -23,7 +23,12 @@
   <meta name="twitter:image" content="https://nemo02070118.github.io/boatfx-repro/assets/og/card.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Non-blocking font load: a blocking stylesheet from fonts.googleapis.com
+       costs ~0.5 s on a good network and can hang the first paint entirely on
+       a slow one. media=print does not block rendering; onload swaps it in.
+       If the request never lands, the page renders in system fonts. -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'" />
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" /></noscript>
   <!-- KaTeX renders the seven math cards and the paper cards — it is not
        needed for first paint, so it loads when the math section comes near
        the viewport (or 1.2 s after load), and renders the formulas itself. -->
