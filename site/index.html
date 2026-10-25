@@ -24,8 +24,40 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <!-- KaTeX renders the seven math cards and the paper cards — it is not
+       needed for first paint, so it loads when the math section comes near
+       the viewport (or 1.2 s after load), and renders the formulas itself. -->
+  <script>
+  (function () {
+    var done = false;
+    function renderAll() {
+      if (!window.katex) return;
+      document.querySelectorAll("[data-tex]").forEach(function (el) {
+        if (el.dataset.texDone) return;
+        try { window.katex.render(el.dataset.tex, el, { throwOnError: false, displayMode: true }); el.dataset.texDone = "1"; } catch (e) {}
+      });
+    }
+    function go() {
+      if (done) return; done = true;
+      var l = document.createElement("link");
+      l.rel = "stylesheet";
+      l.href = "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css";
+      document.head.appendChild(l);
+      var s = document.createElement("script");
+      s.src = "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js";
+      s.onload = renderAll;
+      document.head.appendChild(s);
+    }
+    var node = document.querySelector(".math-grid");
+    if ("IntersectionObserver" in window && node) {
+      var io = new IntersectionObserver(function (es) {
+        if (es[0].isIntersecting) { io.disconnect(); go(); }
+      }, { rootMargin: "800px" });
+      io.observe(node);
+    }
+    window.addEventListener("load", function () { setTimeout(go, 1200); });
+  })();
+  </script>
   <script>
     (function () {
       try {
