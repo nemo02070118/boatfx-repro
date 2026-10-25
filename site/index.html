@@ -1696,16 +1696,19 @@
   <!-- The console's gate/agent/sim commands need these two libraries, and a
        shared ?run= link starts printing the moment upgrade.js executes. Load
        them first so the replay can never outrun them on a slow network. -->
-  <script src="bench.js?v=10"></script>
-  <script src="gate.js?v=3"></script>
-  <script src="ml.js?v=1"></script>
   <!-- The agent stack (engines, council, zoo, guide, llm, agent — ~110 KB
        compressed) is not needed for first paint. It loads when the agent
        section comes near the viewport, or one second after load, whichever
        first. Terminal commands that need it wait for it (whenAgent). -->
   <script>
   (function () {
-    var files = ["engines.js?v=1", "council.js?v=1", "zoo.js?v=1", "guide.js?v=1", "whatif.js?v=1", "workbench.js?v=1", "llm.js?v=1", "agent.js?v=1"];
+    /* the terminal stack (gate, bench, ml, upgrade) plus the agent stack —
+       none of it is needed for the hero. app.js and viz.js never touch
+       these globals, so deferring them is safe; the terminal commands
+       wait for their libs (whenLibs) and the agent for its stack. */
+    var files = ["gate.js?v=3", "bench.js?v=10", "ml.js?v=1", "upgrade.js?v=11",
+                 "engines.js?v=1", "council.js?v=1", "zoo.js?v=1", "guide.js?v=1",
+                 "whatif.js?v=1", "workbench.js?v=1", "llm.js?v=1", "agent.js?v=1"];
     var done = false;
     function go() {
       if (done) return;
@@ -1721,17 +1724,16 @@
         document.head.appendChild(s);
       }
     }
-    var node = document.getElementById("boat-agent");
-    if ("IntersectionObserver" in window && node) {
+    var nodes = [document.getElementById("terminal"), document.getElementById("boat-agent")];
+    if ("IntersectionObserver" in window) {
       var io = new IntersectionObserver(function (es) {
-        if (es[0].isIntersecting) { io.disconnect(); go(); }
+        if (es.some(function (e) { return e.isIntersecting; })) { io.disconnect(); go(); }
       }, { rootMargin: "800px" });
-      io.observe(node);
+      nodes.forEach(function (n) { if (n) io.observe(n); });
     }
     window.addEventListener("load", function () { setTimeout(go, 1000); });
   })();
   </script>
-  <script src="upgrade.js?v=11"></script>
   <script src="i18n.js?term11"></script>
   <script src="app.js?term12"></script>
   <script defer src="viz.js?term11"></script>
