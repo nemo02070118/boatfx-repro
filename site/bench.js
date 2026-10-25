@@ -424,7 +424,9 @@
         var txt = st.rows.map(function (r) {
           return (r.name || "factor") + ", " + (r.t != null ? r.t : "") + (r.pi != null ? ", " + r.pi : "");
         }).join("\n");
-        window.BoatAgent.ask("resurrect\n" + txt);
+        /* the visitor's own rows go to the validation bench — "resurrect"
+           would run the site's sample library instead of their paste */
+        window.BoatAgent.ask("validate\n" + txt);
       } else {
         var tv = st.best != null ? st.best : st.mean;
         if (tv != null) window.BoatAgent.ask("council t=" + tv + " pi=" + (st.pi != null ? st.pi : 0.25));

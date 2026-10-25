@@ -57,6 +57,23 @@
         formulas.push({ name: p[0].trim(), expr: p.slice(1).join("::").trim() });
         return;
       }
+      /* tab (an Excel copy), colon, or whitespace separated; a header row
+         ("name, t") simply fails the numeric test and is ignored */
+      var sep = null;
+      if (ln.indexOf("\t") >= 0) sep = ln.split("\t");
+      else if (/[:：]\s*-?\d/.test(ln)) sep = ln.split(/[:：]/);
+      else {
+        var m2 = /^(.+?)\s+(-?\d+(?:\.\d+)?)(?:\s+(\d*\.?\d+))?$/.exec(ln);
+        if (m2) sep = [m2[1], m2[2], m2[3]];
+      }
+      if (sep) {
+        var s1 = sep[1] != null ? sep[1].trim() : "";
+        if (/^-?\d+(\.\d+)?$/.test(s1)) {
+          tstats.push({ name: sep[0].trim(), t: parseFloat(s1),
+            pi: sep[2] != null && /^\d*\.?\d+$/.test(sep[2].trim()) ? parseFloat(sep[2]) : 0.25 });
+          return;
+        }
+      }
       var c = ln.split(",");
       if (c.length >= 2 && /^-?\d+(\.\d+)?$/.test(c[1].trim())) {
         tstats.push({ name: c[0].trim(), t: parseFloat(c[1]), pi: c[2] != null && /^\d/.test(c[2].trim()) ? parseFloat(c[2]) : 0.25 });

@@ -349,8 +349,12 @@
       };
     });
 
-    /* verdict: bands are declared; the mis-kill override is the paper's move */
+    /* verdict: bands are declared; the mis-kill override is the paper's move.
+       "none" is reserved for the case with NO reading at all (no t, no
+       series, no rows) — a weak reading still deserves a rejection. */
     var key = "reject", tone = "no";
+    var noReading = f.t == null && !f.series && !(f.rows && f.rows.length);
+    if (noReading) { key = "none"; }
     if (score != null) {
       if (score >= 70) { key = "admit"; tone = "ok"; }
       else if (score >= 45) { key = "watch"; tone = "warn"; }
@@ -367,19 +371,24 @@
     var C = eng().constants;
     var s = d.score == null ? "—" : num(d.score, 1);
     var heads = {
+      none: t("no reading — nothing to judge", "没有读数——没有可审的东西"),
       admit: t("the council admits it", "议会裁定：准入"),
       watch: t("the council watches it", "议会裁定：观望"),
       reject: t("the council rejects it", "议会裁定：拒绝"),
       revive: t("mis-killed — the council revives it", "误杀——议会裁定：翻案复活")
     };
     var plains = {
+      none: t("Give it a factor, a t-stat, or a library — then it can judge.", "给它一个因子、一个 t 值或一个库——然后它才能审。"),
       admit: t("Six lenses, one answer: this factor earns its seat.", "六种视角，一个答案：这个因子配得上它的座位。"),
       watch: t("Six lenses, no consensus: worth watching, not worth a bet.", "六种视角，没有共识：值得看，不值得下注。"),
       reject: t("Six lenses, one answer: the evidence is not there.", "六种视角，一个答案：证据不在。"),
       revive: t("The screen would bin a factor that is alive in its own home — the council overrules the screen.",
         "筛选线会扔掉一个在自己主场活着的因子——议会推翻筛选线。")
     };
-    var body = d.revived
+    var body = d.key === "none"
+      ? t("No voter had anything to read: the council needs a factor expression, a t-stat with pi, or a factor library. Nothing was rejected — nothing was measured.",
+          "没有任何投票者有东西可读：议会需要一个因子表达式、一个带 π 的 t 值，或一个因子库。没有东西被拒绝——是没有东西被测量。")
+      : d.revived
       ? t(
         "The statistician's geometry is decisive: t = " + num(f.t, 2) + " clears the allocation bar while t_g = " +
         num(f.tg, 2) + " falls under the screen — the mis-kill the paper is named after. Composite " + s +
