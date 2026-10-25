@@ -195,21 +195,40 @@
     if (mlcLoading) return mlcLoading;
     mlcLoading = importWebLLM()
       .then(function (mod) {
-        /* default sources first (huggingface.co + raw.githubusercontent.com);
-           if the engine fails to start, one retry from the China mirrors. */
-        return mod.CreateMLCEngine(modelId, { initProgressCallback: onProgress })
-          .catch(function (first) {
-            return mod.CreateMLCEngine(modelId, {
-              initProgressCallback: onProgress,
-              appConfig: { model_list: CN_MIRROR_MODELS }
-            }).catch(function () {
-              throw new Error(
-                "the model could not start from either source: the default weights (huggingface.co) and WASM libs (raw.githubusercontent.com) failed — " +
-                String((first && first.message) || first) +
-                " — and the China mirrors (hf-mirror.com, cdn.jsdelivr.net) failed too, so your network appears to block both. " +
-                "The instruments still run and your own key is unaffected — the local model just cannot download here.");
-            });
+        /* three rungs, in order:
+           1. the defaults — weights from huggingface.co, WASM from raw.githubusercontent.com
+           2. the China mirrors — weights from hf-mirror.com, WASM from jsdelivr
+           3. the mixed pair — weights from huggingface.co, WASM from jsdelivr
+              (a network that blocks only raw.githubusercontent lands here)
+           Each failure is recorded with its reason, so the final error says
+           exactly which source broke instead of guessing. */
+        var MIXED_MODELS = CN_MIRROR_MODELS.map(function (r) {
+          var c = {};
+          for (var k in r) c[k] = r[k];
+          c.model = r.model.replace("hf-mirror.com", "huggingface.co");
+          return c;
+        });
+        var rungs = [
+          { label: t("weights huggingface.co + WASM raw.githubusercontent.com", "权重 huggingface.co + WASM raw.githubusercontent.com"),
+            cfg: { initProgressCallback: onProgress } },
+          { label: t("weights hf-mirror.com + WASM cdn.jsdelivr.net", "权重 hf-mirror.com + WASM cdn.jsdelivr.net"),
+            cfg: { initProgressCallback: onProgress, appConfig: { model_list: CN_MIRROR_MODELS } } },
+          { label: t("weights huggingface.co + WASM cdn.jsdelivr.net", "权重 huggingface.co + WASM cdn.jsdelivr.net"),
+            cfg: { initProgressCallback: onProgress, appConfig: { model_list: MIXED_MODELS } } }
+        ];
+        var tried = [];
+        function rung(i) {
+          if (i >= rungs.length) {
+            throw new Error(
+              "the model could not start from any source. Tried: " + tried.join(" | ") +
+              ". The instruments still run and your own key is unaffected — the local model just cannot download from this network.");
+          }
+          return mod.CreateMLCEngine(modelId, rungs[i].cfg).catch(function (e) {
+            tried.push(rungs[i].label + " [" + String((e && e.message) || e).slice(0, 140) + "]");
+            return rung(i + 1);
           });
+        }
+        return rung(0);
       })
       .then(function (engine) {
         engine._id = modelId;
@@ -221,7 +240,6 @@
         mlcLoading = null;
         var msg = String((e && e.message) || e);
         if (/could not be fetched from any CDN/.test(msg)) throw new Error(msg);
-        if (/either source/.test(msg)) throw e; /* the mirror retry already named both */
         /* the module loaded; what failed is the weights */
         throw new Error("the model could not start: " + msg +
           " · the instruments still run and your own key is unaffected.");
@@ -379,10 +397,12 @@
             /* WebLLM returns an async iterable of the same delta shape */
             var content = "", callsRaw = [];
             function pump(it) {
-              var r = it.next();
-              if (r.done) return Promise.resolve();
-              return Promise.resolve(r.value).then(function (j) {
-                var ch = j.choices && j.choices[0];
+              /* it.next() is a PROMISE on an async iterator — resolving
+                 it first is the difference between streaming and this crash */
+              return Promise.resolve(it.next()).then(function (r) {
+                if (r.done) return null;
+                var j = r.value;
+                var ch = j && j.choices && j.choices[0];
                 var d = ch && (ch.delta || {});
                 if (d && d.content) { content += d.content; if (onToken) onToken(d.content); }
                 if (d && d.tool_calls) {
