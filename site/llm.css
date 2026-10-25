@@ -91,11 +91,17 @@
 
 .ag-bp-lead,
 .ag-bp-note,
-.ag-bp-gpu {
+.ag-bp-gpu,
+.ag-bp-weights {
   font-size: .78rem;
   line-height: 1.55;
   color: var(--muted);
   margin: 0;
+}
+.ag-bp-weights {
+  margin-top: .4rem;
+  padding-top: .4rem;
+  border-top: 1px dashed var(--line);
 }
 
 .ag-bp-note {

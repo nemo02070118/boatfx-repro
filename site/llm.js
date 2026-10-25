@@ -94,13 +94,38 @@
   function localSupported() {
     return !!(navigator.gpu && navigator.gpu.requestAdapter);
   }
+  /* The WebLLM module, from the first CDN that answers. esm.run and jsdelivr
+     serve the same bundled build; unpkg serves the raw ESM package as a last
+     resort. A failure here is a network failure, not a site failure — the
+     message says so and points at BYOK. */
+  var WEBLLM_CDNS = [
+    "https://esm.run/@mlc-ai/web-llm@0.2.86",
+    "https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.86/+esm",
+    "https://unpkg.com/@mlc-ai/web-llm@0.2.86/lib/index.js"
+  ];
+  function importWebLLM() {
+    var i = 0;
+    function next() {
+      if (i >= WEBLLM_CDNS.length) {
+        return Promise.reject(new Error(
+          "the WebLLM module could not be fetched from any CDN (esm.run, jsdelivr, unpkg) — " +
+          "your network is blocking them. The instruments still run and your own key still works; " +
+          "the local model needs that one file."));
+      }
+      var url = WEBLLM_CDNS[i++];
+      return import(url).catch(function () { return next(); });
+    }
+    return next();
+  }
+
   function loadLocal(modelId, onProgress) {
+    var M = window.HJ_ML;
     if (!localSupported()) {
       return Promise.reject(new Error("this browser has no WebGPU — the local model needs it (Chrome/Edge 113+). Use your own key instead."));
     }
     if (mlc && mlc._id === modelId) return Promise.resolve(mlc);
     if (mlcLoading) return mlcLoading;
-    mlcLoading = import("https://esm.run/@mlc-ai/webllm@^0.2.79")
+    mlcLoading = importWebLLM()
       .then(function (mod) {
         return mod.CreateMLCEngine(modelId, { initProgressCallback: onProgress });
       })
@@ -112,7 +137,11 @@
       })
       .catch(function (e) {
         mlcLoading = null;
-        throw e;
+        var msg = String((e && e.message) || e);
+        if (/could not be fetched from any CDN/.test(msg)) throw new Error(msg);
+        /* the module loaded; what failed is the weights */
+        throw new Error("the model could not start: " + msg +
+          " · the model file itself (~1.1–2 GB) downloads from huggingface.co when the engine starts — if that host is unreachable on your network, the local model cannot run here. Your own key is unaffected.");
       });
     return mlcLoading;
   }
