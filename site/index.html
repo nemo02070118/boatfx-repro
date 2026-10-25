@@ -387,6 +387,7 @@
                   <option value="https://api.moonshot.cn/v1">Kimi</option>
                 </datalist></label>
               <p class="ag-bp-weights" data-ag-i18n="brain.lna">Local endpoints (Ollama, LM Studio) work only when this page is opened over http — over https, Chrome's private-network policy refuses the loopback call, and no header can lift it. On the live https site, use a public endpoint.</p>
+              <p class="ag-bp-weights" data-ag-i18n="brain.own">Your own machine as the server (16 GB card): install LM Studio, pull Qwen3.5-9B GGUF from ModelScope — <code>pip install modelscope</code> then <code>modelscope download --model Qwen/Qwen3.5-9B-Instruct-GGUF --local_dir ./qwen35-9b</code> — load the Q4/Q6 file in LM Studio, start its local server (port 1234), open this page over http, and put <code>http://localhost:1234/v1</code> below with model <code>qwen3.5-9b</code>. Native tool calling, all 24 instruments, no download from huggingface at all.</p>
               <label class="ag-bp-field"><span data-ag-i18n="brain.model">model</span>
                 <input type="text" id="ag-bp-model-c" autocomplete="off" spellcheck="false"></label>
             </div>
