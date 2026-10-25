@@ -90,7 +90,14 @@
       "ph.6": "pool 1.8, 2.2, 0.9, 1.4",
       "ph.7": "N = 6960 — what is the discovery wall?",
       "ph.8": "run the funnel on 400 proposals",
-      "ph.9": "what can't you answer?"
+      "ph.9": "what can't you answer?",
+      "ph.10": "let the council rule on t = 2.40 · π = 0.25",
+      "ph.11": "resurrect the sample library",
+      "ph.12": "build a strategy on the order-book imbalance",
+      "ph.13": "find the home venue of the imbalance factor",
+      "ph.14": "who built this?",
+      "plain.on": "Plain · on", "plain.off": "Plain · off",
+      "plain.aria": "Plain language mode"
     },
     zh: {
       "brand": "boat-1",
@@ -151,7 +158,14 @@
       "ph.6": "合并 1.8, 2.2, 0.9, 1.4",
       "ph.7": "N = 6960——发现之墙有多高？",
       "ph.8": "跑 400 个提案的漏斗",
-      "ph.9": "有什么你答不了？"
+      "ph.9": "有什么你答不了？",
+      "ph.10": "让议会裁决 t = 2.40 · π = 0.25",
+      "ph.11": "复活样本因子库",
+      "ph.12": "以盘口失衡建策略",
+      "ph.13": "找盘口失衡的主场",
+      "ph.14": "这是谁做的？",
+      "plain.on": "说人话 · 开", "plain.off": "说人话 · 关",
+      "plain.aria": "通俗语言模式"
     }
   };
 
@@ -416,6 +430,41 @@
       pi = (pm[2] === "%" || pv > 1) ? pv / 100 : pv;
       if (pi > 1) pi = 1;
     }
+    /* ---- the council and the new engines. These sit after the t/pi/N
+       extraction (they use it) but BEFORE dilute/pool/hurdle, which would
+       otherwise swallow any question that happens to carry a number. ---- */
+    function libSlots(s) {
+      if (/\n/.test(s) && window.HJ_ENGINES) {
+        try { if (window.HJ_ENGINES.helpers.parseLib(s).length >= 2) return { lib: s }; } catch (e) {}
+      }
+      return {};
+    }
+    if (/(council|parliament|议会|智体|deliberat|jury)/i.test(low)) {
+      var cs = { expr: expr, t: tStat, pi: pi, N: N };
+      var cl = libSlots(s);
+      if (cl.lib) cs.lib = cl.lib;
+      return { intent: "council", slots: cs };
+    }
+    if (/(resurrect|复活|revive|mis-?kill|误杀)/i.test(low)) {
+      var rs = libSlots(s);
+      return { intent: "resurrect", slots: rs };
+    }
+    if (/(strategy|策略|仓位规则|建仓|build a (strategy|book)|trade it)/i.test(low)) {
+      return { intent: "strategy", slots: { expr: expr } };
+    }
+    if (/(venue|主场|在哪兑现|哪个段|where does it pay|home state)/i.test(low)) {
+      return { intent: "venue", slots: { expr: expr } };
+    }
+    if (/(foundry|造因子|compile|编译|写一个因子|make me a factor|一句话)/i.test(low)) {
+      return { intent: "foundry", slots: { idea: s } };
+    }
+    if (/(about (you|the author|him|huannian|jin)|who (is|built)|金宦年|作者|这是谁|介绍一下|论文主张|contact|联系|reach him)/i.test(low)) {
+      return { intent: "about", slots: { question: s } };
+    }
+    if (/(research|full pipeline|全流程|跑全程|完整审判|跑一遍)/i.test(low)) {
+      return { intent: "research", slots: { expr: expr } };
+    }
+
     if (tStat != null || (F === "paper" && /(π|pi|dilut|稀释|命题|prop)/i.test(low))) {
       return { intent: "dilute", slots: { t: tStat, pi: pi } };
     }
@@ -1427,6 +1476,107 @@
      stating a number that did not come back from one.
      ====================================================================== */
   /* evaluated per call: the model must be addressed in the visitor's language */
+  /* -------------------------------------------- the council and engines */
+  function instCouncil(slots) {
+    var C = window.HJ_COUNCIL;
+    if (!C) return mlMissing();
+    return C.run(slots || {});
+  }
+  function instVenue(slots) {
+    var E = window.HJ_ENGINES;
+    if (!E) return mlMissing();
+    return E.venueFind(slots || {});
+  }
+  function instResurrect(slots) {
+    var E = window.HJ_ENGINES;
+    if (!E) return mlMissing();
+    var s = slots || {};
+    var SHIPPED = (typeof SAMPLE_FACTORS !== "undefined") ? SAMPLE_FACTORS : null;
+    if (!s.lib && !s.rows && SHIPPED && SHIPPED.length && window.HJ_ML) {
+      /* the shipped sample library, measured on the declared tape right now:
+         every factor evaluated, its IC block-t as the t, its measured pi */
+      var M0 = E.helpers.market();
+      if (M0) {
+        var rows = [];
+        SHIPPED.forEach(function (f) {
+          if (!f || !f.expr) return;
+          try {
+            var sig = window.HJ_ML.evalAST(f.expr, M0.signals, M0.n);
+            var st = window.HJ_ML.stats(sig, M0.fwd);
+            rows.push({ name: f.name || "factor", t: st.icT, pi: st.pi });
+          } catch (e) {}
+        });
+        if (rows.length) s = { rows: rows };
+      }
+    }
+    return E.resurrect(s);
+  }
+  function instStrategy(slots) {
+    var E = window.HJ_ENGINES;
+    if (!E) return mlMissing();
+    return E.strategyBuild(slots || {});
+  }
+  function instFoundry(slots) {
+    var E = window.HJ_ENGINES;
+    if (!E) return mlMissing();
+    return E.foundry(slots || {});
+  }
+  function instAbout(slots) {
+    var E = window.HJ_ENGINES;
+    if (!E) return mlMissing();
+    return E.about((slots || {}).question || "");
+  }
+  /* the full pipeline: measure -> locate -> deliberate */
+  function instResearch(slots) {
+    var E = window.HJ_ENGINES, C = window.HJ_COUNCIL;
+    var expr = (slots || {}).expr;
+    if (!E || !C) return mlMissing();
+    if (!expr) {
+      return {
+        steps: [{ name: "route", args: "research", status: "fail" }],
+        blocks: [{ k: "verdict", tone: "no",
+          h: t("The pipeline needs a factor expression", "流水线需要一个因子表达式"),
+          b: t("Paste a factor — or describe one in plain words and the foundry compiles it first.",
+            "粘贴一个因子——或者用大白话描述，造因子器会先编译它。") }]
+      };
+    }
+    var ev = instMlEval({ expr: expr });
+    if (ev.steps.some(function (s) { return s.status === "fail"; })) {
+      return {
+        steps: ev.steps,
+        blocks: ev.blocks.concat([{ k: "note",
+          text: t("The pipeline stops at the first gate: a factor that cannot parse cannot be measured.",
+            "流水线停在第一道闸：无法解析的因子无法被测量。") }])
+      };
+    }
+    var ve = E.venueFind({ expr: expr });
+    var co = C.run({ expr: expr });
+    function pick(blocks, k) {
+      for (var i = 0; i < blocks.length; i++) if (blocks[i].k === k) return blocks[i];
+      return null;
+    }
+    var evKv = pick(ev.blocks, "kv"), veKv = pick(ve.blocks, "kv");
+    var blocks = [
+      { k: "prose", text: t(
+        "The full pipeline on " + expr + " — measure, locate, deliberate:",
+        "对 " + expr + " 跑完整流水线——测量、定位、审议：") },
+      pick(ev.blocks, "chart"),
+      pick(ve.blocks, "bars"),
+      evKv || veKv ? { k: "kv", items: (evKv ? evKv.items : []).concat(veKv ? veKv.items.slice(0, 4) : []) } : null,
+      { k: "council", council: co.council },
+      pick(co.blocks, "verdict"),
+      { k: "note", text: t(
+        "Pipeline: ml.evaluate → venue.find → council. Every number computed in this tab under seed " + SEED + ".",
+        "流水线：ml.evaluate → venue.find → council。每个数字都在本页计算，种子 " + SEED + "。") },
+      { k: "actions", items: [
+        { label: t("placebo-test the evidence", "对证据做置换检验"), fn: function () { run("placebo test " + expr); } },
+        { label: t("build a strategy on it", "以它建策略"), fn: function () { run("build a strategy on " + expr); } },
+        { label: t("open the bench", "打开解剖台"), fn: function () { if (window.HJ_BENCH) window.HJ_BENCH.focus("series"); } }
+      ] }
+    ].filter(Boolean);
+    return { steps: [].concat(ev.steps, ve.steps, co.steps), blocks: blocks, council: co.council };
+  }
+
   function sysPrompt() { return t(
     "You are boat-1, the research agent on a personal portfolio page about quantitative research discipline. You are a real language model running in the visitor's browser, and you are talking to a reviewer.\n\n" +
     "GROUND RULES — these are not suggestions:\n" +
@@ -1534,7 +1684,54 @@
       { name: "bench_stats",
         description: "The last numbers the §04b autopsy bench computed in this tab, if any.",
         parameters: S("", {}),
-        run: function () { return instAutopsy(); } }
+        run: function () { return instAutopsy(); } },
+      { name: "council_run",
+        description: "Convene the council: six voters (statistician, physics engine, factor analyst, risk officer, execution officer) each read the same computed facts through their own lens, a devil's advocate argues the dissent without voting, and the captain aggregates into a verdict with a composite score. Use this when the visitor asks for a judgement, a deliberation, or 'what does the council say'.",
+        parameters: S("", {
+          expr: { type: "string", description: "the factor expression in the site grammar" },
+          t: { type: "number", description: "or a bare t-stat inside the paying state" },
+          pi: { type: "number", description: "the paying-state share, 0..1" },
+          N: { type: "number", description: "candidates screened alongside it" },
+          lib: { type: "string", description: "or a pasted factor library, one 'name, t' per line" }
+        }),
+        run: function (a) { return instCouncil(a); } },
+      { name: "venue_find",
+        description: "Find a factor's home venue: cut the declared tape into four contiguous segments, measure each segment's IC t, and report where the factor actually pays — with pi measured, not assumed. This is the paper's WHERE decision made computable.",
+        parameters: S("", {
+          expr: { type: "string", description: "the factor expression in the site grammar" }
+        }, ["expr"]),
+        run: function (a) { return instVenue({ expr: a.expr }); } },
+      { name: "resurrect",
+        description: "The resurrection bench: run a factor library through the universal screen, isolate the mis-killed set (t clears the allocation bar but the pi-diluted t falls under the screen), and pool it with Stouffer's method. Use this when the visitor wants the paper's headline claim reproduced on their own numbers.",
+        parameters: S("", {
+          lib: { type: "string", description: "the library, one 'name, t' or 'name, t, pi' per line" }
+        }),
+        run: function (a) { return instResurrect({ lib: a.lib }); } },
+      { name: "strategy_build",
+        description: "Build a strategy on a factor: positions from the z-scored factor, vol targeting calibrated on train only, and the paper's resolution (venue routing) compared against always-on on the same declared tape. Returns holdout Sharpe, max drawdown, turnover and hit for both modes.",
+        parameters: S("", {
+          expr: { type: "string", description: "the factor expression in the site grammar" }
+        }, ["expr"]),
+        run: function (a) { return instStrategy({ expr: a.expr }); } },
+      { name: "compose_factor",
+        description: "Compile a plain-language factor idea into a legal expression in the site's grammar, then re-measure it. Use this when the visitor describes a factor in words instead of writing the expression. The compiled expression is re-parsed and re-measured by the instruments — you never grade your own homework.",
+        parameters: S("", {
+          expr: { type: "string", description: "the expression you composed in the site grammar (inputs MidPrice, BestBid, BestAsk, BidSize, AskSize, Volume, TradePrice, TradeSize; ops Abs Neg Log Sqrt Sign Rank Add Sub Mul Div Max Min Pow Mean Std Skew Kurt Min Max Sum Zscore Rank Corr Slope IfThenElse Const; rolling windows as Mean[20](...))" },
+          idea: { type: "string", description: "the visitor's plain-language idea, echoed back" }
+        }, ["expr"]),
+        run: function (a) { return instFoundry({ expr: a.expr, idea: a.idea }); } },
+      { name: "about_author",
+        description: "Answer a question about the author from the public record only: biography, the paper and its claims, the stack, the desk, the stated goals, how to reach him. Every fact carries its source; questions the record cannot source are refused, not guessed.",
+        parameters: S("", {
+          question: { type: "string", description: "the visitor's question about the author" }
+        }, ["question"]),
+        run: function (a) { return instAbout({ question: a.question }); } },
+      { name: "research_pipeline",
+        description: "The full pipeline on one factor: evaluate it on the declared tape, find its home venue, then convene the council — measurement, location, deliberation, in that order, with every number computed in this tab.",
+        parameters: S("", {
+          expr: { type: "string", description: "the factor expression in the site grammar" }
+        }, ["expr"]),
+        run: function (a) { return instResearch({ expr: a.expr }); } }
     ];
   }
 
@@ -1762,6 +1959,15 @@
       onCall: function (rec) {
         if (ctl.aborted) return;
         traceRow(ensureTrace(), rec);
+        /* the council renders its card into the answer, and with a brain
+           attached each persona then delivers its own speech */
+        if (rec && rec.result && rec.result.council && window.HJ_COUNCIL) {
+          var card = el("div", "ag-msg-block");
+          body.appendChild(card);
+          window.HJ_COUNCIL.renderCouncil(card, rec.result.council);
+          if (brainActive()) window.HJ_COUNCIL.speakAll(rec.result.council);
+          maybeScroll(true);
+        }
       }
     }).then(function (final) {
       if (caret.parentNode) caret.parentNode.removeChild(caret);
@@ -2291,6 +2497,9 @@
   var activeCtl = null;
   var thinkOn = true;
   var currentMode = "auto";
+  var PLAIN = true;
+  try { PLAIN = localStorage.getItem("hj-plain") !== "off"; } catch (e) {}
+  window.HJ_PLAIN = PLAIN;
 
   var LANE = {
     gate: "#5ec9a8", dilute: "#a78bfa", hurdle: "#38bdf8", pool: "#2c5f7c",
@@ -2322,7 +2531,7 @@
         done();
         return;
       }
-      var chunk = 1 + Math.floor(Math.random() * 3);
+      var chunk = 2 + Math.floor(Math.random() * 4);
       host.insertBefore(document.createTextNode(text.slice(i, i + chunk)), caret);
       i += chunk;
       maybeScroll();
@@ -2455,11 +2664,18 @@
       node.appendChild(b.variant === "hist"
         ? chartHist(b.nulls, b.real, b.label)
         : chartLine(b.series, b.variant === "loss", b.label));
+    } else if (b.k === "council") {
+      node = el("div");
+      if (window.HJ_COUNCIL) {
+        window.HJ_COUNCIL.renderCouncil(node, b.council);
+        if (brainActive()) window.HJ_COUNCIL.speakAll(b.council);
+      }
     } else if (b.k === "verdict") {
       node = el("div", "ag-verdict");
       node.setAttribute("data-tone", b.tone || "ok");
       node.appendChild(el("p", "ag-verdict-h", b.h));
       node.appendChild(el("p", "ag-verdict-b", b.b));
+      if (b.plain && PLAIN) node.appendChild(el("p", "ag-verdict-plain", b.plain));
     } else if (b.k === "note") {
       node = el("p", "ag-prov", b.text);
     } else if (b.k === "actions") {
@@ -2505,6 +2721,13 @@
       case "placebo": return instMlPlacebo(r.slots || {});
       case "market": return instMlMarket();
       case "desk": return instDesk();
+      case "council": return instCouncil(r.slots || {});
+      case "resurrect": return instResurrect(r.slots || {});
+      case "strategy": return instStrategy(r.slots || {});
+      case "venue": return instVenue(r.slots || {});
+      case "foundry": return instFoundry(r.slots || {});
+      case "about": return instAbout(r.slots || {});
+      case "research": return instResearch(r.slots || {});
       case "paper": return instPaper();
       case "stack": return instStack();
       case "help": return instHelp();
@@ -2859,7 +3082,12 @@
       t("t = 2.40 · π = 0.25 — does it survive?", "t = 2.40 · π = 0.25——能过筛吗？"),
       t("N = 6960 — what is the discovery wall?", "N = 6960——发现之墙有多高？"),
       t("run the funnel on 400 proposals", "跑 400 个提案的漏斗"),
-      t("what can't you answer?", "有什么你答不了？")
+      t("what can't you answer?", "有什么你答不了？"),
+      t("let the council rule on t = 2.40 · π = 0.25", "让议会裁决 t = 2.40 · π = 0.25"),
+      t("find the home venue of (BidSize - AskSize) / (BidSize + AskSize)", "找 (BidSize - AskSize) / (BidSize + AskSize) 的主场"),
+      t("build a strategy on (BidSize - AskSize) / (BidSize + AskSize)", "以 (BidSize - AskSize) / (BidSize + AskSize) 建策略"),
+      t("resurrect the sample library", "复活样本因子库"),
+      t("who built this?", "这是谁做的？")
     ];
     host.textContent = "";
     items.forEach(function (s) {
@@ -2898,6 +3126,23 @@
         th.classList.toggle("is-on", thinkOn);
         th.setAttribute("aria-pressed", thinkOn ? "true" : "false");
         th.textContent = t(thinkOn ? "Think · on" : "Think · off", thinkOn ? "思考链 · 开" : "思考链 · 关");
+      });
+    }
+
+    /* plain language: every verdict carries a one-sentence plain line */
+    var pl = $("ag-plain");
+    if (pl) {
+      var syncPlain = function () {
+        pl.classList.toggle("is-on", PLAIN);
+        pl.setAttribute("aria-pressed", PLAIN ? "true" : "false");
+        pl.textContent = t(PLAIN ? "Plain · on" : "Plain · off", PLAIN ? "说人话 · 开" : "说人话 · 关");
+      };
+      syncPlain();
+      pl.addEventListener("click", function () {
+        PLAIN = !PLAIN;
+        window.HJ_PLAIN = PLAIN;
+        try { localStorage.setItem("hj-plain", PLAIN ? "on" : "off"); } catch (e) {}
+        syncPlain();
       });
     }
 
@@ -2980,6 +3225,14 @@
   window.BoatAgent = {
     route: route,
     run: run,
+    ask: function (text) { run(text); },
+    prefill: function (text) {
+      if (!inputEl) return;
+      inputEl.value = String(text || "");
+      autogrow();
+      parseEcho();
+      inputEl.focus();
+    },
     version: VERSION,
     brain: function () { return brainCfg(); },
     brainActive: brainActive,

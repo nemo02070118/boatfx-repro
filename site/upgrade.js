@@ -615,6 +615,95 @@
       }
     };
 
+    /* --- the council and the new engines, in the terminal */
+    function agentAsk(text, note) {
+      line(note, "ok");
+      var node = document.getElementById("boat-agent");
+      if (node) node.scrollIntoView({ behavior: "smooth", block: "start" });
+      if (window.BoatAgent && window.BoatAgent.ask) window.BoatAgent.ask(text);
+    }
+    CMD.council = {
+      desc: t("convene the council on a factor", "召集议会裁决一个因子"),
+      run: function (a) {
+        var C = window.HJ_COUNCIL;
+        if (!C) { line("council.js has not loaded", "warn"); return; }
+        var raw = a.join(" ").trim() || "(BidSize - AskSize) / (BidSize + AskSize)";
+        var out = C.run({ expr: raw });
+        var co = out.council;
+        if (!co) { line("the council could not convene", "warn"); return; }
+        line("council · " + co.question, "head");
+        gap();
+        co.personas.forEach(function (p) {
+          line("  " + pad(t(p.name.en, p.name.zh), 12) +
+            (p.score == null ? " —" : String(Math.round(p.score)).padStart(3, " ")) + "  " + p.stance);
+        });
+        gap();
+        line("  " + co.verdict.h, "ok");
+        line("  " + co.verdict.b, "dim");
+        gap();
+        line("  open the agent panel for the full card →", "dim");
+      }
+    };
+    CMD.ask = {
+      desc: t("ask about the author — record only", "问作者的事——只按记录"),
+      run: function (a) {
+        var E = window.HJ_ENGINES;
+        if (!E) { line("engines.js has not loaded", "warn"); return; }
+        var q = a.join(" ").trim();
+        if (!q) {
+          line("usage: ask <question> — e.g. `ask what is the paper's claim`", "dim");
+          return;
+        }
+        var out = E.about(q);
+        out.blocks.forEach(function (b) {
+          if (b.k === "prose") { line(b.text); gap(); }
+          else if (b.k === "verdict") { line(b.h, "ok"); line(b.b, "dim"); }
+          else if (b.k === "note") { line(b.text, "dim"); }
+        });
+      }
+    };
+    CMD.agents = {
+      desc: t("the council roster", "议会花名册"),
+      run: function () {
+        var C = window.HJ_COUNCIL;
+        if (!C) { line("council.js has not loaded", "warn"); return; }
+        line("boat-1 council · 7 personas", "head");
+        gap();
+        C.personas.forEach(function (p) {
+          line("  " + pad(t(p.name.en, p.name.zh), 14) + t(p.role.en, p.role.zh), "dim");
+        });
+        gap();
+        line("  stances computed from printed thresholds · the model only writes speeches", "dim");
+      }
+    };
+    CMD.venue = {
+      desc: t("find a factor's home venue", "找因子的主场"),
+      run: function (a) {
+        var raw = a.join(" ").trim() || "(BidSize - AskSize) / (BidSize + AskSize)";
+        agentAsk("find the venue for " + raw, t("sending to the venue finder →", "送入主场寻找器 →"));
+      }
+    };
+    CMD.strategy = {
+      desc: t("build a strategy on a factor", "以因子建策略"),
+      run: function (a) {
+        var raw = a.join(" ").trim() || "(BidSize - AskSize) / (BidSize + AskSize)";
+        agentAsk("build a strategy on " + raw, t("sending to the strategy builder →", "送入策略构建器 →"));
+      }
+    };
+    CMD.resurrect = {
+      desc: t("run the resurrection bench on the sample library", "对样本库跑复活台"),
+      run: function () {
+        agentAsk("resurrect", t("sending to the resurrection bench →", "送入复活台 →"));
+      }
+    };
+    CMD.research = {
+      desc: t("run the full pipeline on a factor", "对因子跑完整流水线"),
+      run: function (a) {
+        var raw = a.join(" ").trim() || "(BidSize - AskSize) / (BidSize + AskSize)";
+        agentAsk("research " + raw, t("sending to the pipeline →", "送入完整流水线 →"));
+      }
+    };
+
     /* --- autopsy */
     CMD.autopsy = {
       desc: t("open the bench on your own factor", "打开解剖台，测你自己的因子"),
@@ -1427,7 +1516,7 @@
     shellEl.appendChild(form);
 
     chipsEl = el("div", "term-chips");
-    ["agent", "gate", "plot q2", "diagnose --t 2.40 --pi 0.25", "autopsy", "help"].forEach(function (c) {
+    ["agent", "gate", "plot q2", "diagnose --t 2.40 --pi 0.25", "autopsy", "council", "ask", "help"].forEach(function (c) {
       var b = el("button", null, c);
       b.type = "button";
       b.addEventListener("click", function () {
@@ -1523,6 +1612,13 @@
         line("  " + pad("gate", 32) + t("compile a factor, get a receipt", "编译一个因子，拿到回执"));
         line("  " + pad("diagnose --t 2.40 --pi 0.25", 32) + t("is this factor killed?", "这个因子会被杀掉吗？"));
         line("  " + pad("autopsy", 32) + t("test your own data", "测你自己的数据"));
+        line("  " + pad("council", 32) + t("convene the seven-persona council", "召集七智体议会"));
+        line("  " + pad("resurrect", 32) + t("revival bench on the sample library", "对样本库跑复活台"));
+        line("  " + pad("venue", 32) + t("find a factor's home venue", "找因子的主场"));
+        line("  " + pad("strategy", 32) + t("build a strategy on a factor", "以因子建策略"));
+        line("  " + pad("research", 32) + t("the full pipeline on one factor", "对单因子跑完整流水线"));
+        line("  " + pad("agents", 32) + t("the council roster", "议会花名册"));
+        line("  " + pad("ask", 32) + t("ask about the author — record only", "问作者的事——只按记录"));
         line("  " + pad("help", 32) + t("full command list", "全部命令"));
       }, 380);
     }

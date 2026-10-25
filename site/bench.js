@@ -415,6 +415,22 @@
     outEl.appendChild(batchWrap);
 
     var foot = el("div", "bench-foot");
+    var councilBtn = el("button", "bench-btn", t("Council it", "交给议会"));
+    councilBtn.type = "button";
+    councilBtn.addEventListener("click", function () {
+      var st = (window.HJ_BENCH && window.HJ_BENCH.stats) ? window.HJ_BENCH.stats() : null;
+      if (!st || !window.BoatAgent || !window.BoatAgent.ask) return;
+      if (st.source === "library" && st.rows && st.rows.length) {
+        var txt = st.rows.map(function (r) {
+          return (r.name || "factor") + ", " + (r.t != null ? r.t : "") + (r.pi != null ? ", " + r.pi : "");
+        }).join("\n");
+        window.BoatAgent.ask("resurrect\n" + txt);
+      } else {
+        var tv = st.best != null ? st.best : st.mean;
+        if (tv != null) window.BoatAgent.ask("council t=" + tv + " pi=" + (st.pi != null ? st.pi : 0.25));
+      }
+    });
+    foot.appendChild(councilBtn);
     copyBtn = el("button", "bench-btn", t("Copy report", "复制报告"));
     copyBtn.type = "button";
     foot.appendChild(copyBtn);

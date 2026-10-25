@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <link rel="icon" href="data:," />
   <title>Huannian Jin — Discarded but Alive: What Factor Screening Throws Away</title>
   <meta name="description" content="Discarded but Alive: What Factor Screening Throws Away, and What It Cannot Recover. A significance hurdle read in one segment discards factors alive in another. Of 179 anomalies, the 94 a |t|<1.96 screen rejects in large caps earn out-of-sample Sharpe 0.85, but 1.30 reallocated as a group to their small-cap segment (+0.45, FF6 α 3.8%/yr t=8.3), reproduced out of sample in China (+0.95, p=0). The correction has a ceiling: q²(τ)=τ/(1+τ), half-recovery at m*≈1.3. Working paper on SSRN (abstract 7607684). AI factor factory · Zheshang systems · public repro." />
   <!-- Open Graph / share card (upgrade layer) -->
@@ -41,6 +42,7 @@
   <link rel="stylesheet" href="agent.css?v=1" />
   <link rel="stylesheet" href="ml.css?v=1" />
   <link rel="stylesheet" href="llm.css?v=1" />
+  <link rel="stylesheet" href="council.css?v=1" />
 </head>
 <body>
   <div class="progress" id="progress" aria-hidden="true"></div>
@@ -314,6 +316,7 @@
             <button type="button" class="ag-mode" data-mode="learn" aria-pressed="false" data-ag-i18n="m.learn">Learn</button>
           </div>
           <button type="button" class="ag-think is-on" id="ag-think" aria-pressed="true" data-ag-i18n="think.on">Think · on</button>
+          <button type="button" class="ag-think is-on" id="ag-plain" aria-pressed="true" data-ag-i18n="plain.on" data-ag-aria="plain.aria">Plain · on</button>
           <button type="button" class="ag-brain" id="ag-brain" aria-pressed="false" aria-expanded="false" aria-haspopup="true" data-ag-i18n="brain.off">Brain · off</button>
           <span class="ag-status" id="ag-status" data-ag-i18n="status.ready">ready</span>
         </header>
@@ -1636,6 +1639,8 @@
   <script src="bench.js?v=10"></script>
   <script src="gate.js?v=3"></script>
   <script src="ml.js?v=1"></script>
+  <script src="engines.js?v=1"></script>
+  <script src="council.js?v=1"></script>
   <script src="llm.js?v=1"></script>
   <script src="agent.js?v=1"></script>
   <script src="upgrade.js?v=11"></script>

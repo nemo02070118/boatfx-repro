@@ -1,0 +1,210 @@
+/* ==========================================================================
+   BOAT · 00b council — the parliament card
+   Terminal-dark by design, same surface language as .ag-trace: the council
+   is a panel of the engine, not a page section. Persona accent comes from
+   the inline --ac each row carries; stance colors are fixed terminal hues.
+   ========================================================================== */
+.ag-council {
+  --c-bg: #0a1018;
+  --c-ink: #d7e0ea;
+  --c-dim: rgba(215, 224, 234, .55);
+  --c-line: rgba(215, 224, 234, .14);
+  --c-ok: #6dcea8;
+  --c-warn: #f0b429;
+  --c-no: #e26d5a;
+  --c-revive: #a78bfa;
+  --c-idle: #7c8a9c;
+  border: 1px solid var(--c-line);
+  background: var(--c-bg);
+  color: var(--c-ink);
+  font-family: var(--mono);
+  border-radius: 10px;
+  max-width: 76ch;
+  overflow: hidden;
+}
+
+.ag-council-h {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: .45rem .7rem;
+  padding: .6rem .8rem;
+  border-bottom: 1px solid var(--c-line);
+  background: rgba(215, 224, 234, .03);
+}
+.ag-council-t {
+  font-size: .68rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--c-ok);
+}
+.ag-council-q {
+  font-size: .78rem;
+  color: var(--c-ink);
+  word-break: break-all;
+}
+.ag-council-n {
+  margin-left: auto;
+  font-size: .66rem;
+  color: var(--c-dim);
+}
+
+.ag-council-rows { padding: .35rem .8rem .5rem; }
+
+.ag-c-persona {
+  border-left: 2px solid var(--ac, var(--c-idle));
+  padding: .5rem 0 .5rem .7rem;
+  border-bottom: 1px dashed rgba(215, 224, 234, .08);
+}
+.ag-c-persona:last-child { border-bottom: 0; }
+
+.ag-c-p-top {
+  display: flex;
+  align-items: baseline;
+  gap: .5rem;
+  flex-wrap: wrap;
+}
+.ag-c-p-name { font-size: .8rem; font-weight: 600; }
+.ag-c-p-role { font-size: .66rem; color: var(--c-dim); }
+.ag-c-p-chip {
+  font-size: .62rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: .1rem .4rem;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+}
+.ag-c-p-chip.is-admit, .ag-c-p-chip.is-adjudicates { color: var(--c-ok); }
+.ag-c-p-chip.is-revive { color: var(--c-revive); }
+.ag-c-p-chip.is-watch { color: var(--c-warn); }
+.ag-c-p-chip.is-reject { color: var(--c-no); }
+.ag-c-p-chip.is-abstain { color: var(--c-idle); }
+.ag-c-p-score {
+  margin-left: auto;
+  font-size: .82rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--c-ink);
+}
+
+.ag-c-p-bar {
+  height: 3px;
+  margin: .35rem 0 .4rem;
+  background: rgba(215, 224, 234, .1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.ag-c-p-fill {
+  height: 100%;
+  width: 0;
+  background: var(--ac, var(--c-idle));
+  transition: width .5s cubic-bezier(.2, .7, .2, 1);
+}
+
+.ag-c-p-reason {
+  font-size: .74rem;
+  line-height: 1.55;
+  color: rgba(215, 224, 234, .82);
+}
+
+.ag-c-p-speech {
+  margin-top: .4rem;
+  padding: .4rem .55rem;
+  border-left: 2px solid var(--c-revive);
+  background: rgba(167, 139, 250, .06);
+  border-radius: 0 6px 6px 0;
+  font-size: .74rem;
+  line-height: 1.6;
+}
+.ag-c-p-speech[hidden] { display: none; }
+.ag-c-p-tag {
+  display: none;
+  font-size: .6rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--c-revive);
+  margin-bottom: .2rem;
+}
+.ag-c-p-speech.is-model .ag-c-p-tag { display: block; }
+.ag-c-p-speech.is-live .ag-c-p-tag {
+  display: block;
+  color: var(--c-dim);
+}
+.ag-c-p-speech.is-live .ag-c-p-speech-b::after {
+  content: "▌";
+  color: var(--c-revive);
+  animation: ag-c-blink 1s steps(2) infinite;
+}
+@keyframes ag-c-blink { 50% { opacity: 0; } }
+
+.ag-c-verdict {
+  display: flex;
+  gap: .8rem;
+  align-items: flex-start;
+  padding: .7rem .8rem;
+  border-top: 1px solid var(--c-line);
+  background: rgba(215, 224, 234, .03);
+}
+.ag-c-verdict.is-admit { box-shadow: inset 3px 0 0 var(--c-ok); }
+.ag-c-verdict.is-revive { box-shadow: inset 3px 0 0 var(--c-revive); }
+.ag-c-verdict.is-watch { box-shadow: inset 3px 0 0 var(--c-warn); }
+.ag-c-verdict.is-reject { box-shadow: inset 3px 0 0 var(--c-no); }
+.ag-c-v-score {
+  font-size: 1.9rem;
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--c-ink);
+}
+.ag-c-v-text { min-width: 0; }
+.ag-c-v-h { font-size: .82rem; font-weight: 600; }
+.ag-c-v-b { font-size: .74rem; line-height: 1.55; color: rgba(215, 224, 234, .82); margin-top: .2rem; }
+.ag-c-v-plain {
+  font-size: .74rem;
+  line-height: 1.5;
+  color: var(--c-ok);
+  margin-top: .35rem;
+  padding-top: .35rem;
+  border-top: 1px dashed rgba(215, 224, 234, .12);
+}
+.ag-c-v-cap { font-size: .66rem; color: var(--c-dim); margin-top: .35rem; }
+
+/* the captain's speech lives in the verdict bar */
+.ag-c-v-speech {
+  margin-top: .45rem;
+  padding: .4rem .55rem;
+  border-left: 2px solid var(--c-ok);
+  background: rgba(109, 206, 168, .06);
+  border-radius: 0 6px 6px 0;
+  font-size: .74rem;
+  line-height: 1.6;
+}
+.ag-c-v-speech[hidden] { display: none; }
+.ag-c-v-speech .ag-c-p-tag { color: var(--c-ok); }
+.ag-c-v-speech.is-model .ag-c-p-tag { display: block; }
+.ag-c-v-speech.is-live .ag-c-p-tag { display: block; color: var(--c-dim); }
+.ag-c-v-speech.is-live .ag-c-p-speech-b::after {
+  content: "▌";
+  color: var(--c-ok);
+  animation: ag-c-blink 1s steps(2) infinite;
+}
+
+/* the plain-language line every verdict carries when 说人话 is on */
+.ag-verdict-plain {
+  font-size: .78rem;
+  line-height: 1.5;
+  color: var(--accent);
+  margin-top: .35rem;
+  padding-top: .35rem;
+  border-top: 1px dashed var(--line);
+}
+
+@media (max-width: 640px) {
+  .ag-council { max-width: 100%; }
+  .ag-council-n { margin-left: 0; width: 100%; }
+  .ag-c-v-score { font-size: 1.5rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ag-c-p-fill { transition: none; }
+  .ag-c-p-speech.is-live .ag-c-p-speech-b::after { animation: none; }
+}
