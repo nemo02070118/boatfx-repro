@@ -226,9 +226,20 @@
     blocks.push({ k: "prose", text: t(
       "Your " + d.rows.length + " factor" + (d.rows.length === 1 ? "" : "s") + ", measured on the declared tape, then the double path: the normal way (universal screen, survivors equal-weighted) against our way (home-venue routing plus pooling of the mis-killed). Every number is computed in this tab.",
       "你的 " + d.rows.length + " 个因子，先在声明胶带上测，然后走双路：正常方式（通用筛+等权）对我们的方式（主场路由+误杀集池化）。每个数字都在本页计算。") });
-    blocks = blocks.concat(ex.blocks || []);
+    /* the experiment brings its own verdict and action bar; this module
+       writes its own aggressive verdict below, so drop the duplicates */
+    (ex.blocks || []).forEach(function (b) {
+      if (b.k === "verdict" || b.k === "actions") return;
+      blocks.push(b);
+    });
     var e = ex.experiment || {};
-    var ag = aggressive(e.sharpeA, e.sharpeB);
+    var ag = d.rows.length === 1
+      ? { tone: "warn",
+          h: t("one factor — the table above is its measurement", "只有一个因子——上面的表就是它的测量"),
+          b: t("The double path needs at least two factors: one to keep, one to discard, so both portfolios can be built. Add rows and run it again.",
+              "双路对比至少需要两个因子：一个被留下、一个被丢弃，两条组合才建得起来。多加几行再跑。"),
+          plain: t("One factor is a measurement, not a comparison.", "一个因子是测量，不是对比。") }
+      : aggressive(e.sharpeA, e.sharpeB);
     blocks.push({ k: "verdict", tone: ag.tone, h: ag.h, b: ag.b, plain: ag.plain });
     blocks.push({ k: "actions", items: [
       { label: t("run the what-if engine", "跑反事实引擎"), fn: function () {

@@ -432,7 +432,11 @@
       return { intent: "market" };
     }
 
-    if (expr || F === "gate") {
+    /* an expression alone is a gate request — but "build a strategy on
+       Rank(...)" names another instrument, and the gate used to swallow it.
+       If the text names one of the other instruments, let it through. */
+    var namesOther = /(council|parliament|议会|resurrect|复活|guide|向导|分步|strategy|策略|建仓|venue|主场|foundry|造因子|compile|编译|生成|产出|generate|suggest|propose|zoo|动物园|what.?if|如果|validate|检验|experiment|实验|research|全流程|pool|hurdle|dilute|autopsy|解剖|library|funnel|train|placebo|evaluate|measure|bench)/i.test(low);
+    if ((expr || F === "gate") && !namesOther) {
       return { intent: "gate", slots: { expr: expr, why: extractWhy(s, expr) } };
     }
 

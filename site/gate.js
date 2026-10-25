@@ -378,7 +378,8 @@
     if (rlen < 12) {
       gate("G4", "economic rationale", false,
         rlen ? t("too short — the gate wants a sentence", "太短——闸门要一句话")
-          : t("empty — a bare expression is not a proposal", "为空——裸表达式不算提案"));
+          : t("empty — add the rationale after a dash: judge Rank(...) — why it should pay",
+              "为空——在破折号后补上理由：judge Rank(...) — 它为什么该兑现"));
     } else {
       gate("G4", "economic rationale", true, t("stated, and printed on the receipt", "已陈述，并会印在回执上"));
     }
