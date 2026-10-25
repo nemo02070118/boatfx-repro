@@ -496,6 +496,14 @@
       var nM = /(\d+)\s*(个|条|只|factors?|alphas?)/i.exec(s);
       return { intent: "generate", slots: { family: fam, count: nM ? parseInt(nM[1], 10) : 5 } };
     }
+    if (/(上限|天花板|ceiling|q2|q²|能捞回|recover|m\*|half.recovery|命题|proposition)/i.test(low)) {
+      /* "the paper's ceiling" is the ceiling; "the paper's propositions"
+         is the list. The law's own words win over the word "paper". */
+      var isCeil = /(上限|天花板|ceiling|q2|q²|能捞回|recover|m\*|half.recovery)/i.test(low);
+      var tm2 = /(?:tau|τ)\s*[=:≈]?\s*(0?\.\d+|\d+(?:\.\d+)?)/i.exec(s);
+      var tauIn = tm2 ? parseFloat(tm2[1]) : pi;
+      return { intent: "paper", slots: { mode: isCeil ? "ceiling" : "props", expr: expr, tau: tauIn } };
+    }
     if (/(zoo|动物园|因子库|public factor|公开因子|有哪些因子|what factors)/i.test(low)) {
       return { intent: "zoo", slots: {} };
     }
@@ -1725,6 +1733,12 @@
     return { steps: steps, blocks: blocks };
   }
 
+  function instPaper(slots) {
+    var P = window.HJ_PAPER;
+    if (!P) return mlMissing();
+    return (slots && slots.mode === "props") ? P.propsRun() : P.ceilingRun(slots || {});
+  }
+
   function instZoo() {
     var Z = window.HJ_ZOO;
     if (!Z) return mlMissing();
@@ -1878,6 +1892,7 @@
     "- run_experiment(source | lib): the paper's experiment — the normal screen against home-venue routing plus pooling, adjudicated by the council.\n" +
     "- fetch_library(url): fetch a public factor library from a URL, compile-validate every formula, report kept and skipped.\n" +
     "- mine_factors(): the machine-enumerated zoo over the DSL whitelist.\n" +
+    "- paper_ceiling(expr, tau) / paper_props(): the paper's ceiling law and its four propositions.\n" +
     "- generate_factors(count, family): produce legal factors from the site's own pool and measure them.\n" +
     "- strategy_guide(expr): the step-by-step strategy builder.\n" +
     "- what_if(expr, pi, N, screen, venue): the counterfactual engine — re-run the pipeline with one changed parameter and report what changes, before/after.\n" +
@@ -1917,6 +1932,7 @@
     "- run_experiment(source | lib)：论文的实验——正常筛选对主场路由加池化，议会终审。\n" +
     "- fetch_library(url)：从 URL 拉取公开因子库，逐公式编译校验，报告收录与跳过。\n" +
     "- mine_factors()：DSL 白名单上的机器枚举动物园。\n" +
+    "- paper_ceiling(expr, tau) / paper_props()：论文的上限定律与四个命题。\n" +
     "- generate_factors(count, family)：从站点自合法池产出因子并测量。\n" +
     "- strategy_guide(expr)：分步策略构建向导。\n" +
     "- what_if(expr, pi, N, screen, venue)：反事实引擎——改一个参数重跑整条流水线，报告前后变化。\n" +
@@ -2068,6 +2084,17 @@
           expr: { type: "string", description: "optional starting factor expression" }
         }),
         run: function (a) { return instGuide({ expr: a.expr }); } },
+      { name: "paper_ceiling",
+        description: "The paper's ceiling law q2(tau) = tau/(1+tau): how much of the discarded edge is recoverable at a paying share tau, with the paper's half-recovery point m* ~ 1.3. Give a factor expression to measure tau on the tape, or a tau directly.",
+        parameters: S("", {
+          expr: { type: "string", description: "optional factor expression whose pi becomes tau" },
+          tau: { type: "number", description: "optional paying share 0-1" }
+        }),
+        run: function (a) { return instPaper({ mode: "ceiling", expr: a.expr, tau: a.tau }); } },
+      { name: "paper_props",
+        description: "The paper as four propositions (dilution, allocation wall, ceiling, pooling), with the formula and where each one runs on this page.",
+        parameters: S("", {}),
+        run: function () { return instPaper({ mode: "props" }); } },
       { name: "generate_factors",
         description: "Produce N legal factor expressions from the site's own pool (the 22 public factors and the machine-mined zoo) and measure each on the declared tape: IC, t, pi, verdict. Use when the visitor asks you to generate, suggest, or produce factors. Never write a formula yourself — the pool only contains expressions that compile.",
         parameters: S("", {
@@ -3146,6 +3173,7 @@
       case "about": return instAbout(r.slots || {});
       case "research": return instResearch(r.slots || {});
       case "zoo": return instZoo();
+      case "paper": return instPaper(r.slots || {});
       case "generate": return instGenerate(r.slots || {});
       case "whatif": return instWhatIf(r.slots || {});
       case "validate": return instValidate(r.slots || {});
