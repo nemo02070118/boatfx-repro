@@ -1,5 +1,5 @@
 /* ==========================================================================
-   BOAT-2 · 00b research agent — author: 金宦年
+   BOAT-3 · 00b research agent — author: 金宦年
    --------------------------------------------------------------------------
    Not a replay. A free-text router extracts parameters from whatever you
    type, then calls the instruments this page already ships:
@@ -32,7 +32,7 @@
 
   var AG_I18N = {
     en: {
-      "brand": "BOAT-2",
+      "brand": "BOAT-3",
       "ver": "engine v1.0 · local",
       "ctx": "Moutai · daily",
       "m.auto": "Auto", "m.gate": "Gate", "m.paper": "Paper",
@@ -52,7 +52,7 @@
       "t.mlmarket.d": "the declared generative process",
       "roster.f": "Every call runs in this tab.",
       "empty.k": "00b · research agent",
-      "empty.t": "Ask BOAT-2.",
+      "empty.t": "Ask BOAT-3.",
       "empty.s": "It judges factor expressions, evaluates them on a declared market, trains real models on the eight signals and permutation-tests the answer — all computed in this tab. No model call, no network, no API key. Attach a brain (top right) and a real language model answers instead — with the same instruments as its tools, and still no invented numbers.",
       "send": "Send", "stop": "Stop",
       "note": "computed in this tab · 0 network requests · open DevTools and watch",
@@ -108,7 +108,7 @@
       "plain.aria": "Plain language mode"
     },
     zh: {
-      "brand": "BOAT-2",
+      "brand": "BOAT-3",
       "ver": "引擎 v1.0 · 本地",
       "ctx": "茅台 · 日线",
       "m.auto": "自动", "m.gate": "闸门", "m.paper": "论文",
@@ -128,7 +128,7 @@
       "t.mlmarket.d": "声明的生成过程",
       "roster.f": "每次调用都在本页运行。",
       "empty.k": "00b · 研究代理",
-      "empty.t": "问 BOAT-2。",
+      "empty.t": "问 BOAT-3。",
       "empty.s": "它评判因子表达式、在声明市场上评估它们、在八个信号上训练真实模型、再对答案做置换检验——全部在这个页面里算完。没有模型调用、没有网络、没有 API 密钥。接上大脑（右上角）后，由真实的大语言模型回答——仪器还是它的工具，数字照样不许编。",
       "send": "发送", "stop": "停止",
       "note": "本页计算 · 0 次网络请求 · 可以打开 DevTools 看",
@@ -224,7 +224,7 @@
   var D_EFF = 17;                       /* effective independent trials      */
   var ALLOC = Math.sqrt(2 * Math.log(D_EFF)); /* 2.3803 allocation bar      */
   var SEED = 20261105;                  /* the site's fixed seed            */
-  var VERSION = "v2.0";
+  var VERSION = "v3.0";
 
   /* The §05b canonical funnel for the same seed — shown in the rail so a
      reader can check the agent's answer against the panel. */
@@ -482,6 +482,15 @@
     }
     if (/(research|full pipeline|全流程|跑全程|完整审判|跑一遍)/i.test(low)) {
       return { intent: "research", slots: { expr: expr } };
+    }
+    if (/(生成|产出|造|挑|选|generate|create|suggest|propose|recommend)/i.test(low) &&
+        /(因子|factor|alpha|信号)/i.test(low)) {
+      var famM = /(动量|momentum|反转|reversal|波动|volatility|量|volume|订单流|order.?flow|偏度|skew|趋势|trend)/i.exec(low);
+      var famMap = { "动量": "momentum", "反转": "reversal", "波动": "volatility", "量": "volume",
+        "订单流": "orderflow", "偏度": "skew", "趋势": "trend" };
+      var fam = famM ? (famMap[famM[1]] || famM[1].toLowerCase()) : null;
+      var nM = /(\d+)\s*(个|条|只|factors?|alphas?)/i.exec(s);
+      return { intent: "generate", slots: { family: fam, count: nM ? parseInt(nM[1], 10) : 5 } };
     }
     if (/(zoo|动物园|因子库|public factor|公开因子|有哪些因子|what factors)/i.test(low)) {
       return { intent: "zoo", slots: {} };
@@ -1646,6 +1655,72 @@
     return { steps: out.steps, blocks: out.blocks };
   }
 
+  /* generate legal factors and measure them — the model may SUGGEST, but
+     the factors come from the site's own legal pool (the 22 public factors
+     and the machine-mined zoo), so every expression compiles and every
+     number is computed here. A 3B model writing Close-Close[1] is not a
+     factor; this is. */
+  function instGenerate(slots) {
+    var Z = window.HJ_ZOO, C = window.HJ_COUNCIL;
+    if (!Z) return mlMissing();
+    var n = Math.min(8, Math.max(3, (slots && slots.count) || 5));
+    var fam = (slots && slots.family) || null;
+    var pool = Z.builtin.slice();
+    var mined = [];
+    try { mined = Z.mine ? Z.mine() : []; } catch (e) { mined = []; }
+    mined.forEach(function (m) {
+      pool.push({ id: m.expr, name: m.expr, expr: m.expr, family: "mined", cite: t("machine-mined from the grammar", "从文法里机器枚举") });
+    });
+    if (fam) {
+      var hit = pool.filter(function (f) { return String(f.family || "").toLowerCase().indexOf(fam) >= 0; });
+      if (hit.length >= 3) pool = hit;
+    }
+    var picked = pool.slice(0, n);
+    var rows = [];
+    picked.forEach(function (f) {
+      var m = Z.measureOne(f);
+      if (m && !m.err) rows.push({ f: f, m: m });
+    });
+    var steps = [{ name: "zoo.generate", args: "(" + n + (fam ? ", " + fam : "") + ")", status: rows.length ? "ok" : "fail",
+      detail: "legal expressions only — every one compiles under the grammar" }];
+    var blocks = [];
+    blocks.push({ k: "prose", text: t(
+      "Here are " + rows.length + " factors from the site's legal pool" + (fam ? " (" + fam + " family)" : "") + " — the 22 public factors and the machine-mined zoo, every expression compiled by the grammar and measured on the declared tape just now. The model suggests directions; the factors themselves are the ones that compile.",
+      "从站点的合法池里产出了 " + rows.length + " 个因子" + (fam ? "（" + fam + " 族）" : "") + "——内置 22 个公开因子 + 机器枚举动物园，每个表达式都过了文法，刚刚在声明胶带上测完。模型负责建议方向；因子本身必须是能编译的那些。") });
+    blocks.push({ k: "table",
+      head: [{ t: "factor" }, { t: "expression" }, { t: "IC", num: true }, { t: "t", num: true }, { t: "pi", num: true }, { t: "verdict" }],
+      rows: rows.map(function (r) {
+        var v = r.m.key === "miskill" ? t("mis-killed", "误杀") : r.m.key === "weak" ? t("weak", "偏弱") : t("pass", "过筛");
+        return [{ t: r.f.id }, { t: r.f.expr }, { t: num(r.m.ic, 4), num: true }, { t: num(r.m.t, 2), num: true },
+          { t: num(r.m.pi, 2), num: true },
+          { t: v, tone: r.m.key === "miskill" ? "no" : (r.m.key === "weak" ? "" : "ok") }];
+      }) });
+    var best = rows.slice().sort(function (a, b) { return Math.abs(b.m.t) - Math.abs(a.m.t); })[0];
+    if (best) {
+      blocks.push({ k: "verdict",
+        tone: best.m.key === "miskill" ? "warn" : "ok",
+        h: t("strongest of the batch: " + best.f.id + " — t = " + num(best.m.t, 2) + (best.m.key === "miskill" ? ", and it is mis-killed" : ""),
+            "这批里最强的：" + best.f.id + " —— t = " + num(best.m.t, 2) + (best.m.key === "miskill" ? "，而且它是被误杀的" : "")),
+        b: t("IC " + num(best.m.ic, 4) + ", pi = " + num(best.m.pi, 2) + ". Run the experiment to see the whole zoo through both ways, or build a strategy on this one.",
+            "IC " + num(best.m.ic, 4) + "，π = " + num(best.m.pi, 2) + "。跑实验看整个动物园走双路，或者就以它建策略。"),
+        plain: t("These are factors that compile — not formulas that merely look like factors.", "这些是能编译的因子——不是看起来像因子的公式。") });
+      var co = C ? C.run({ expr: best.f.expr }) : null;
+      if (co && co.council) blocks.push({ k: "council", council: co.council });
+      blocks.push({ k: "actions", items: [
+        { label: t("build a strategy on " + best.f.id, "以 " + best.f.id + " 建策略"), fn: function () {
+          if (window.BoatAgent && window.BoatAgent.ask) window.BoatAgent.ask("build a strategy on " + best.f.expr);
+        } },
+        { label: t("run the experiment", "跑双路对比实验"), fn: function () {
+          if (window.BoatAgent && window.BoatAgent.ask) window.BoatAgent.ask("run the experiment");
+        } }
+      ] });
+    }
+    blocks.push({ k: "note", text: t(
+      "Declared: every factor above is a legal expression from the site's own pool, measured on the declared tape under seed 20261105. A model-written formula that does not compile is not a factor — the grammar decides, not the model.",
+      "声明：上面每个因子都是站点自合法池里的表达式，在声明胶带上按种子 20261105 测量。模型写出的不合法公式不是因子——文法说了算，不是模型。") });
+    return { steps: steps, blocks: blocks };
+  }
+
   function instZoo() {
     var Z = window.HJ_ZOO;
     if (!Z) return mlMissing();
@@ -1768,7 +1843,7 @@
   }
 
   function sysPrompt() { return t(
-    "You are BOAT-2, the research agent on Huannian Jin's personal portfolio page about quantitative research discipline (author: 金宦年). You are a real language model running in the visitor's browser, and you are talking to a reviewer.\n\n" +
+    "You are BOAT-3, the research agent on Huannian Jin's personal portfolio page about quantitative research discipline (author: 金宦年). You are a real language model running in the visitor's browser, and you are talking to a reviewer.\n\n" +
     "GROUND RULES — these are not suggestions:\n" +
     "1. You may not state, estimate, round, or imply any number that did not come back from a tool call in THIS conversation. If a number is needed, call the instrument that computes it. If no instrument covers it, say so plainly and stop.\n" +
     "2. Never claim to have computed something you did not compute. The tool trail is on screen next to your answer; the reader can see it.\n" +
@@ -1799,6 +1874,7 @@
     "- run_experiment(source | lib): the paper's experiment — the normal screen against home-venue routing plus pooling, adjudicated by the council.\n" +
     "- fetch_library(url): fetch a public factor library from a URL, compile-validate every formula, report kept and skipped.\n" +
     "- mine_factors(): the machine-enumerated zoo over the DSL whitelist.\n" +
+    "- generate_factors(count, family): produce legal factors from the site's own pool and measure them.\n" +
     "- strategy_guide(expr): the step-by-step strategy builder.\n" +
     "- what_if(expr, pi, N, screen, venue): the counterfactual engine — re-run the pipeline with one changed parameter and report what changes, before/after.\n" +
     "- validate_own(lib, sharpe, maxDD, turnover): the visitor's own factors or strategy metrics, measured against our method.\n\n" +
@@ -1806,7 +1882,7 @@
     "CONSTANTS: screen 1.96, allocation sqrt(2 ln 17) = 2.3803, D_eff 17, seed 20261105, declared tape 1200 bars.\n" +
     "If the visitor asks something outside all of this — live prices, advice, a brokerage, your training data — say what you are and are not, in one sentence, and offer the nearest instrument.\n\n" +
     "YOU ARE ALSO A NORMAL ASSISTANT. For ordinary conversation — greetings, small talk, how are you, the weather, opinions, general knowledge, anything that is not about this site's instruments — answer naturally, briefly and warmly, exactly like a good general chatbot would. The honesty rules above apply to claims about numbers, the paper, and the tape — not to ordinary conversation. Never answer an ordinary question with \"I have no instrument for that\"; that sentence belongs to the deterministic router, not to you.",
-    "你是 BOAT-2，金宦年关于量化研究纪律的个人作品集页面上的研究代理（作者：金宦年）。你是一个真实运行在访客浏览器里的大语言模型，对面是评审。\n\n" +
+    "你是 BOAT-3，金宦年关于量化研究纪律的个人作品集页面上的研究代理（作者：金宦年）。你是一个真实运行在访客浏览器里的大语言模型，对面是评审。\n\n" +
     "基本规则——不是建议：\n" +
     "1. 凡是本次对话里没有从工具调用拿回来的数字，你一律不许说、不许估、不许四舍五入、不许暗示。需要数字就调用算它的仪器；没有仪器覆盖就直说，然后停下。\n" +
     "2. 不许声称你算了你没算的东西。工具调用轨迹就在你答案旁边，读者看得见。\n" +
@@ -1837,6 +1913,7 @@
     "- run_experiment(source | lib)：论文的实验——正常筛选对主场路由加池化，议会终审。\n" +
     "- fetch_library(url)：从 URL 拉取公开因子库，逐公式编译校验，报告收录与跳过。\n" +
     "- mine_factors()：DSL 白名单上的机器枚举动物园。\n" +
+    "- generate_factors(count, family)：从站点自合法池产出因子并测量。\n" +
     "- strategy_guide(expr)：分步策略构建向导。\n" +
     "- what_if(expr, pi, N, screen, venue)：反事实引擎——改一个参数重跑整条流水线，报告前后变化。\n" +
     "- validate_own(lib, sharpe, maxDD, turnover)：访客自己的因子或策略数字，用我们的方法检验。\n\n" +
@@ -1987,6 +2064,13 @@
           expr: { type: "string", description: "optional starting factor expression" }
         }),
         run: function (a) { return instGuide({ expr: a.expr }); } },
+      { name: "generate_factors",
+        description: "Produce N legal factor expressions from the site's own pool (the 22 public factors and the machine-mined zoo) and measure each on the declared tape: IC, t, pi, verdict. Use when the visitor asks you to generate, suggest, or produce factors. Never write a formula yourself — the pool only contains expressions that compile.",
+        parameters: S("", {
+          count: { type: "integer", description: "how many, 3-8 (default 5)" },
+          family: { type: "string", description: "optional family filter: momentum, reversal, volatility, volume, orderflow, skew, trend" }
+        }),
+        run: function (a) { return instGenerate({ count: a.count, family: a.family }); } },
       { name: "what_if",
         description: "The counterfactual engine: re-run the measurement pipeline with a changed parameter and show what changes. Use for any question of the form 'what if ...' — pi override, N override, screen level, venue restriction. Reports before/after verdicts with a council adjudication.",
         parameters: S("", {
@@ -2171,7 +2255,7 @@
     msg.style.setProperty("--ac", "#c084fc");
     var who = el("div", "ag-msg-who");
     who.appendChild(el("i"));
-    who.appendChild(el("span", null, "BOAT-2"));
+    who.appendChild(el("span", null, "BOAT-3"));
     who.appendChild(el("span", "ag-msg-tag", brainLabel()));
     msg.appendChild(who);
     var body = el("div", "ag-blocks");
@@ -2317,6 +2401,7 @@
     strategy: [t("run the experiment", "跑双路对比实验"), t("council the factor", "让议会裁决它"), t("guide me step by step", "带我分步建策略")],
     foundry: [t("evaluate it on the declared market", "在声明市场上评估它"), t("council it", "让议会裁决它"), t("build a strategy on it", "以它建策略")],
     zoo: [t("run the experiment on the zoo", "对动物园跑实验"), t("mine the zoo", "机器枚举动物园"), t("fetch a public library", "拉取公开因子库")],
+    generate: [t("build a strategy on the strongest", "以最强的那个建策略"), t("run the experiment on the zoo", "对动物园跑双路实验"), t("generate 8 momentum factors", "产 8 个动量类因子")],
     experiment: [t("what if pi were 0.1", "如果 π 只有 0.1 会怎样"), t("guide me through a strategy", "带我分步建策略"), t("resurrect the sample library", "复活样本库")],
     guide: [t("run the experiment", "跑双路对比实验"), t("council the factor", "让议会裁决它"), t("open the bench", "打开解剖台")],
     whatif: [t("validate my own factors", "检验我自己的因子"), t("run the experiment", "跑双路对比实验"), t("guide me through a strategy", "带我分步建策略")],
@@ -2344,17 +2429,17 @@
     prov.textContent = cfg.provider === "local"
       ? t("local model · " + shortModel(cfg.model) + " · runs in this tab · " + nCalls +
           " tool call" + (nCalls === 1 ? "" : "s") + " · compute " + num(computeMs, 2) +
-          " ms · seed " + SEED + " · BOAT-2 " + VERSION,
+          " ms · seed " + SEED + " · BOAT-3 " + VERSION,
           "本地模型 · " + shortModel(cfg.model) + " · 在本页运行 · " + nCalls +
           " 次工具调用 · 计算 " + num(computeMs, 2) + " ms · 种子 " + SEED +
-          " · BOAT-2 " + VERSION)
+          " · BOAT-3 " + VERSION)
       : t("model " + cfg.model + " via " + cfg.provider + " · " + nCalls +
           " tool call" + (nCalls === 1 ? "" : "s") + " · every number above came back from one · " +
           (nCalls ? "compute " : "provider latency ") + num(computeMs, 2) + " ms · seed " + SEED +
-          " · BOAT-2 " + VERSION,
+          " · BOAT-3 " + VERSION,
           "模型 " + cfg.model + " · 经由 " + cfg.provider + " · " + nCalls +
           " 次工具调用 · 上面每个数字都从其中一次回来 · " + (nCalls ? "计算 " : "提供方时延 ") +
-          num(computeMs, 2) + " ms · 种子 " + SEED + " · BOAT-2 " + VERSION);
+          num(computeMs, 2) + " ms · 种子 " + SEED + " · BOAT-3 " + VERSION);
     body.appendChild(prov);
 
     if (!interrupted) {
@@ -2648,10 +2733,10 @@
     var cfg = brainCfg();
     steps.push({ name: "route", args: "capability query", status: "ok" });
     blocks.push({ k: "prose", text: cfg
-      ? t("I am BOAT-2. Right now a real language model (" + brainLabel() + ") is answering, and the ten instruments below are its tools — it may not state a number that did not come back from one of them:",
-         "我是 BOAT-2。现在由一个真实的大语言模型（" + brainLabel() + "）回答，下面十件仪器是它的工具——凡是没从其中一次调用回来的数字，它不许说：")
-      : t("I am BOAT-2, the research agent on this page. I am not a language model and I make no network calls — I am a router over the instruments this site already ships. Ten of them:",
-         "我是 BOAT-2，这个页面上的研究代理。我不是语言模型，也不发任何网络请求——我是站点自带仪器之上的一台路由器。一共十件：") });
+      ? t("I am BOAT-3. Right now a real language model (" + brainLabel() + ") is answering, and the ten instruments below are its tools — it may not state a number that did not come back from one of them:",
+         "我是 BOAT-3。现在由一个真实的大语言模型（" + brainLabel() + "）回答，下面十件仪器是它的工具——凡是没从其中一次调用回来的数字，它不许说：")
+      : t("I am BOAT-3, the research agent on this page. I am not a language model and I make no network calls — I am a router over the instruments this site already ships. Ten of them:",
+         "我是 BOAT-3，这个页面上的研究代理。我不是语言模型，也不发任何网络请求——我是站点自带仪器之上的一台路由器。一共十件：") });
     blocks.push({
       k: "table",
       head: [{ t: "instrument" }, { t: "what it does" }],
@@ -3028,9 +3113,9 @@
     var p = el("p", "ag-prov");
     p.textContent = t(
       "local compute · 0 network requests · seed " + SEED + " · compute " + num(ms, 2) +
-      " ms · streamed for readability · BOAT-2 " + VERSION,
+      " ms · streamed for readability · BOAT-3 " + VERSION,
       "本地计算 · 0 次网络请求 · 种子 " + SEED + " · 计算 " + num(ms, 2) +
-      " ms · 流式只为可读 · BOAT-2 " + VERSION);
+      " ms · 流式只为可读 · BOAT-3 " + VERSION);
     host.appendChild(p);
     maybeScroll();
   }
@@ -3057,6 +3142,7 @@
       case "about": return instAbout(r.slots || {});
       case "research": return instResearch(r.slots || {});
       case "zoo": return instZoo();
+      case "generate": return instGenerate(r.slots || {});
       case "whatif": return instWhatIf(r.slots || {});
       case "validate": return instValidate(r.slots || {});
       case "experiment": return instExperiment(r.slots || {});
@@ -3090,7 +3176,7 @@
     if (!text || !streamEl) return;
     if (activeCtl) abortActive();   /* a new question retires the old answer */
 
-    /* BOAT-2 — the router runs FIRST, always. If it has an instrument for
+    /* BOAT-3 — the router runs FIRST, always. If it has an instrument for
        the question, the instrument runs and its numbers are on screen before
        any model is involved; the model then writes two or three sentences on
        top of the computed digest (narrate()). A small local model can no
@@ -3118,7 +3204,7 @@
     runDeterministic(text, r0);
   }
 
-  /* BOAT-2: the model writes on top of the computed result. It receives the
+  /* BOAT-3: the model writes on top of the computed result. It receives the
      question and a digest of what the instruments returned — it never gets
      to change a number, only to interpret what is already on screen. */
   function narrate(body, text, r, out, ctl) {
@@ -3131,8 +3217,8 @@
     host.appendChild(p);
     var raw = "";
     var sys = t(
-      "You are BOAT-2, the research agent on Huannian Jin's quant-research portfolio. The instruments have already run and their numbers are on screen. Write TWO OR THREE short sentences interpreting the result below — what it shows, what it does not. Use only the numbers in the digest; never invent, round or imply a number that is not there. No preamble, no restating the question. Reply in the visitor's language.",
-      "你是 BOAT-2，金宦年量化研究作品集上的研究代理。仪器已经跑完，数字就在屏幕上。针对下面的结果写两到三句短句——它说明了什么、没说明什么。只许用摘要里的数字，不许编、不许估、不许暗示摘要里没有的数字。不要开场白，不要重复问题。用访客的语言回答。");
+      "You are BOAT-3, the research agent on Huannian Jin's quant-research portfolio. The instruments have already run and their numbers are on screen. Write TWO OR THREE short sentences interpreting the result below — what it shows, what it does not. Use only the numbers in the digest; never invent, round or imply a number that is not there. No preamble, no restating the question. Reply in the visitor's language.",
+      "你是 BOAT-3，金宦年量化研究作品集上的研究代理。仪器已经跑完，数字就在屏幕上。针对下面的结果写两到三句短句——它说明了什么、没说明什么。只许用摘要里的数字，不许编、不许估、不许暗示摘要里没有的数字。不要开场白，不要重复问题。用访客的语言回答。");
     window.HJ_LLM.chat({
       system: sys,
       tools: [],
@@ -3157,7 +3243,7 @@
     maybeScroll(true);
 
     setBusy(true);
-    if (liveEl) liveEl.textContent = t("BOAT-2 is computing", "BOAT-2 正在计算");
+    if (liveEl) liveEl.textContent = t("BOAT-3 is computing", "BOAT-3 正在计算");
 
     var t0 = now();
     r.raw = text;
@@ -3171,7 +3257,7 @@
     msg.style.setProperty("--ac", LANE[r.intent] || "var(--accent)");
     var who = el("div", "ag-msg-who");
     who.appendChild(el("i"));
-    who.appendChild(el("span", null, "BOAT-2"));
+    who.appendChild(el("span", null, "BOAT-3"));
     msg.appendChild(who);
     var body = el("div", "ag-blocks");
     msg.appendChild(body);
@@ -3244,7 +3330,7 @@
       [t("seed", "种子"), String(SEED)]
     ];
     if (cfg) rows.push([t("brain", "大脑"), brainLabel()]);
-    rows.push([t("engine", "引擎"), "BOAT-2 " + VERSION]);
+    rows.push([t("engine", "引擎"), "BOAT-3 " + VERSION]);
     host.textContent = "";
     rows.forEach(function (r) {
       var row = el("div", "ag-kv-row");
