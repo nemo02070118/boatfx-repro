@@ -616,6 +616,24 @@
     };
 
     /* --- the council and the new engines, in the terminal */
+    /* the agent stack loads dynamically (see index.html) — commands that
+       need it wait for it instead of failing on a cold page */
+    function whenAgent(fn) {
+      var ready = function () {
+        return window.HJ_COUNCIL && window.HJ_ENGINES && window.BoatAgent;
+      };
+      if (ready()) { fn(); return; }
+      var n = 0;
+      (function poll() {
+        if (ready()) { fn(); return; }
+        if (++n > 160) {
+          line(t("the agent stack is still loading — give it a second and run it again",
+            "智能体栈还在加载——稍等一秒再跑一次"), "warn");
+          return;
+        }
+        setTimeout(poll, 50);
+      })();
+    }
     function agentAsk(text, note) {
       line(note, "ok");
       var node = document.getElementById("boat-agent");
@@ -701,6 +719,34 @@
       run: function (a) {
         var raw = a.join(" ").trim() || "(BidSize - AskSize) / (BidSize + AskSize)";
         agentAsk("research " + raw, t("sending to the pipeline →", "送入完整流水线 →"));
+      }
+    };
+
+    /* wrap the agent-dependent commands so they wait for the dynamic stack */
+    ["council", "ask", "agents", "venue", "strategy", "resurrect", "research"].forEach(function (name) {
+      var inner = CMD[name];
+      if (!inner) return;
+      CMD[name] = {
+        desc: inner.desc,
+        run: function (a) { whenAgent(function () { inner.run(a); }); }
+      };
+    });
+    CMD.zoo = {
+      desc: t("the public factor library", "公开因子库"),
+      run: function () {
+        whenAgent(function () { agentAsk("what factors are public", t("sending to the zoo →", "送入动物园 →")); });
+      }
+    };
+    CMD.experiment = {
+      desc: t("the paper's experiment: the screen against home-venue pooling", "论文实验：通用筛 对 主场+池化"),
+      run: function () {
+        whenAgent(function () { agentAsk("run the experiment", t("sending to the experiment →", "送入实验 →")); });
+      }
+    };
+    CMD.guide = {
+      desc: t("the step-by-step strategy builder", "分步策略构建向导"),
+      run: function () {
+        whenAgent(function () { agentAsk("guide me through building a strategy", t("sending to the guide →", "送入向导 →")); });
       }
     };
 
@@ -1617,6 +1663,9 @@
         line("  " + pad("venue", 32) + t("find a factor's home venue", "找因子的主场"));
         line("  " + pad("strategy", 32) + t("build a strategy on a factor", "以因子建策略"));
         line("  " + pad("research", 32) + t("the full pipeline on one factor", "对单因子跑完整流水线"));
+        line("  " + pad("zoo", 32) + t("the public factor library", "公开因子库"));
+        line("  " + pad("experiment", 32) + t("the paper's experiment, both ways", "论文实验，双路对比"));
+        line("  " + pad("guide", 32) + t("the step-by-step strategy builder", "分步策略构建向导"));
         line("  " + pad("agents", 32) + t("the council roster", "议会花名册"));
         line("  " + pad("ask", 32) + t("ask about the author — record only", "问作者的事——只按记录"));
         line("  " + pad("help", 32) + t("full command list", "全部命令"));

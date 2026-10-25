@@ -23,7 +23,7 @@
   <meta name="twitter:image" content="https://nemo02070118.github.io/boatfx-repro/assets/og/card.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script>
@@ -1162,7 +1162,7 @@
           <footer><span data-i18n="letter.quote.f">— Liao Jingchi, Managing Director, Zheshang Securities</span></footer>
         </blockquote>
         <figure class="letter-fig">
-          <img src="assets/recommendation-letter.jpg" alt="Recommendation letter from Liao Jingchi, Managing Director, Zheshang Securities" />
+          <img src="assets/recommendation-letter.jpg" alt="Recommendation letter from Liao Jingchi, Managing Director, Zheshang Securities" loading="lazy" decoding="async" />
           <figcaption><span data-i18n="letter.fig">Signed MD letter on file</span></figcaption>
         </figure>
       </div>
@@ -1374,7 +1374,7 @@
 
       <div class="wiki-gallery" id="wiki-gallery">
         <figure class="wiki-hero" data-wiki="badge">
-          <img src="assets/wiki/wiki-5.jpg" data-webp="assets/wiki/wiki-5.webp" alt="VIP badge — Wiki Finance Expo Hong Kong 2026" data-full="assets/wiki/wiki-5.webp" />
+          <img src="assets/wiki/wiki-5.jpg" data-webp="assets/wiki/wiki-5.webp" alt="VIP badge — Wiki Finance Expo Hong Kong 2026" data-full="assets/wiki/wiki-5.webp" loading="lazy" decoding="async" />
           <figcaption data-i18n="field.cap.badge">VIP badge · TRADEHALL · 23–24 July 2026</figcaption>
         </figure>
         <div class="wiki-grid">
@@ -1658,12 +1658,32 @@
   <script src="bench.js?v=10"></script>
   <script src="gate.js?v=3"></script>
   <script src="ml.js?v=1"></script>
-  <script src="engines.js?v=1"></script>
-  <script src="council.js?v=1"></script>
-  <script src="zoo.js?v=1"></script>
-  <script src="guide.js?v=1"></script>
-  <script src="llm.js?v=1"></script>
-  <script src="agent.js?v=1"></script>
+  <!-- The agent stack (engines, council, zoo, guide, llm, agent — ~110 KB
+       compressed) is not needed for first paint. It loads when the agent
+       section comes near the viewport, or one second after load, whichever
+       first. Terminal commands that need it wait for it (whenAgent). -->
+  <script>
+  (function () {
+    var files = ["engines.js?v=1", "council.js?v=1", "zoo.js?v=1", "guide.js?v=1", "llm.js?v=1", "agent.js?v=1"];
+    var done = false;
+    function load(i) {
+      if (i >= files.length) return;
+      var s = document.createElement("script");
+      s.src = files[i];
+      s.onload = function () { load(i + 1); };
+      document.head.appendChild(s);
+    }
+    function go() { if (done) return; done = true; load(0); }
+    var node = document.getElementById("boat-agent");
+    if ("IntersectionObserver" in window && node) {
+      var io = new IntersectionObserver(function (es) {
+        if (es[0].isIntersecting) { io.disconnect(); go(); }
+      }, { rootMargin: "800px" });
+      io.observe(node);
+    }
+    window.addEventListener("load", function () { setTimeout(go, 1000); });
+  })();
+  </script>
   <script src="upgrade.js?v=11"></script>
   <script src="i18n.js?term11"></script>
   <script src="app.js?term12"></script>
