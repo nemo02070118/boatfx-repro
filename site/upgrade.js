@@ -723,7 +723,7 @@
     };
 
     /* wrap the agent-dependent commands so they wait for the dynamic stack */
-    ["council", "ask", "agents", "venue", "strategy", "resurrect", "research",
+    ["council", "ask", "agents", "venue", "strategy", "resurrect", "research", "evolve",
      "zoo", "experiment", "guide", "whatif", "validate"].forEach(function (name) {
       var inner = CMD[name];
       if (!inner) return;
@@ -748,6 +748,13 @@
       desc: t("the step-by-step strategy builder", "分步策略构建向导"),
       run: function () {
         whenAgent(function () { agentAsk("guide me through building a strategy", t("sending to the guide →", "送入向导 →")); });
+      }
+    };
+    CMD.evolve = {
+      desc: t("a genetic search for factors — crossover, mutation, all legal", "遗传搜索因子——交叉变异，全部合法"),
+      run: function (a) {
+        var m = /(\d+)\s*(代|gens?|generations?)/i.exec(a.join(" "));
+        whenAgent(function () { agentAsk("evolve factors" + (m ? " " + m[1] + " generations" : ""), t("searching the grammar →", "搜索文法 →")); });
       }
     };
     CMD.whatif = {
@@ -1681,6 +1688,7 @@
         line("  " + pad("zoo", 32) + t("the public factor library", "公开因子库"));
         line("  " + pad("experiment", 32) + t("the paper's experiment, both ways", "论文实验，双路对比"));
         line("  " + pad("guide", 32) + t("the step-by-step strategy builder", "分步策略构建向导"));
+        line("  " + pad("evolve", 32) + t("a genetic search for factors — crossover, mutation", "遗传搜索因子——交叉变异"));
         line("  " + pad("whatif", 32) + t("the counterfactual engine — change one parameter", "反事实引擎——改一个参数全部重跑"));
         line("  " + pad("validate", 32) + t("validate your own factors or strategy, our way", "用我们的方法检验你自己的因子或策略"));
         line("  " + pad("agents", 32) + t("the council roster", "议会花名册"));

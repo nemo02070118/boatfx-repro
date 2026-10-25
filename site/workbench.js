@@ -252,5 +252,40 @@
     return { steps: steps, blocks: blocks };
   }
 
-  window.HJ_WORKBENCH = { version: "v1.0", run: run, detect: detect, helpers: { t: t, num: num } };
+  /* B3 — one click, the whole answer as a markdown file: table, charts,
+     verdict, council, the declared note. A reviewer can read it offline. */
+  function markdown(out, title) {
+    var L = [];
+    L.push("# " + (title || t("BOAT-2 factor workbench report", "BOAT-2 因子工作台报告")));
+    L.push("");
+    L.push("> " + t("declared tape · seed 20261105 · computed in the browser · SSRN 7607684",
+      "声明胶带 · 种子 20261105 · 浏览器内计算 · SSRN 7607684"));
+    L.push("");
+    (out.blocks || []).forEach(function (b) {
+      if (b.k === "prose" || b.k === "note") L.push(b.text, "");
+      else if (b.k === "table") {
+        L.push("| " + (b.head || []).map(function (h) { return h.t; }).join(" | ") + " |");
+        L.push("|" + (b.head || []).map(function () { return "---"; }).join("|") + "|");
+        (b.rows || []).forEach(function (r) { L.push("| " + r.map(function (c) { return String(c.t).replace(/\|/g, "/"); }).join(" | ") + " |"); });
+        L.push("");
+      } else if (b.k === "kv") {
+        (b.items || []).forEach(function (it) { L.push("- **" + it.k + "** — " + it.v); });
+        L.push("");
+      } else if (b.k === "verdict") {
+        L.push("## " + b.h, "", b.b, "", "> " + (b.plain || ""), "");
+      } else if (b.k === "chart") {
+        L.push("_chart: " + (b.label || "") + " (" + (b.series || []).length + " points)_", "");
+      } else if (b.k === "bars") {
+        L.push("_bars: " + (b.items || []).map(function (x) { return x.label + " " + num(x.value, 2); }).join(" · "), "");
+      } else if (b.k === "council") {
+        var c = b.council || {};
+        L.push("_council: " + ((c.verdict && c.verdict.h) || "") + "_", "");
+      }
+    });
+    return L.join("\n");
+  }
+
+  window.HJ_WORKBENCH = {
+    version: "v1.0", run: run, detect: detect, markdown: markdown, helpers: { t: t, num: num }
+  };
 })();

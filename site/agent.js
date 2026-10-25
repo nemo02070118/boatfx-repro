@@ -504,6 +504,11 @@
       var tauIn = tm2 ? parseFloat(tm2[1]) : pi;
       return { intent: "paper", slots: { mode: isCeil ? "ceiling" : "props", expr: expr, tau: tauIn } };
     }
+    if (/(evolve|evolution|遗传|演化|进化|繁育|breed|search for factors|因子搜索|自己找因子)/i.test(low)) {
+      var gM = /(\d+)\s*(代|generations?|gens)/i.exec(s);
+      var pM = /(\d+)\s*(个|population|pop)/i.exec(s);
+      return { intent: "evolve", slots: { generations: gM ? parseInt(gM[1], 10) : 5, pop: pM ? parseInt(pM[1], 10) : 60 } };
+    }
     if (/(zoo|动物园|因子库|public factor|公开因子|有哪些因子|what factors)/i.test(low)) {
       return { intent: "zoo", slots: {} };
     }
@@ -1790,6 +1795,12 @@
     return (slots && slots.mode === "props") ? P.propsRun() : P.ceilingRun(slots || {});
   }
 
+  function instEvolve(slots) {
+    var V = window.HJ_EVOLVE;
+    if (!V) return mlMissing();
+    return V.run(slots || {});
+  }
+
   function instZoo() {
     var Z = window.HJ_ZOO;
     if (!Z) return mlMissing();
@@ -1944,6 +1955,7 @@
     "- fetch_library(url): fetch a public factor library from a URL, compile-validate every formula, report kept and skipped.\n" +
     "- mine_factors(): the machine-enumerated zoo over the DSL whitelist.\n" +
     "- paper_ceiling(expr, tau) / paper_props(): the paper's ceiling law and its four propositions.\n" +
+    "- evolve_factors(generations, pop): a genetic search over the legal grammar — crossover and mutation, every candidate parsed.\n" +
     "- generate_factors(count, family): produce legal factors from the site's own pool and measure them.\n" +
     "- strategy_guide(expr): the step-by-step strategy builder.\n" +
     "- what_if(expr, pi, N, screen, venue): the counterfactual engine — re-run the pipeline with one changed parameter and report what changes, before/after.\n" +
@@ -1984,6 +1996,7 @@
     "- fetch_library(url)：从 URL 拉取公开因子库，逐公式编译校验，报告收录与跳过。\n" +
     "- mine_factors()：DSL 白名单上的机器枚举动物园。\n" +
     "- paper_ceiling(expr, tau) / paper_props()：论文的上限定律与四个命题。\n" +
+    "- evolve_factors(generations, pop)：在合法文法上跑遗传搜索——交叉变异，每个候选都过文法。\n" +
     "- generate_factors(count, family)：从站点自合法池产出因子并测量。\n" +
     "- strategy_guide(expr)：分步策略构建向导。\n" +
     "- what_if(expr, pi, N, screen, venue)：反事实引擎——改一个参数重跑整条流水线，报告前后变化。\n" +
@@ -2146,6 +2159,13 @@
         description: "The paper as four propositions (dilution, allocation wall, ceiling, pooling), with the formula and where each one runs on this page.",
         parameters: S("", {}),
         run: function () { return instPaper({ mode: "props" }); } },
+      { name: "evolve_factors",
+        description: "Run a genetic search over the site's legal grammar to find factors: a random population, scored by |t| on the declared tape, bred by crossover and mutation for a few generations. Every candidate is parsed by the grammar before it is scored, so nothing illegal can win. Use when the visitor asks to search for, evolve, or discover factors.",
+        parameters: S("", {
+          generations: { type: "integer", description: "how many generations, 1-8 (default 5)" },
+          pop: { type: "integer", description: "population size, 20-120 (default 60)" }
+        }),
+        run: function (a) { return instEvolve({ generations: a.generations, pop: a.pop }); } },
       { name: "generate_factors",
         description: "Produce N legal factor expressions from the site's own pool (the 22 public factors and the machine-mined zoo) and measure each on the declared tape: IC, t, pi, verdict. Use when the visitor asks you to generate, suggest, or produce factors. Never write a formula yourself — the pool only contains expressions that compile.",
         parameters: S("", {
@@ -3224,6 +3244,7 @@
       case "about": return instAbout(r.slots || {});
       case "research": return instResearch(r.slots || {});
       case "zoo": return instZoo();
+      case "evolve": return instEvolve(r.slots || {});
       case "paper": return instPaper(r.slots || {});
       case "generate": return instGenerate(r.slots || {});
       case "whatif": return instWhatIf(r.slots || {});
@@ -3255,6 +3276,7 @@
   }
 
   var LAST_ASK = "";
+  var LAST_WB = null;   /* the last workbench result, for the markdown export */
   /* a stable fingerprint for an answer: seed + intent + question + digest */
   function fingerprint(text, r, out) {
     var src = SEED + "|" + (r && r.intent || "") + "|" + String(text || "").slice(0, 96) +
@@ -3618,6 +3640,21 @@
         rd.readAsText(f);
       });
     }
+    var ex = $("ag-wb-export");
+    if (ex) {
+      ex.addEventListener("click", function () {
+        if (!LAST_WB || !window.HJ_WORKBENCH || !window.HJ_WORKBENCH.markdown) return;
+        var md = window.HJ_WORKBENCH.markdown(LAST_WB);
+        var blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "boat2-workbench-report.md";
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+        sysLine(t("report saved — boat2-workbench-report.md", "报告已保存——boat2-workbench-report.md"));
+      });
+    }
     go.addEventListener("click", function () {
       var text = ta.value.trim();
       if (!text) { ta.focus(); return; }
@@ -3626,7 +3663,8 @@
         return;
       }
       if (activeCtl) abortActive();
-      appendOut(window.HJ_WORKBENCH.run(text));
+      LAST_WB = window.HJ_WORKBENCH.run(text);
+      appendOut(LAST_WB);
     });
   }
 

@@ -523,6 +523,7 @@
                 <input type="file" id="ag-wb-file" accept=".txt,.csv,.md" hidden />
                 <button type="button" class="btn ghost" id="ag-wb-upload" data-ag-i18n="wb.upload">load a file</button>
                 <button type="button" class="btn primary" id="ag-wb-run" data-ag-i18n="wb.run">run it</button>
+                <button type="button" class="btn ghost" id="ag-wb-export" data-ag-i18n="wb.export">export .md</button>
                 <span class="ag-wb-note" data-ag-i18n="wb.note">computed in this tab · nothing leaves the page</span>
               </div>
             </details>
@@ -1754,7 +1755,7 @@
        wait for their libs (whenLibs) and the agent for its stack. */
     var files = ["gate.js?v=3", "bench.js?v=10", "ml.js?v=1", "upgrade.js?v=11",
                  "engines.js?v=1", "council.js?v=1", "zoo.js?v=1", "guide.js?v=1",
-                 "whatif.js?v=1", "workbench.js?v=1", "paper.js?v=1", "llm.js?v=1", "agent.js?v=1"];
+                 "whatif.js?v=1", "workbench.js?v=1", "evolve.js?v=1", "paper.js?v=1", "llm.js?v=1", "agent.js?v=1"];
     var done = false;
     function go() {
       if (done) return;
