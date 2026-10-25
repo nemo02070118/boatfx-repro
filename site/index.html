@@ -468,7 +468,7 @@
 
             <p class="ag-live" id="ag-live" role="status" aria-live="polite"></p>
 
-            <form class="ag-form" id="ag-form" onsubmit="return false">
+            <form class="ag-form" id="ag-form" onsubmit="if(!window.BoatAgent){var n=document.getElementById('ag-note');if(n){n.textContent='BOAT-2 is loading — one moment';n.setAttribute('data-loading','1');}}return false">
               <div class="ag-parse" id="ag-parse" hidden></div>
               <div class="ag-row">
                 <textarea id="ag-input" class="ag-input" rows="1" autocomplete="off" spellcheck="false" data-ag-i18n-ph="ph.0" placeholder="judge Rank(Mean[10](BestAsk - BestBid) / MidPrice) — order-book imbalance…"></textarea>
@@ -1715,16 +1715,20 @@
   (function () {
     var files = ["engines.js?v=1", "council.js?v=1", "zoo.js?v=1", "guide.js?v=1", "whatif.js?v=1", "workbench.js?v=1", "llm.js?v=1", "agent.js?v=1"];
     var done = false;
-    function load(i) {
-      if (i >= files.length) return;
-      var s = document.createElement("script");
-      s.src = files[i];
-      /* chain on error too: a missing file must not break the stack */
-      s.onload = function () { load(i + 1); };
-      s.onerror = function () { load(i + 1); };
-      document.head.appendChild(s);
+    function go() {
+      if (done) return;
+      done = true;
+      /* parallel downloads, ordered execution: async=false keeps the classic
+         script order (agent.js still runs after llm.js) while letting all
+         eight files fly at once — a sequential chain took 5-10 s on a slow
+         link, which read as "the panel is dead". */
+      for (var i = 0; i < files.length; i++) {
+        var s = document.createElement("script");
+        s.src = files[i];
+        s.async = false;
+        document.head.appendChild(s);
+      }
     }
-    function go() { if (done) return; done = true; load(0); }
     var node = document.getElementById("boat-agent");
     if ("IntersectionObserver" in window && node) {
       var io = new IntersectionObserver(function (es) {
