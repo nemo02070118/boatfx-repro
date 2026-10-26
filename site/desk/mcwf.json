@@ -1,0 +1,1 @@
+{"status":"success","data":{"baseline_sharpe":2.408,"mc_p_value":0.0,"mc_mean_sharpe":2.527374732630911,"wf_sharpes":[2.071,1.433,0.045],"wf_mean_sharpe":1.183,"pbo":0.0,"all_pass":true}}
