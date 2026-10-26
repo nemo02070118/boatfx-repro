@@ -930,9 +930,9 @@
     if (pack.crowd && pack.crowd.factors) {
       var c = pack.crowd, cw = el("div");
       var ck = el("div", "dk-cells");
-      ck.appendChild(cell(T("crowding ratio", "拥挤度"), num(c.crowding_ratio, 2)));
+      ck.appendChild(cell(T("crowding ratio", "拥挤度"), pct((c.crowding_ratio || 0) * 100, 1)));
       ck.appendChild(cell(T("avg score", "平均分"), num(c.avg_score, 3)));
-      ck.appendChild(cell(T("crowded", "拥挤因子"), String((c.crowded_factors || []).length)));
+      ck.appendChild(cell(T("crowded", "拥挤因子"), (c.crowded_factors || []).length + " / " + (c.factors || []).length));
       cw.appendChild(ck);
       var top = c.factors.map(function (f, i2) { return { n: f, v: c.scores[i2] }; }).sort(function (x, y) { return y.v - x.v; }).slice(0, 12);
       cw.appendChild(svgbox(barsChart(top.map(function (x) { return { v: x.v, color: x.v > 0.6 ? "#e5484d" : "#5ec9a8" }; }), { h: 100 })));
@@ -964,9 +964,12 @@
     if (tda.barcodes && tda.barcodes.length) {
       var tw = el("div"); tw.appendChild(svgbox(barcodeChart(tda.barcodes)));
       var tk = el("div", "dk-cells");
-      if (tda.betti_numbers) ["beta_0", "beta_1", "beta_2", "euler_characteristic"].forEach(function (k2) { if (tda.betti_numbers[k2] != null) tk.appendChild(cell(k2, compact(tda.betti_numbers[k2]))); });
       if (tda.max_persistence != null) tk.appendChild(cell(T("max persistence", "最大持续"), num(tda.max_persistence, 3)));
+      if (tda.barcodes) tk.appendChild(cell(T("features", "特征数"), String(tda.barcodes.length)));
       tw.appendChild(tk);
+      tw.appendChild(el("p", "dk-note", T(
+        "The backend's “betti” fields are barcode counts, not topological Betti numbers, so they are not shown. What is shown is the persistence distribution itself.",
+        "后端的 “betti” 字段其实是条码计数、不是拓扑 Betti 数，所以不展示；这里展示的是持续度分布本身。")));
       g3.appendChild(card(T("TDA · persistence histogram", "拓扑 · 持久度分布"), tw));
     }
     body.appendChild(g3);
@@ -980,7 +983,8 @@
     }
     if (a.entropy) {
       var e = a.entropy, ek = el("div", "dk-cells");
-      [["transfer_entropy_xy", "TE x→y"], ["transfer_entropy_yx", "TE y→x"], ["net_flow", T("net flow", "净流")], ["p_value", "p"], ["is_significant", T("significant", "显著")], ["causality_type", T("type", "类型")]].forEach(function (p) { if (e[p[0]] != null) ek.appendChild(cell(p[1], String(e[p[0]]).slice(0, 14))); });
+      var eFmt = { transfer_entropy_xy: function (v) { return num(v, 4); }, transfer_entropy_yx: function (v) { return num(v, 4); }, net_flow: function (v) { return num(v, 4); }, p_value: function (v) { return num(v, 4); }, is_significant: function (v) { return v ? T("yes", "是") : T("no", "否"); }, causality_type: function (v) { return String(v); } };
+      [["transfer_entropy_xy", "TE x→y"], ["transfer_entropy_yx", "TE y→x"], ["net_flow", T("net flow", "净流")], ["p_value", "p"], ["is_significant", T("significant", "显著")], ["causality_type", T("type", "类型")]].forEach(function (p) { if (e[p[0]] != null) ek.appendChild(cell(p[1], eFmt[p[0]](e[p[0]]))); });
       g4.appendChild(card(T("transfer entropy (rust)", "转移熵（Rust）"), ek));
     }
     if (a.mfdfa) {
