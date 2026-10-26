@@ -322,6 +322,38 @@
     return { trades: segs, curve: curve, sharpe: sd > 0 ? mean / sd * Math.sqrt(252) : 0, total: curve[curve.length - 1] - 1, maxDD: mdd, winRate: segs.length ? wins / segs.length : 0, n: segs.length, skipped: skipped, mode: mode, filter: filter };
   }
 
+  /* simple causal rules on the same bars — the US trend playbook */
+  function ruleBacktest(kl, rule) {
+    var c = kl.map(function (k) { return k.close; });
+    var h = kl.map(function (k) { return k.high; });
+    var l = kl.map(function (k) { return k.low; });
+    var n = kl.length, pos = new Array(n).fill(0), i;
+    function sma(w) { var o = [], s = 0; for (var q = 0; q < n; q++) { s += c[q]; if (q >= w) s -= c[q - w]; o.push(q >= w - 1 ? s / w : null); } return o; }
+    if (rule === "ma50") { var m = sma(50); for (i = 1; i < n; i++) pos[i] = m[i] == null ? 0 : (c[i] > m[i] ? 1 : -1); }
+    else if (rule === "ma20_50") { var a = sma(20), b = sma(50); for (i = 1; i < n; i++) pos[i] = (a[i] != null && b[i] != null) ? (a[i] > b[i] ? 1 : -1) : 0; }
+    else if (rule === "donchian") {
+      var p = 0;
+      for (i = 1; i < n; i++) {
+        var hi = -Infinity, lo = Infinity;
+        for (var q = Math.max(0, i - 20); q < i; q++) { if (h[q] > hi) hi = h[q]; if (l[q] < lo) lo = l[q]; }
+        if (c[i] > hi) p = 1; else if (c[i] < lo) p = -1;
+        pos[i] = p;
+      }
+    }
+    else if (rule === "momentum60") { for (i = 1; i < n; i++) pos[i] = i >= 60 ? (c[i] / c[i - 60] - 1 > 0 ? 1 : -1) : 0; }
+    else if (rule === "buyhold") { for (i = 0; i < n; i++) pos[i] = 1; }
+    var eq = 1, curve = [1], rets = [], peak = 1, mdd = 0, sw = 0, prev = 0;
+    for (i = 1; i < n; i++) {
+      var r = pos[i] * (c[i] / c[i - 1] - 1);
+      rets.push(r); eq *= 1 + r; curve.push(eq);
+      if (eq > peak) peak = eq; mdd = Math.max(mdd, 1 - eq / peak);
+      if (pos[i] !== prev) { sw++; prev = pos[i]; }
+    }
+    var mean = 0; for (i = 0; i < rets.length; i++) mean += rets[i]; mean /= (rets.length || 1);
+    var sd = 0; for (i = 0; i < rets.length; i++) { var d = rets[i] - mean; sd += d * d; } sd = Math.sqrt(sd / Math.max(1, rets.length - 1));
+    return { curve: curve, total: eq - 1, sharpe: sd > 0 ? mean / sd * Math.sqrt(252) : 0, maxDD: mdd, switches: sw, rule: rule };
+  }
+
   /* --------------------------------------------------------------- V12 */
   function renderV12(body) {
     var v = D.v12;
@@ -668,7 +700,40 @@
     body.appendChild(card(T("smart filter · trade a label only after its past +60 has been positive", "聪明过滤 · 只在该标签的历史 +60 为正时交易"), smart));
     body.appendChild(el("p", "dk-note", T(
       "Causal: only same-type signals whose +60 window has already closed are used — no future data. A buy is trusted if past buys rose; a sell is trusted if past sells actually fell. Fewer than two completed observations and the signal is taken (one observation is noise). The hindsight row uses the signal's own future and is only a ceiling, not a strategy. Hollow rings are the points the filter skips.",
-      "因果：只参考同类型、且 +60 窗口已经走完的过去信号——不用未来数据。买点看过去买点是否上涨；卖点看过去卖点之后是否真的下跌。已走完样本少于两个就不过滤（一个样本是噪声）。事后那一行用了信号自己的未来，只作为上限，不是策略。图上的空心圈就是被过滤掉的点。")));
+      "因果：只参考同类型、且 +60 窗口已经走完的过去信号——不用未来数据。买点看过去买点是否上涨；卖点看过去卖点之后是否真的下跌。已走完样本少于两个就不过滤（一个样本是噪声）。事后那一行用了信号自己的未来，只作为上限，不是策略。图上的空心圈就是被过滤掉的点。")))
+    ;
+
+    /* US playbook: simple causal rules on the same bars */
+    var rules = [
+      [T("MA50 long/short", "MA50 多空"), ruleBacktest(kl, "ma50")],
+      [T("Donchian 20 breakout", "唐奇安 20 突破"), ruleBacktest(kl, "donchian")],
+      [T("60-bar momentum", "60 日动量"), ruleBacktest(kl, "momentum60")],
+      [T("buy & hold", "买入持有"), ruleBacktest(kl, "buyhold")],
+      [T("chanlun points · long-only", "缠论点 · 只做多"), sigL],
+      [T("chanlun points · long/short", "缠论点 · 多空"), sigT]
+    ];
+    var bestRule = rules.reduce(function (a, b) { return b[1].total > a[1].total ? b : a; });
+    var pw = el("div");
+    var rt = el("table"); rt.className = "dk-table";
+    rt.innerHTML = "<thead><tr><th>rule</th><th>return</th><th>Sharpe</th><th>maxDD</th><th>switches</th></tr></thead>";
+    var rb = el("tbody");
+    rules.forEach(function (p) {
+      var r = p[1], tr = el("tr");
+      [p[0], pct(r.total * 100, 2), num(r.sharpe, 3), pct(r.maxDD * 100, 2), String(r.switches != null ? r.switches : r.n)].forEach(function (v, i2) {
+        tr.appendChild(el("td", i2 === 1 ? (r.total >= 0 ? "pos" : "neg") : i2 === 2 ? (r.sharpe > 0 ? "acc" : "neg") : null, String(v)));
+      });
+      rb.appendChild(tr);
+    });
+    rt.appendChild(rb); pw.appendChild(rt);
+    pw.appendChild(svgbox(line(ruleBacktest(kl, "ma50").curve, { h: 150, color: "#5ec9a8" })));
+    pw.appendChild(svgbox(line(ruleBacktest(kl, "donchian").curve, { h: 100, color: "#f5a524" })));
+    pw.appendChild(el("p", "dk-verdict is-ok", T(
+      "best rule on this tape: " + bestRule[0] + " " + pct(bestRule[1].total * 100, 2) + " · Sharpe " + num(bestRule[1].sharpe, 3),
+      "这条胶带上最强的规则：" + bestRule[0] + " " + pct(bestRule[1].total * 100, 2) + " · Sharpe " + num(bestRule[1].sharpe, 3))));
+    body.appendChild(card(T("US playbook · simple causal rules on the same bars", "美股剧本 · 同一批 bar 上的简单因果规则"), pw));
+    body.appendChild(el("p", "dk-note", T(
+      "MA50 long/short is the US trend characteristic: long above the 50-day, short below it. It is not the chanlun points and not investment advice; the same bars, one rule, no costs, no fitting.",
+      "MA50 多空是美股的趋势特性：站上 50 日线做多、跌破做空。它不是缠论点，也不是投资建议；同一批 bar、一条规则、无成本、无拟合。")));;
 
     var q = signalQuality(kl, sigs);
     if (q.length) {
