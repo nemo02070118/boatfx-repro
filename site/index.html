@@ -626,6 +626,14 @@
       </div>
     </section>
 
+    <!-- 07 · THE REAL DESK — V12 + TSLA + 600519.SH, precomputed by the backend -->
+    <section id="real-desk" class="section reveal">
+      <p class="section-kicker" data-i18n="desk.kicker">07 · the real desk · V12 + TSLA + 600519.SH</p>
+      <h2 data-i18n="desk.title">The terminal's own output, on the page</h2>
+      <p class="section-lede" data-i18n="desk.lede">Not a browser demo. The V12 portfolio backtest below is the real engine's cached result — Sharpe 2.595, 54.11% annual, 11.6% max drawdown over 2020–2025 on a 200-stock universe — and the TSLA / Moutai panels are the real Rust stack's analysis and buy/sell signals. Precomputed on the user's machine, shipped as JSON, recomputed in this tab where marked.</p>
+      <div id="desk-host"></div>
+    </section>
+
     <!-- ACT I -->
     <div class="act-divider reveal" data-act="1" aria-hidden="true">
       <span class="act-num">Act I</span>
@@ -1802,7 +1810,7 @@
        wait for their libs (whenLibs) and the agent for its stack. */
     var files = ["gate.js?v=3", "bench.js?v=10", "ml.js?v=1", "upgrade.js?v=11",
                  "engines.js?v=1", "council.js?v=1", "zoo.js?v=1", "guide.js?v=1",
-                 "whatif.js?v=1", "workbench.js?v=1", "evolve.js?v=1", "paper.js?v=1", "net.js?v=1", "dashboard.js?v=1", "tsla.js?v=1", "llm.js?v=1", "agent.js?v=1"];
+                 "whatif.js?v=1", "workbench.js?v=1", "evolve.js?v=1", "paper.js?v=1", "net.js?v=1", "dashboard.js?v=1", "desk.js?v=1", "tsla.js?v=1", "llm.js?v=1", "agent.js?v=1"];
     var done = false;
     function go() {
       if (done) return;
