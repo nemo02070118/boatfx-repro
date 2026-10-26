@@ -38,6 +38,22 @@
     var lines = String(text || "").split(/\r?\n/).map(function (l) { return l.trim(); })
       .filter(function (l) { return l && l.charAt(0) !== "#"; });
     if (!lines.length) return { kind: "empty" };
+    /* B1 — a bare numeric series, or a date,value table (a factor's own daily
+       values). This must be detected BEFORE the "name, t" parser, or a date
+       in column 0 would be read as a factor name. */
+    var seriesVals = [], dateHits = 0, numericHits = 0;
+    lines.forEach(function (ln) {
+      var c = ln.split(/[,;\t]+/).map(function (s) { return s.trim(); }).filter(function (s) { return s !== ""; });
+      if (c.length === 2 && /^\d{4}[-/.]\d{1,2}([-/.]\d{1,2})?$/.test(c[0]) && isFinite(parseFloat(c[1]))) {
+        seriesVals.push(parseFloat(c[1])); dateHits++; return;
+      }
+      if (c.length === 1 && /^-?\d+(\.\d+)?([eE][-+]?\d+)?$/.test(c[0])) {
+        seriesVals.push(parseFloat(c[0])); numericHits++;
+      }
+    });
+    if (dateHits >= 3) return { kind: "series", values: seriesVals };
+    if (numericHits >= 8 && numericHits >= lines.length * 0.8) return { kind: "series", values: seriesVals };
+
     var formulas = [], tstats = [], bare = [], strategy = null;
     lines.forEach(function (ln) {
       if (/sharpe/i.test(ln) && /=/.test(ln)) {
@@ -125,6 +141,140 @@
     };
   }
 
+  /* ------------------------------------------------------- B1: own series */
+  /* A pasted factor series (date,value rows, or one number per line) is a
+     signal. It is resampled onto the declared tape, measured by HJ_ML.stats,
+     and put through the same sieve as every other factor. Nothing is fitted;
+     the series is taken as given. */
+  function resample(v, n) {
+    var m = v.length, o = [], i;
+    if (m === 1) { for (i = 0; i < n; i++) o.push(v[0]); return o; }
+    for (i = 0; i < n; i++) {
+      var x = i * (m - 1) / (n - 1), j = Math.floor(x), f = x - j;
+      o.push(j + 1 < m ? v[j] * (1 - f) + v[j + 1] * f : v[m - 1]);
+    }
+    return o;
+  }
+  function runSeries(values, steps) {
+    var M = window.HJ_ML, E = window.HJ_ENGINES, C = window.HJ_COUNCIL;
+    var blocks = [];
+    if (!M || !E) return { steps: steps, blocks: [{ k: "verdict", tone: "no", h: t("machinery not loaded", "机器没加载完"), b: t("Reload and try again.", "刷新再试。") }] };
+    var H = E.helpers, K = E.constants;
+    var M0 = H.market(), n = M0.n, fwd = M0.fwd;
+    var sig = resample(values, n);
+    var st = M.stats(sig, fwd);
+    var segs = [], s, segLen = Math.floor(n / K.SEGMENTS);
+    for (s = 0; s < K.SEGMENTS; s++) {
+      var a = s * segLen, b = (s === K.SEGMENTS - 1) ? n : a + segLen;
+      var bt = H.blockT(sig.slice(a, b), fwd.slice(a, b));
+      segs.push({ i: s + 1, t: bt.t, pays: bt.t >= K.PAY_T });
+    }
+    var home = null;
+    segs.forEach(function (g) { if (g.pays && (!home || Math.abs(g.t) > Math.abs(home.t))) home = g; });
+    var tg = st.icT * Math.sqrt(st.pi);
+    var key = Math.abs(tg) >= K.SCREEN ? "pass" : (Math.abs(st.icT) >= K.ALLOC ? "miskill" : "weak");
+
+    steps.push({ name: "workbench.series", args: "(" + values.length + " → " + n + " bars)", status: "ok",
+      detail: "resampled onto the declared tape · measured by HJ_ML.stats" });
+
+    blocks.push({ k: "prose", text: t(
+      "Your " + values.length + "-point series, resampled onto the " + n + "-bar declared tape and measured by the same instrument as every factor here. It is taken as given — nothing is fitted, nothing is smoothed away.",
+      "你的 " + values.length + " 点序列，重采样到 " + n + " 根 bar 的声明胶带上，用和这里每个因子相同的仪器测量。按原样使用——不拟合、不抹平。") });
+    var dec = []; for (var i = 0; i < sig.length; i += 4) dec.push(sig[i]);
+    blocks.push({ k: "chart", variant: "line", label: t("your series (resampled)", "你的序列（重采样后）"), series: dec });
+    blocks.push({ k: "kv", items: [
+      { k: "IC (Spearman)", v: num(st.ic, 4) },
+      { k: "t (non-overlapping blocks)", v: num(st.icT, 2), tone: Math.abs(st.icT) >= K.ALLOC ? "ok" : "" },
+      { k: "π (active share)", v: num(st.pi, 3) },
+      { k: "t_g = t·√π", v: num(tg, 2), tone: Math.abs(tg) >= K.SCREEN ? "ok" : "no" },
+      { k: "Sharpe", v: num(st.sharpe, 2) },
+      { k: "max drawdown", v: num(st.maxDD * 100, 1) + "%" },
+      { k: "turnover", v: num(st.turnover, 3) }
+    ] });
+    blocks.push({ k: "table",
+      head: [{ t: "segment" }, { t: "block t", num: true }, { t: "pays (≥ " + K.PAY_T + ")" }],
+      rows: segs.map(function (g) {
+        return [{ t: "Q" + g.i }, { t: num(g.t, 2), num: true },
+          { t: g.pays ? t("pays", "兑现") : t("quiet", "安静"), tone: g.pays ? "ok" : "" }];
+      }) });
+    var miskilled = key === "miskill";
+    blocks.push({ k: "verdict",
+      tone: key === "pass" ? "ok" : (miskilled ? "no" : "warn"),
+      h: key === "pass"
+        ? t("your series clears the universal screen: t_g = " + num(tg, 2) + " ≥ 1.96", "你的序列过通用筛：t_g = " + num(tg, 2) + " ≥ 1.96")
+        : miskilled
+          ? t("the universal screen mis-kills your series", "通用筛误杀了你的序列")
+          : t("your series is weak on this tape: |t| = " + num(Math.abs(st.icT), 2), "你的序列在这条胶带上偏弱：|t| = " + num(Math.abs(st.icT), 2)),
+      b: t("Own t = " + num(st.icT, 2) + ", diluted t_g = " + num(tg, 2) + ", π = " + num(st.pi, 3) +
+        (home ? ". Its home venue is Q" + home.i + " (block t = " + num(home.t, 2) + ")." : ". No segment reaches the declared " + K.PAY_T + " bar.") +
+        (miskilled ? " It clears the allocation bar but not the screen after dilution — exactly the paper's mis-kill." : ""),
+        "自身 t = " + num(st.icT, 2) + "，稀释后 t_g = " + num(tg, 2) + "，π = " + num(st.pi, 3) +
+        (home ? "。它的主场是 Q" + home.i + "（段 t = " + num(home.t, 2) + "）。" : "。没有段达到声明的 " + K.PAY_T + " 门槛。") +
+        (miskilled ? " 它过了配置线、稀释后却过不了筛线——正是论文说的误杀。" : "")),
+      plain: key === "pass" ? t("It survives the screen.", "它过了筛。")
+        : miskilled ? t("It is strong where it lives, but the single screen discards it.", "它在自己的场子里很强，但单一筛子把它扔了。")
+          : t("No edge on this tape.", "这条胶带上没有边。") });
+    if (C) { var co = C.run({ t: st.icT, pi: st.pi, N: 6960 }); if (co && co.council) blocks.push({ k: "council", council: co.council }); }
+    blocks.push({ k: "note", text: t(
+      "Declared: your series is echoed as given, resampled by linear interpolation onto the " + n + "-bar tape, and measured once — no fitting, no tuning, no look-ahead. One tape, one seed. This says how your series relates to this declared market, not to the real one.",
+      "声明：你的序列按原样使用，线性插值重采样到 " + n + " 根 bar 的胶带，只测一次——不拟合、不调参、不偷看未来。一条胶带、一个种子。这说的是你的序列与这个声明市场的关系，不是与真实市场的关系。") });
+    return { steps: steps, blocks: blocks };
+  }
+
+  /* ------------------------------------------------ B2: the combined factor */
+  /* Two or more of your factors, combined into ONE signal two ways —
+     equal-weight, and IC-weighted (each factor weighted by its own measured
+     IC). The composite is then measured by the same instrument, so you can
+     see whether combining beat the best single factor on this tape. */
+  function combine(rows) {
+    var M = window.HJ_ML, E = window.HJ_ENGINES;
+    if (!M || !E || rows.length < 2) return null;
+    var H = E.helpers, M0 = H.market(), n = M0.n, fwd = M0.fwd, i, j;
+    var sigs = [], names = [];
+    rows.forEach(function (r) {
+      var s = H.evalExpr(r.expr);
+      if (s) { sigs.push(s); names.push(r.name); }
+    });
+    if (sigs.length < 2) return null;
+    var zs = sigs.map(function (s) { return M.zscore(s.slice(0, n)); });
+    var ics = sigs.map(function (s) { return M.spearman(s.slice(0, n), fwd); });
+    var eq = [], iw = [];
+    for (i = 0; i < n; i++) {
+      var a = 0, b = 0;
+      for (j = 0; j < zs.length; j++) { a += zs[j][i]; b += ics[j] * zs[j][i]; }
+      eq.push(a / zs.length);
+      iw.push(b);
+    }
+    var wsum = ics.reduce(function (x, y) { return x + Math.abs(y); }, 0) || 1;
+    iw = iw.map(function (v) { return v / wsum; });
+    var stEq = M.stats(eq, fwd), stIw = M.stats(iw, fwd);
+    var indT = sigs.map(function (s) { return Math.abs(M.stats(s, fwd).icT); });
+    var bestT = Math.max.apply(null, indT);
+    var bestI = indT.indexOf(bestT);
+    var win = stIw.icT > stEq.icT ? "ic" : "eq";
+    var best = Math.max(Math.abs(stEq.icT), Math.abs(stIw.icT));
+    return [
+      { k: "prose", text: t(
+        "The same " + sigs.length + " factors, combined into one signal two ways: equal-weight (each z-scored, averaged) and IC-weighted (each weighted by its own measured IC). Both composites are then measured by the same instrument — a portfolio factor, judged like any other.",
+        "同样这 " + sigs.length + " 个因子，用两种方式合成一条信号：等权（各自 z 分数后平均）与 IC 加权（按各自实测 IC 加权）。两条合成信号再用同一仪器测量——一个组合因子，像其他因子一样被审判。") },
+      { k: "table",
+        head: [{ t: "signal" }, { t: "IC", num: true }, { t: "t", num: true }, { t: "Sharpe", num: true }],
+        rows: [
+          [{ t: t("equal-weight composite", "等权合成") }, { t: num(stEq.ic, 4), num: true }, { t: num(stEq.icT, 2), num: true }, { t: num(stEq.sharpe, 2), num: true }],
+          [{ t: t("IC-weighted composite", "IC 加权合成") }, { t: num(stIw.ic, 4), num: true }, { t: num(stIw.icT, 2), num: true }, { t: num(stIw.sharpe, 2), num: true }],
+          [{ t: t("best single (" + names[bestI] + ")", "最佳单因子（" + names[bestI] + "）") }, { t: "—" }, { t: num(bestT, 2), num: true }, { t: "—" }]
+        ] },
+      { k: "verdict", tone: best >= Math.max(Math.abs(stEq.icT), Math.abs(stIw.icT)) ? "ok" : "warn",
+        h: t("combining " + sigs.length + " factors: " + (win === "ic" ? "IC-weighted" : "equal-weight") + " is stronger, |t| = " + num(best, 2) + " vs best single " + num(bestT, 2),
+            "合成 " + sigs.length + " 个因子：" + (win === "ic" ? "IC 加权" : "等权") + "更强，|t| = " + num(best, 2) + "，最佳单因子 " + num(bestT, 2)),
+        b: t("Equal-weight t = " + num(stEq.icT, 2) + ", IC-weighted t = " + num(stIw.icT, 2) + ", best single |t| = " + num(bestT, 2) +
+          ". A composite is not automatically better — combining diversifying signals can raise t, combining redundant ones cannot. The numbers say which happened here.",
+          "等权 t = " + num(stEq.icT, 2) + "，IC 加权 t = " + num(stIw.icT, 2) + "，最佳单因子 |t| = " + num(bestT, 2) +
+          "。合成不会自动更好——合成互补的信号能抬高 t，合成冗余的不能。数字说明这里发生了哪种。"),
+        plain: t("Two ways to combine, measured side by side.", "两种合成方式，并排测量。") }
+    ];
+  }
+
   /* ----------------------------------------------------------------- run */
   function run(input) {
     var text = typeof input === "string" ? input : (input && input.text) || "";
@@ -137,6 +287,8 @@
     }
     var d = detect(text);
     steps.push({ name: "workbench.detect", args: "(" + d.kind + ")", status: d.kind === "none" || d.kind === "empty" ? "fail" : "ok" });
+
+    if (d.kind === "series") return runSeries(d.values, steps);
 
     if (d.kind === "empty" || d.kind === "none") {
       return { steps: steps, blocks: [{ k: "verdict", tone: "no",
@@ -232,6 +384,10 @@
       if (b.k === "verdict" || b.k === "actions") return;
       blocks.push(b);
     });
+    if (d.rows.length >= 2) {
+      var cb = combine(d.rows);
+      if (cb) cb.forEach(function (b) { blocks.push(b); });
+    }
     var e = ex.experiment || {};
     var ag = d.rows.length === 1
       ? { tone: "warn",
