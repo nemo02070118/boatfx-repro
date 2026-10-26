@@ -482,6 +482,10 @@
             <p class="ag-bp-weights" data-ag-i18n="brain.weights">The model file itself (~1.1–2 GB) downloads from huggingface.co the first time — if that host is unreachable on your network, use your own key instead.</p>
           </div>
           <p class="ag-bp-note" data-ag-i18n="brain.note">The key is written to this browser's localStorage and is sent to nobody except the provider you chose. The tape stays declared-synthetic either way: admission at the gate never means a program earns.</p>
+          <div class="ag-bp-bench">
+            <button type="button" class="ag-bp-bench-btn" id="ag-bp-bench">Benchmark this model</button>
+            <div class="ag-bp-bench-out" id="ag-bp-bench-out" hidden></div>
+          </div>
           <button type="button" class="ag-bp-clear" id="ag-bp-clear" data-ag-i18n="brain.clear">clear the brain</button>
         </div>
 
@@ -1231,6 +1235,22 @@
       </div>
     </section>
 
+    <!-- 04d · THE PERMANENT COMPARISON DASHBOARD -->
+    <section id="dashboard" class="section reveal">
+      <p class="section-kicker" data-i18n="dash.kicker">04d · the permanent comparison dashboard</p>
+      <h2 data-i18n="dash.title">One screen, four sources, both ways</h2>
+      <p class="section-lede" data-i18n="dash.lede">The universal screen against home-venue routing plus pooling — always on the page, not only inside an agent answer. Compute it once; it caches with a timestamp and the seed, so a reload never lies about being fresh.</p>
+      <div id="dash-host"></div>
+    </section>
+
+    <!-- 04c · TSLA TRIAL DESK — the terminal's method, on one real tape -->
+    <section id="tsla-desk" class="section reveal">
+      <p class="section-kicker" data-i18n="tsla.kicker">04c · TSLA trial desk · the terminal's method, on one real tape</p>
+      <h2 data-i18n="tsla.title">The desk, on a stock you can name</h2>
+      <p class="section-lede" data-i18n="tsla.lede">A declared snapshot of TSLA daily bars and a small peer basket, analysed in this tab by a browser port of the BOAT method — indicators, Chanlun, an Ising phase gauge, Hurst, an RMT spectrum, transfer entropy, an LPPLS fit, a decision gene, and a long/flat backtest with an equity curve and an underwater chart. It is a snapshot, not a feed; a methodology demo, not the Rust terminal, and not investment advice.</p>
+      <div class="ts-desk" id="tsla-host"></div>
+    </section>
+
     <!-- FACTORY -->
     <section id="factory" class="section reveal factory">
       <p class="section-kicker" data-i18n="factory.kicker">05 · AI agent factory</p>
@@ -1782,7 +1802,7 @@
        wait for their libs (whenLibs) and the agent for its stack. */
     var files = ["gate.js?v=3", "bench.js?v=10", "ml.js?v=1", "upgrade.js?v=11",
                  "engines.js?v=1", "council.js?v=1", "zoo.js?v=1", "guide.js?v=1",
-                 "whatif.js?v=1", "workbench.js?v=1", "evolve.js?v=1", "paper.js?v=1", "net.js?v=1", "llm.js?v=1", "agent.js?v=1"];
+                 "whatif.js?v=1", "workbench.js?v=1", "evolve.js?v=1", "paper.js?v=1", "net.js?v=1", "dashboard.js?v=1", "tsla.js?v=1", "llm.js?v=1", "agent.js?v=1"];
     var done = false;
     function go() {
       if (done) return;

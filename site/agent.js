@@ -2659,6 +2659,27 @@
     chip.addEventListener("click", function () { toggle(); });
     var x = $("ag-bp-close");
     if (x) x.addEventListener("click", function () { toggle(false); });
+
+    /* ⑥ — benchmark the attached brain on three contract probes */
+    var bBtn = $("ag-bp-bench"), bOut = $("ag-bp-bench-out");
+    if (bBtn && bOut) bBtn.addEventListener("click", function () {
+      var a = window.HJ_LLM.active();
+      bOut.hidden = false;
+      if (!a) { bOut.textContent = t("attach a brain first", "先接一个大脑"); return; }
+      bBtn.disabled = true; bOut.textContent = t("running 3 probes…", "跑 3 道题…");
+      window.HJ_LLM.bench().then(function (r) {
+        bOut.textContent = "";
+        r.probes.forEach(function (p) {
+          var row = el("div", "ag-bp-bench-row" + (p.pass ? " is-ok" : " is-no"));
+          row.textContent = (p.pass ? "✓ " : "✗ ") + p.label + " · " + p.ms + " ms";
+          bOut.appendChild(row);
+        });
+        bOut.appendChild(el("p", "ag-bp-bench-score", r.score + "/" + r.total + " · " + (r.model || r.provider)));
+        bBtn.disabled = false;
+      }).catch(function (e) {
+        bOut.textContent = String(e && e.message || e); bBtn.disabled = false;
+      });
+    });
     document.addEventListener("click", function (e) {
       if (panel.hidden) return;
       if (panel.contains(e.target) || chip.contains(e.target)) return;

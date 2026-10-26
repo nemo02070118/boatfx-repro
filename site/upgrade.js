@@ -764,6 +764,24 @@
         whenAgent(function () { agentAsk("train a neural factor" + (m ? " " + m[1] + " epochs" : ""), t("training a network →", "训练网络 →")); });
       }
     };
+    CMD.benchmark = {
+      desc: t("benchmark the current brain — three contract probes", "基准测试当前大脑——三道契约题"),
+      run: function () {
+        if (!window.HJ_LLM || !window.HJ_LLM.bench) {
+          line(t("  the brain module is not loaded yet", "  大脑模块还没加载"), "warn"); return;
+        }
+        var a = window.HJ_LLM.active();
+        if (!a) { line(t("  no brain — attach one in the brain panel first", "  没有大脑——先在大脑面板接一个"), "warn"); return; }
+        line(t("benchmarking " + (a.model || a.provider) + " — 3 probes …", "基准测试 " + (a.model || a.provider) + "——3 道题 …"));
+        window.HJ_LLM.bench().then(function (r) {
+          r.probes.forEach(function (p) {
+            line("  " + (p.pass ? "✓" : "✗") + "  " + p.label + "  " + p.ms + " ms", p.pass ? "ok" : "warn");
+          });
+          line("  " + r.score + "/" + r.total + " · " + (r.model || r.provider), r.score === r.total ? "ok" : "warn");
+          line(t("  compliance, not intelligence — it tests the contract, not the IQ.", "  这是契约合规，不是智商测试。"));
+        }).catch(function (e) { line("  " + String(e), "warn"); });
+      }
+    };
     CMD.detect = {
       desc: t("probe local model ports — LM Studio 1234 · Ollama 11434 · 8080", "探测本地模型端口——LM Studio 1234 · Ollama 11434 · 8080"),
       run: function () {
@@ -1722,6 +1740,7 @@
         line("  " + pad("evolve", 32) + t("a genetic search for factors — crossover, mutation", "遗传搜索因子——交叉变异"));
         line("  " + pad("net", 32) + t("train a neural network factor, then run it through the sieve", "训练神经网络因子，再把它过一遍筛子"));
         line("  " + pad("detect", 32) + t("probe local model ports (LM Studio · Ollama)", "探测本地模型端口（LM Studio · Ollama）"));
+        line("  " + pad("benchmark", 32) + t("test the current brain on three contract probes", "用三道契约题测当前大脑"));
         line("  " + pad("whatif", 32) + t("the counterfactual engine — change one parameter", "反事实引擎——改一个参数全部重跑"));
         line("  " + pad("validate", 32) + t("validate your own factors or strategy, our way", "用我们的方法检验你自己的因子或策略"));
         line("  " + pad("agents", 32) + t("the council roster", "议会花名册"));

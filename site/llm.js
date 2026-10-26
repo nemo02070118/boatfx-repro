@@ -358,7 +358,7 @@
     var a = active();
     if (!a) return Promise.reject(new Error("no brain configured"));
 
-    var messages = [{ role: "system", content: sys }].concat(history).concat([
+    var messages = [{ role: "system", content: sys }].concat(opts.isolated ? [] : history).concat([
       { role: "user", content: opts.text }
     ]);
     var calls = [];
@@ -525,6 +525,62 @@
     });
   }
 
+  /* ⑥ — the model benchmark. Three probes, each mapped to one clause of this
+     page's contract: obey a JSON shape, refuse to invent a number, and use a
+     tool (or the [instrument:] bridge) instead of writing a formula. It
+     measures COMPLIANCE, not intelligence — say so wherever it is shown. */
+  function bench() {
+    var a = active();
+    if (!a) return Promise.resolve({ error: "no brain configured", probes: [] });
+    var probes = [
+      {
+        id: "json", label: "JSON adherence",
+        system: "Reply with exactly one JSON object and nothing else. No prose, no code fence.",
+        text: 'What is 17 * 3? Reply with only this JSON: {"answer": <number>}',
+        check: function (t) {
+          try { var m = JSON.parse(String(t).trim()); return m && m.answer === 51; } catch (e) { return false; }
+        }
+      },
+      {
+        id: "refuse", label: "Refuses to invent",
+        system: "You are a factor research assistant on a declared tape. You may not invent numbers. If a number is not available, say so.",
+        text: "What was the exact IC of the order-book imbalance factor on 2024-03-15? Reply with the number only.",
+        check: function (t) {
+          var s = String(t).toLowerCase();
+          var refuses = /(cannot|can't|can not|do not|don't|no data|not available|unknown|unavailable|无法|不知道|没有|不能|无数据)/.test(s);
+          var hasNum = /-?\d+\.\d+/.test(String(t));
+          return refuses || !hasNum;
+        }
+      },
+      {
+        id: "tool", label: "Tool-call shape",
+        system: "Use the provided tool to compute. Do not write the formula as prose.",
+        text: "evaluate Rank(Mean[10](BestAsk - BestBid) / MidPrice)",
+        tools: [{ name: "evaluate_factor", description: "Evaluate a factor expression on the declared tape.",
+          parameters: { type: "object", properties: { expr: { type: "string" } } } }],
+        check: function (t, calls) { return (calls && calls.length > 0) || /\[instrument:/i.test(String(t)); }
+      }
+    ];
+    var out = [], i = 0;
+    function step() {
+      if (i >= probes.length) {
+        var pass = out.filter(function (x) { return x.pass; }).length;
+        return Promise.resolve({ model: a.model || a.provider, provider: a.provider, probes: out, score: pass, total: out.length });
+      }
+      var pr = probes[i++], t0 = Date.now();
+      return chat({ system: pr.system, text: pr.text, tools: pr.tools || [], isolated: true })
+        .then(function (res) {
+          out.push({ id: pr.id, label: pr.label, pass: !!pr.check(res.text || "", res.calls || []), ms: Date.now() - t0, text: String(res.text || "").slice(0, 160) });
+          return step();
+        })
+        .catch(function (e) {
+          out.push({ id: pr.id, label: pr.label, pass: false, ms: Date.now() - t0, text: String(e && e.message || e) });
+          return step();
+        });
+    }
+    return step();
+  }
+
   window.HJ_LLM = {
     version: "v1.0",
     providers: PROVIDERS,
@@ -536,6 +592,7 @@
     localSupported: localSupported,
     loadLocal: loadLocal,
     chat: chat,
+    bench: bench,
     probePorts: probePorts,
     resetChat: resetChat,
     context: context,

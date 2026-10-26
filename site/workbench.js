@@ -372,6 +372,7 @@
     }
 
     /* formulas — the full double path through the experiment engine */
+    try { localStorage.setItem("hj-wb-lib", JSON.stringify(d.rows)); } catch (e) {}
     var ex = Z.experiment({ rows: d.rows.map(function (r) {
       return { id: r.name, name: r.name, expr: r.expr, cite: t("yours", "你的"), family: "own" };
     }), builtin: false });
