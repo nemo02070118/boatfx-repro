@@ -364,6 +364,7 @@
     function sma(w) { var o = [], s = 0; for (var q = 0; q < n; q++) { s += c[q]; if (q >= w) s -= c[q - w]; o.push(q >= w - 1 ? s / w : null); } return o; }
     if (rule === "ma50") { var m = sma(50); for (i = 1; i < n; i++) pos[i] = m[i] == null ? 0 : (c[i] > m[i] ? 1 : -1); }
     else if (rule === "ma20_50") { var a = sma(20), b = sma(50); for (i = 1; i < n; i++) pos[i] = (a[i] != null && b[i] != null) ? (a[i] > b[i] ? 1 : -1) : 0; }
+    else if (rule === "ma20_50_long") { var a2 = sma(20), b2 = sma(50); for (i = 1; i < n; i++) pos[i] = (a2[i] != null && b2[i] != null && a2[i] > b2[i]) ? 1 : 0; }
     else if (rule === "donchian") {
       var p = 0;
       for (i = 1; i < n; i++) {
@@ -728,9 +729,10 @@
     sk.appendChild(cell(T("inverse return", "反向收益"), pct(sigI.total * 100, 2), sigI.total >= 0 ? "pos" : "neg"));
     sk.appendChild(cell(T("trades", "交易"), String(sigT.n)));
     sb.appendChild(sk);
+    sb.appendChild(el("p", "dk-h", T("long-only", "只做多") + " · " + pct(sigL.total * 100, 1) + " · maxDD " + pct(sigL.maxDD * 100, 1)));
     sb.appendChild(svgbox(line(sigL.curve, { h: 150, color: "#5ec9a8" })));
-    sb.appendChild(svgbox(line(sigT.curve, { h: 100, color: "#8fa6b8" })));
-    sb.appendChild(svgbox(line(sigI.curve, { h: 100, color: "#f5a524" })));
+    sb.appendChild(el("p", "dk-h", T("long/short", "多空") + " · " + pct(sigT.total * 100, 1) + " · maxDD " + pct(sigT.maxDD * 100, 1)));
+    sb.appendChild(svgbox(line(sigT.curve, { h: 110, color: "#8fa6b8" })));
     body.appendChild(card(T("backtest that follows the points · long-only (teal) / long-short (grey) / inverse (amber)", "按买卖点走的回测 · 只做多（青）/ 多空（灰）/ 反向（琥珀）"), sb));
 
     /* the smart filter: trade a label only after its past +60 has been positive */
@@ -784,6 +786,7 @@
     /* US playbook: simple causal rules on the same bars */
     var rules = [
       [T("MA50 long/short", "MA50 多空"), ruleBacktest(kl, "ma50")],
+      [T("MA20>MA50 long-only", "MA20>MA50 只做多"), ruleBacktest(kl, "ma20_50_long")],
       [T("Donchian 20 breakout", "唐奇安 20 突破"), ruleBacktest(kl, "donchian")],
       [T("60-bar momentum", "60 日动量"), ruleBacktest(kl, "momentum60")],
       [T("buy & hold", "买入持有"), ruleBacktest(kl, "buyhold")],
@@ -793,18 +796,29 @@
     var bestRule = rules.reduce(function (a, b) { return b[1].total > a[1].total ? b : a; });
     var pw = el("div");
     var rt = el("table"); rt.className = "dk-table";
-    rt.innerHTML = "<thead><tr><th>rule</th><th>return</th><th>Sharpe</th><th>maxDD</th><th>switches</th></tr></thead>";
+    rt.innerHTML = "<thead><tr><th>rule</th><th>return</th><th>Sharpe</th><th>maxDD</th><th>Calmar</th><th>switches</th></tr></thead>";
     var rb = el("tbody");
     rules.forEach(function (p) {
       var r = p[1], tr = el("tr");
-      [p[0], pct(r.total * 100, 2), num(r.sharpe, 3), pct(r.maxDD * 100, 2), String(r.switches != null ? r.switches : r.n)].forEach(function (v, i2) {
-        tr.appendChild(el("td", i2 === 1 ? (r.total >= 0 ? "pos" : "neg") : i2 === 2 ? (r.sharpe > 0 ? "acc" : "neg") : null, String(v)));
+      var calmar = r.maxDD > 1e-9 ? (r.total * 100) / (r.maxDD * 100) : 0;
+      [p[0], pct(r.total * 100, 2), num(r.sharpe, 3), pct(r.maxDD * 100, 2), num(calmar, 2), String(r.switches != null ? r.switches : r.n)].forEach(function (v, i2) {
+        tr.appendChild(el("td", i2 === 1 ? (r.total >= 0 ? "pos" : "neg") : i2 === 2 ? (r.sharpe > 0 ? "acc" : "neg") : i2 === 4 ? (calmar > 0 ? "acc" : "neg") : null, String(v)));
       });
       rb.appendChild(tr);
     });
     rt.appendChild(rb); pw.appendChild(rt);
-    pw.appendChild(svgbox(line(ruleBacktest(kl, "ma50").curve, { h: 150, color: "#5ec9a8" })));
-    pw.appendChild(svgbox(line(ruleBacktest(kl, "donchian").curve, { h: 100, color: "#f5a524" })));
+    var top3 = [
+      [T("buy & hold", "买入持有"), ruleBacktest(kl, "buyhold"), "#5ec9a8"],
+      [T("MA20>MA50 long-only", "MA20>MA50 只做多"), ruleBacktest(kl, "ma20_50_long"), "#f5a524"],
+      [T("chanlun long-only", "缠论只做多"), sigL, "#8fa6b8"]
+    ];
+    top3.forEach(function (c) {
+      pw.appendChild(el("p", "dk-h", c[0] + " · " + pct(c[1].total * 100, 1) + " · maxDD " + pct(c[1].maxDD * 100, 1)));
+      pw.appendChild(svgbox(line(c[1].curve, { h: 110, color: c[2] })));
+    });
+    pw.appendChild(el("p", "dk-note", T(
+      "TSLA's drawdown is real: buy & hold 72.2%, MA20>MA50 61.6%, chanlun long-only 28.6%. Higher return comes with more drawdown — there is no free lunch on this tape.",
+      "TSLA 的回撤是真实的：买入持有 72.2%、MA20>MA50 61.6%、缠论只做多 28.6%。收益越高回撤越大——这条胶带上没有免费的午餐。")));
     var la = ruleBacktest(kl, "ma50", { lag: false, cost: 0 });
     var honest = ruleBacktest(kl, "ma50");
     pw.appendChild(el("p", "dk-note", T(
