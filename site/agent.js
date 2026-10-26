@@ -104,6 +104,7 @@
       "ph.12": "build a strategy on the order-book imbalance",
       "ph.13": "find the home venue of the imbalance factor",
       "ph.14": "who built this?",
+      "ph.15": "train a neural network factor",
       "plain.on": "Plain · on", "plain.off": "Plain · off",
       "plain.aria": "Plain language mode"
     },
@@ -180,6 +181,7 @@
       "ph.12": "以盘口失衡建策略",
       "ph.13": "找盘口失衡的主场",
       "ph.14": "这是谁做的？",
+      "ph.15": "训练一个神经网络因子",
       "plain.on": "说人话 · 开", "plain.off": "说人话 · 关",
       "plain.aria": "通俗语言模式"
     }
@@ -422,6 +424,13 @@
     if (/(placebo|permutation|置换|零分布|null distribution|shuffle|安慰剂)/i.test(low)) {
       return { intent: "placebo", slots: { expr: expr } };
     }
+    /* a real network: "train a neural factor", "神经网络因子", "深度学习" —
+       must beat the generic train intent, which would otherwise answer with
+       the logistic/ridge bench. */
+    if (/(neural|神经网络|深度学习|deep.?learn|\bmlp\b|perceptron|感知机|multilayer)/i.test(low)) {
+      var eM = /(\d+)\s*(epoch|轮|代)/i.exec(s);
+      return { intent: "net", slots: { epochs: eM ? parseInt(eM[1], 10) : null } };
+    }
     if (/(train|learn|logistic|ridge|regression|gradient descent|weights?|loss curve|模型|训练|学习|逻辑回归|岭回归|梯度下降|损失曲线|权重)/i.test(low)) {
       return { intent: "train" };
     }
@@ -435,7 +444,7 @@
     /* an expression alone is a gate request — but "build a strategy on
        Rank(...)" names another instrument, and the gate used to swallow it.
        If the text names one of the other instruments, let it through. */
-    var namesOther = /(council|parliament|议会|resurrect|复活|guide|向导|分步|strategy|策略|建仓|venue|主场|foundry|造因子|compile|编译|生成|产出|generate|suggest|propose|zoo|动物园|what.?if|如果|validate|检验|experiment|实验|research|全流程|pool|hurdle|dilute|autopsy|解剖|library|funnel|train|placebo|evaluate|measure|bench)/i.test(low);
+    var namesOther = /(council|parliament|议会|resurrect|复活|guide|向导|分步|strategy|策略|建仓|venue|主场|foundry|造因子|compile|编译|生成|产出|generate|suggest|propose|zoo|动物园|what.?if|如果|validate|检验|experiment|实验|research|全流程|pool|hurdle|dilute|autopsy|解剖|library|funnel|train|placebo|evaluate|measure|bench|neural|神经网络|深度学习|mlp|perceptron|感知机)/i.test(low);
     if ((expr || F === "gate") && !namesOther) {
       return { intent: "gate", slots: { expr: expr, why: extractWhy(s, expr) } };
     }
@@ -1801,6 +1810,12 @@
     return V.run(slots || {});
   }
 
+  function instNet(slots) {
+    var V = window.HJ_NET;
+    if (!V) return mlMissing();
+    return V.run(slots || {});
+  }
+
   function instZoo() {
     var Z = window.HJ_ZOO;
     if (!Z) return mlMissing();
@@ -1956,6 +1971,7 @@
     "- mine_factors(): the machine-enumerated zoo over the DSL whitelist.\n" +
     "- paper_ceiling(expr, tau) / paper_props(): the paper's ceiling law and its four propositions.\n" +
     "- evolve_factors(generations, pop): a genetic search over the legal grammar — crossover and mutation, every candidate parsed.\n" +
+    "- train_neural_factor(epochs): a real two-layer MLP trained by back-propagation in the tab; returns the neural factor's IC/t/pi, loss curves, importance, and its verdict under the universal discovery hurdle vs home-venue routing.\n" +
     "- generate_factors(count, family): produce legal factors from the site's own pool and measure them.\n" +
     "- strategy_guide(expr): the step-by-step strategy builder.\n" +
     "- what_if(expr, pi, N, screen, venue): the counterfactual engine — re-run the pipeline with one changed parameter and report what changes, before/after.\n" +
@@ -1997,6 +2013,7 @@
     "- mine_factors()：DSL 白名单上的机器枚举动物园。\n" +
     "- paper_ceiling(expr, tau) / paper_props()：论文的上限定律与四个命题。\n" +
     "- evolve_factors(generations, pop)：在合法文法上跑遗传搜索——交叉变异，每个候选都过文法。\n" +
+    "- train_neural_factor(epochs)：在本页用反向传播真训练一个两层 MLP；返回神经网络因子的 IC/t/π、损失曲线、重要性，以及它在通用发现门槛 对 主场路由下的判决。\n" +
     "- generate_factors(count, family)：从站点自合法池产出因子并测量。\n" +
     "- strategy_guide(expr)：分步策略构建向导。\n" +
     "- what_if(expr, pi, N, screen, venue)：反事实引擎——改一个参数重跑整条流水线，报告前后变化。\n" +
@@ -2166,6 +2183,12 @@
           pop: { type: "integer", description: "population size, 20-120 (default 60)" }
         }),
         run: function (a) { return instEvolve({ generations: a.generations, pop: a.pop }); } },
+      { name: "train_neural_factor",
+        description: "Train a real two-layer neural network in the visitor's tab: eight inputs (the declared signals), two tanh hidden layers, one linear output, back-propagation on the forward return. Returns the neural factor's IC, t, pi and diluted t, its training and holdout loss curves, permutation importance, and the paper's verdict — universal discovery hurdle against home-venue routing plus pooling. Use when the visitor asks about deep learning, a neural factor, an MLP, or a network.",
+        parameters: S("", {
+          epochs: { type: "integer", description: "training epochs, 80-400 (default 130)" }
+        }),
+        run: function (a) { return instNet({ epochs: a.epochs }); } },
       { name: "generate_factors",
         description: "Produce N legal factor expressions from the site's own pool (the 22 public factors and the machine-mined zoo) and measure each on the declared tape: IC, t, pi, verdict. Use when the visitor asks you to generate, suggest, or produce factors. Never write a formula yourself — the pool only contains expressions that compile.",
         parameters: S("", {
@@ -3245,6 +3268,7 @@
       case "research": return instResearch(r.slots || {});
       case "zoo": return instZoo();
       case "evolve": return instEvolve(r.slots || {});
+      case "net": return instNet(r.slots || {});
       case "paper": return instPaper(r.slots || {});
       case "generate": return instGenerate(r.slots || {});
       case "whatif": return instWhatIf(r.slots || {});

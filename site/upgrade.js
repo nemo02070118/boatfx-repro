@@ -757,6 +757,13 @@
         whenAgent(function () { agentAsk("evolve factors" + (m ? " " + m[1] + " generations" : ""), t("searching the grammar →", "搜索文法 →")); });
       }
     };
+    CMD.net = {
+      desc: t("train a neural network factor — real back-prop, then the sieve", "训练神经网络因子——真反向传播，再上筛子"),
+      run: function (a) {
+        var m = /(\d+)\s*(epoch|轮|代)/i.exec(a.join(" "));
+        whenAgent(function () { agentAsk("train a neural factor" + (m ? " " + m[1] + " epochs" : ""), t("training a network →", "训练网络 →")); });
+      }
+    };
     CMD.whatif = {
       desc: t("the counterfactual engine — change one parameter, re-run everything", "反事实引擎——改一个参数，全部重跑"),
       run: function (a) {
@@ -1689,6 +1696,7 @@
         line("  " + pad("experiment", 32) + t("the paper's experiment, both ways", "论文实验，双路对比"));
         line("  " + pad("guide", 32) + t("the step-by-step strategy builder", "分步策略构建向导"));
         line("  " + pad("evolve", 32) + t("a genetic search for factors — crossover, mutation", "遗传搜索因子——交叉变异"));
+        line("  " + pad("net", 32) + t("train a neural network factor, then run it through the sieve", "训练神经网络因子，再把它过一遍筛子"));
         line("  " + pad("whatif", 32) + t("the counterfactual engine — change one parameter", "反事实引擎——改一个参数全部重跑"));
         line("  " + pad("validate", 32) + t("validate your own factors or strategy, our way", "用我们的方法检验你自己的因子或策略"));
         line("  " + pad("agents", 32) + t("the council roster", "议会花名册"));
