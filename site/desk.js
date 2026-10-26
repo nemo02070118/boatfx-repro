@@ -232,6 +232,96 @@
     });
   }
 
+  function f60Of(kl, sig) {
+    var i = sig.kline_index;
+    return i + 60 < kl.length ? kl[i + 60].close / sig.price - 1 : null;
+  }
+
+  /* per-type reliability: how each label has actually resolved */
+  function signalStats(kl, sigs) {
+    var by = {};
+    (sigs || []).forEach(function (s) {
+      if (!by[s.type]) by[s.type] = { type: s.type, n: 0, sum: 0, cnt: 0, wins: 0 };
+      by[s.type].n++;
+      var f = f60Of(kl, s);
+      if (f != null) { by[s.type].sum += f; by[s.type].cnt++; if (f > 0) by[s.type].wins++; }
+    });
+    return Object.keys(by).map(function (k) {
+      var x = by[k];
+      return { type: k, n: x.n, meanF60: x.cnt ? x.sum / x.cnt : null, winRate: x.cnt ? x.wins / x.cnt : null };
+    }).sort(function (a, b) { return b.n - a.n; });
+  }
+
+  /* causal filter: at signal i, look only at same-type signals whose +60
+     window has already completed (idx + 60 <= i). No future information. */
+  function causalDecision(kl, sigs) {
+    var s = (sigs || []).slice().sort(function (a, b) { return (a.kline_index || 0) - (b.kline_index || 0); });
+    var taken = {}, skipped = {};
+    s.forEach(function (sig) {
+      var i = sig.kline_index, take = true, buy = /buy/i.test(sig.type);
+      var prior = s.filter(function (x) { return x.type === sig.type && x.kline_index + 60 <= i; });
+      /* need at least two completed observations before filtering at all —
+         one observation is noise, and filtering on it kills the best trade */
+      if (prior.length >= 2) {
+        var sum = 0, c = 0;
+        prior.forEach(function (x) { var g = f60Of(kl, x); if (g != null) { sum += g; c++; } });
+        if (c >= 2) {
+          var mean = sum / c;
+          /* a buy is trusted if past buys rose; a sell is trusted if past
+             sells actually fell (f60 < 0) — otherwise it is a false sell */
+          take = buy ? mean > 0 : mean < 0;
+        }
+      }
+      var key = i + ":" + sig.type;
+      if (take) taken[key] = true; else skipped[key] = true;
+    });
+    return { taken: taken, skipped: skipped };
+  }
+
+  /* mode: longonly | longshort | inverse
+     filter: none | causal | hindsight (hindsight is look-ahead, labelled) */
+  function filteredTrades(kl, sigs, mode, filter) {
+    var s = (sigs || []).slice().sort(function (a, b) { return (a.kline_index || 0) - (b.kline_index || 0); });
+    var ev = {}; s.forEach(function (x) { ev[x.kline_index] = x; });
+    var pos = 0, curve = [1], rets = [], peak = 1, mdd = 0, segs = [], open = null, skipped = 0, i;
+    for (i = 1; i < kl.length; i++) {
+      var r = pos * (kl[i].close / kl[i - 1].close - 1);
+      rets.push(r);
+      var e = curve[curve.length - 1] * (1 + r); curve.push(e);
+      if (e > peak) peak = e; mdd = Math.max(mdd, 1 - e / peak);
+      if (ev[i]) {
+        var sig = ev[i], take = true;
+        if (filter === "hindsight") { var f = f60Of(kl, sig); take = f != null && f > 0; }
+        else if (filter === "causal") {
+          var buySig = /buy/i.test(sig.type);
+          var prior = s.filter(function (x) { return x.type === sig.type && x.kline_index + 60 <= i; });
+          if (prior.length >= 2) {
+            var sum = 0, c = 0;
+            prior.forEach(function (x) { var g = f60Of(kl, x); if (g != null) { sum += g; c++; } });
+            if (c >= 2) { var mean = sum / c; take = buySig ? mean > 0 : mean < 0; }
+          }
+        }
+        if (!take) { skipped++; continue; }
+        var buy = /buy/i.test(sig.type);
+        var np = mode === "inverse" ? (buy ? -1 : 1) : (buy ? 1 : (mode === "longshort" ? -1 : 0));
+        if (np !== pos) {
+          if (open) { open.exit = { sig: sig, i: i, price: kl[i].close }; segs.push(open); open = null; }
+          pos = np;
+          if (pos !== 0) open = { entry: { sig: sig, i: i, price: kl[i].close }, side: pos > 0 ? "long" : "short" };
+        }
+      }
+    }
+    if (open) { open.exit = { sig: null, i: kl.length - 1, price: kl[kl.length - 1].close }; segs.push(open); }
+    segs.forEach(function (g) {
+      g.ret = g.side === "long" ? (g.exit.price / g.entry.price - 1) : (g.entry.price / g.exit.price - 1);
+      g.bars = g.exit.i - g.entry.i;
+    });
+    var mean = 0; for (i = 0; i < rets.length; i++) mean += rets[i]; mean /= (rets.length || 1);
+    var sd = 0; for (i = 0; i < rets.length; i++) { var d = rets[i] - mean; sd += d * d; } sd = Math.sqrt(sd / Math.max(1, rets.length - 1));
+    var wins = segs.filter(function (g) { return g.ret > 0; }).length;
+    return { trades: segs, curve: curve, sharpe: sd > 0 ? mean / sd * Math.sqrt(252) : 0, total: curve[curve.length - 1] - 1, maxDD: mdd, winRate: segs.length ? wins / segs.length : 0, n: segs.length, skipped: skipped, mode: mode, filter: filter };
+  }
+
   /* --------------------------------------------------------------- V12 */
   function renderV12(body) {
     var v = D.v12;
@@ -397,6 +487,11 @@
     if (opt.signals) (sigs || []).forEach(function (s) {
       var q = s.kline_index != null ? s.kline_index : s.index;
       if (q == null || q < from || q >= to) return;
+      if (opt.skipped && opt.skipped[q + ":" + s.type]) {
+        /* the causal filter would skip this one — show a hollow ring */
+        g.appendChild(sv("circle", { cx: X(q), cy: Y(s.price), r: 2.4, fill: "none", stroke: "#5f7a8e", "stroke-width": 1 }));
+        return;
+      }
       var buy = /buy/i.test(s.type), lbl = LAB[s.type] || (buy ? "B" : "S"), px = X(q), py = Y(s.price);
       var ly = py + (buy ? 26 : -26);
       g.appendChild(sv("line", { x1: px, y1: py, x2: px, y2: ly, stroke: buy ? "#e5484d" : "#2f9e6b", "stroke-width": 1, "stroke-opacity": .6, "stroke-dasharray": "2 2" }));
@@ -454,6 +549,10 @@
     var sigT = signalTrades(kl, sigs, "longshort");
     var sigL = signalTrades(kl, sigs, "longonly");
     var sigI = signalTrades(kl, sigs, "inverse");
+    var dec = causalDecision(kl, sigs);
+    var fL = filteredTrades(kl, sigs, "longonly", "causal");
+    var fT = filteredTrades(kl, sigs, "longshort", "causal");
+    var hL = filteredTrades(kl, sigs, "longonly", "hindsight");
 
     var k = el("div", "dk-kpis");
     if (n) { var last = kl[n - 1], prev = kl[n - 2], chg = prev ? last.close / prev.close - 1 : 0;
@@ -487,7 +586,7 @@
     body.appendChild(card(T("chanlun · candles + 笔 + 中枢 + labeled points + paired trades (hover)", "缠论 · K线 + 笔 + 中枢 + 标签买卖点 + 配对交易（可悬停）"), chartHost));
     function redraw() {
       chartHost.textContent = "";
-      chartHost.appendChild(interactiveChart(kl, ch, sigs, sigT.trades, { h: 440, from: Math.max(0, n - st.win), ma: st.ma, strokes: st.strokes, zs: st.zs, signals: st.signals, trades: st.pairs }));
+      chartHost.appendChild(interactiveChart(kl, ch, sigs, sigT.trades, { h: 440, from: Math.max(0, n - st.win), ma: st.ma, strokes: st.strokes, zs: st.zs, signals: st.signals, trades: st.pairs, skipped: dec.skipped }));
     }
     redraw();
 
@@ -523,6 +622,53 @@
     sb.appendChild(svgbox(line(sigT.curve, { h: 100, color: "#8fa6b8" })));
     sb.appendChild(svgbox(line(sigI.curve, { h: 100, color: "#f5a524" })));
     body.appendChild(card(T("backtest that follows the points · long-only (teal) / long-short (grey) / inverse (amber)", "按买卖点走的回测 · 只做多（青）/ 多空（灰）/ 反向（琥珀）"), sb));
+
+    /* the smart filter: trade a label only after its past +60 has been positive */
+    var smart = el("div");
+    var stt = el("table"); stt.className = "dk-table";
+    stt.innerHTML = "<thead><tr><th>type</th><th>n</th><th>mean +60</th><th>win</th></tr></thead>";
+    var stb = el("tbody");
+    signalStats(kl, sigs).forEach(function (x) {
+      var tr = el("tr");
+      [x.type, x.n, x.meanF60 == null ? "—" : (x.meanF60 >= 0 ? "+" : "") + pct(x.meanF60 * 100, 1), x.winRate == null ? "—" : pct(x.winRate * 100, 1)].forEach(function (v, i2) {
+        tr.appendChild(el("td", i2 === 2 ? (String(v).charAt(0) === "+" ? "pos" : "neg") : null, String(v)));
+      });
+      stb.appendChild(tr);
+    });
+    stt.appendChild(stb);
+    smart.appendChild(stt);
+    var variants = [
+      [T("unfiltered long-only", "未过滤·只做多"), sigL],
+      [T("unfiltered long/short", "未过滤·多空"), sigT],
+      [T("smart filter long-only", "聪明过滤·只做多"), fL],
+      [T("smart filter long/short", "聪明过滤·多空"), fT],
+      [T("hindsight filter (not tradable)", "事后过滤（不可交易）"), hL]
+    ];
+    var cmp = el("table"); cmp.className = "dk-table";
+    cmp.innerHTML = "<thead><tr><th>variant</th><th>return</th><th>Sharpe</th><th>maxDD</th><th>trades</th><th>win</th><th>skipped</th></tr></thead>";
+    var cb = el("tbody");
+    variants.forEach(function (p) {
+      var r = p[1], tr = el("tr");
+      [p[0], pct(r.total * 100, 2), num(r.sharpe, 3), pct(r.maxDD * 100, 2), String(r.n), pct(r.winRate * 100, 1), String(r.skipped == null ? 0 : r.skipped)].forEach(function (v, i2) {
+        tr.appendChild(el("td", i2 === 1 ? (r.total >= 0 ? "pos" : "neg") : i2 === 2 ? (r.sharpe > 0 ? "acc" : "neg") : null, String(v)));
+      });
+      cb.appendChild(tr);
+    });
+    cmp.appendChild(cb);
+    smart.appendChild(cmp);
+    var best = variants.slice(0, 4).reduce(function (a, b) { return b[1].total > a[1].total ? b : a; });
+    smart.appendChild(el("p", "dk-verdict " + (best[1].total > 0 ? "is-ok" : "is-warn"),
+      T("best honest variant: " + best[0] + " " + pct(best[1].total * 100, 2) + " · Sharpe " + num(best[1].sharpe, 3),
+        "最优诚实版本：" + best[0] + " " + pct(best[1].total * 100, 2) + " · Sharpe " + num(best[1].sharpe, 3))));
+    if (fL.total < sigL.total) smart.appendChild(el("p", "dk-note", T(
+      "The causal filter reduced the return on this tape: it learned from early false sells and skipped the two that were right (a regime change). Keeping every point is the better honest choice here.",
+      "因果过滤在这条胶带上反而降低了收益：它从早期假卖里学到“卖点不可信”，于是跳过了后来两个真正正确的卖点（市场状态变了）。这里保留全部信号才是更诚实的更好选择。")));
+    smart.appendChild(svgbox(line(fL.curve, { h: 140, color: "#5ec9a8" })));
+    smart.appendChild(svgbox(line(sigL.curve, { h: 90, color: "#8fa6b8" })));
+    body.appendChild(card(T("smart filter · trade a label only after its past +60 has been positive", "聪明过滤 · 只在该标签的历史 +60 为正时交易"), smart));
+    body.appendChild(el("p", "dk-note", T(
+      "Causal: only same-type signals whose +60 window has already closed are used — no future data. A buy is trusted if past buys rose; a sell is trusted if past sells actually fell. Fewer than two completed observations and the signal is taken (one observation is noise). The hindsight row uses the signal's own future and is only a ceiling, not a strategy. Hollow rings are the points the filter skips.",
+      "因果：只参考同类型、且 +60 窗口已经走完的过去信号——不用未来数据。买点看过去买点是否上涨；卖点看过去卖点之后是否真的下跌。已走完样本少于两个就不过滤（一个样本是噪声）。事后那一行用了信号自己的未来，只作为上限，不是策略。图上的空心圈就是被过滤掉的点。")));
 
     var q = signalQuality(kl, sigs);
     if (q.length) {
