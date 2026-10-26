@@ -28,23 +28,30 @@
   function sv(tag, at) { var n = document.createElementNS(NS, tag); for (var k in at) if (at.hasOwnProperty(k)) n.setAttribute(k, at[k]); return n; }
   function get(o, p) { return p.split(".").reduce(function (a, k) { return a && a[k] != null ? a[k] : null; }, o); }
 
+  /* bars per year, from the spacing of the tape — 52 for weekly, 252 for daily */
+  function ppy(kl) {
+    if (!kl || kl.length < 3) return 252;
+    var d = (kl[kl.length - 1].timestamp - kl[0].timestamp) / (kl.length - 1) / 86400000;
+    return d > 3 ? 52 : 252;
+  }
+
   var D = {};
   function j(name) { return fetch("desk/" + name).then(function (r) { return r.json(); }).catch(function () { return null; }); }
 
   function loadAll() {
     return Promise.all([
       j("v12.json"), j("mcwf.json"), j("market-indices.json"), j("northbound.json"),
-      j("margin-moutai.json"), j("dragon-moutai.json"), j("block-moutai.json"),
+      j("margin-moutai.json"),
       Promise.all([j("analysis-tsla.json"), j("klines-tsla.json"), j("signals-tsla.json"), j("bt-tsla.json"), j("similar-tsla.json"), j("multi-tsla.json"), j("crowd-tsla.json")]),
       Promise.all([j("analysis-moutai.json"), j("klines-moutai.json"), j("signals-moutai.json"), j("bt-moutai.json"), j("similar-moutai.json"), j("multi-moutai.json"), j("crowd-moutai.json")])
     ]).then(function (r) {
       D.v12 = r[0] && r[0].data ? r[0].data : r[0];
       D.mcwf = r[1] && r[1].data ? r[1].data : r[1];
-      D.market = r[2]; D.northbound = r[3]; D.marginM = r[4]; D.dragonM = r[5]; D.blockM = r[6];
+      D.market = r[2]; D.northbound = r[3]; D.marginM = r[4];
       function pack(a) {
         return { analysis: a[0], klines: a[1] && a[1].klines ? a[1] : null, signals: a[2] && a[2].signals ? a[2] : null, bt: a[3], similar: a[4], multi: a[5], crowd: a[6] };
       }
-      D.tsla = pack(r[7]); D.moutai = pack(r[8]);
+      D.tsla = pack(r[5]); D.moutai = pack(r[6]);
     });
   }
 
@@ -216,7 +223,7 @@
     var mean = 0; for (i = 0; i < rets.length; i++) mean += rets[i]; mean /= (rets.length || 1);
     var sd = 0; for (i = 0; i < rets.length; i++) { var d = rets[i] - mean; sd += d * d; } sd = Math.sqrt(sd / Math.max(1, rets.length - 1));
     var wins = segs.filter(function (g) { return g.ret > 0; }).length;
-    return { trades: segs, curve: curve, sharpe: sd > 0 ? mean / sd * Math.sqrt(252) : 0, total: curve[curve.length - 1] - 1, maxDD: mdd, winRate: segs.length ? wins / segs.length : 0, n: segs.length, mode: mode };
+    return { trades: segs, curve: curve, sharpe: sd > 0 ? mean / sd * Math.sqrt(ppy(kl)) : 0, total: curve[curve.length - 1] - 1, maxDD: mdd, winRate: segs.length ? wins / segs.length : 0, n: segs.length, mode: mode };
   }
 
   /* forward return after each signal: which "sell" was actually a long */
@@ -319,7 +326,7 @@
     var mean = 0; for (i = 0; i < rets.length; i++) mean += rets[i]; mean /= (rets.length || 1);
     var sd = 0; for (i = 0; i < rets.length; i++) { var d = rets[i] - mean; sd += d * d; } sd = Math.sqrt(sd / Math.max(1, rets.length - 1));
     var wins = segs.filter(function (g) { return g.ret > 0; }).length;
-    return { trades: segs, curve: curve, sharpe: sd > 0 ? mean / sd * Math.sqrt(252) : 0, total: curve[curve.length - 1] - 1, maxDD: mdd, winRate: segs.length ? wins / segs.length : 0, n: segs.length, skipped: skipped, mode: mode, filter: filter };
+    return { trades: segs, curve: curve, sharpe: sd > 0 ? mean / sd * Math.sqrt(ppy(kl)) : 0, total: curve[curve.length - 1] - 1, maxDD: mdd, winRate: segs.length ? wins / segs.length : 0, n: segs.length, skipped: skipped, mode: mode, filter: filter };
   }
 
   /* simple causal rules on the same bars — the US trend playbook */
@@ -358,7 +365,7 @@
     }
     var mean = 0; for (i = 0; i < rets.length; i++) mean += rets[i]; mean /= (rets.length || 1);
     var sd = 0; for (i = 0; i < rets.length; i++) { var d = rets[i] - mean; sd += d * d; } sd = Math.sqrt(sd / Math.max(1, rets.length - 1));
-    return { curve: curve, total: eq - 1, sharpe: sd > 0 ? mean / sd * Math.sqrt(252) : 0, maxDD: mdd, switches: sw, rule: rule };
+    return { curve: curve, total: eq - 1, sharpe: sd > 0 ? mean / sd * Math.sqrt(ppy(kl)) : 0, maxDD: mdd, switches: sw, rule: rule };
   }
 
   /* --------------------------------------------------------------- V12 */
@@ -604,7 +611,8 @@
     k.appendChild(kpi("Hurst", num(a.mfdfa ? (a.mfdfa.hurst_index != null ? a.mfdfa.hurst_index : get(a.mfdfa, "result.hurst_index")) : null, 3)));
     k.appendChild(kpi(T("similar win", "相似胜率"), pack.similar && pack.similar.statistics ? pct(pack.similar.statistics.win_rate * 100, 1) : "—"));
     body.appendChild(k);
-    body.appendChild(el("p", "dk-prov", "computed_by: " + (a.computed_by || "rust") + " · " + name + " · " + n + " bars · " + sigs.length + " signals · " + sigT.n + " signal trades"));
+    var freq = ppy(kl) === 52 ? T("weekly", "周线") : T("daily", "日线");
+    body.appendChild(el("p", "dk-prov", "computed_by: " + (a.computed_by || "rust") + " · " + name + " · " + n + " " + freq + " bars · " + sigs.length + " signals · " + sigT.n + " signal trades"));
 
     var st = { ma: true, strokes: true, zs: true, signals: true, pairs: true, win: 320 };
     var bar = el("div", "dk-toolbar");
