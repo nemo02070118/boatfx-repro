@@ -764,6 +764,30 @@
         whenAgent(function () { agentAsk("train a neural factor" + (m ? " " + m[1] + " epochs" : ""), t("training a network →", "训练网络 →")); });
       }
     };
+    CMD.detect = {
+      desc: t("probe local model ports — LM Studio 1234 · Ollama 11434 · 8080", "探测本地模型端口——LM Studio 1234 · Ollama 11434 · 8080"),
+      run: function () {
+        line(t("probing 1234 · 11434 · 8080 …", "探测 1234 · 11434 · 8080 …"));
+        if (!window.HJ_LLM || !window.HJ_LLM.probePorts) {
+          line(t("  the brain module is not loaded yet", "  大脑模块还没加载"), "warn");
+          return;
+        }
+        window.HJ_LLM.probePorts().then(function (r) {
+          if (r.found.length) {
+            r.found.forEach(function (f) {
+              line("  " + f.base + "  " + t("ok · ", "可用 · ") +
+                (f.models.slice(0, 4).join(", ") || t("no models listed", "未列模型")), "ok");
+            });
+            line(t("  open the brain panel → custom, and paste the base above.", "  打开大脑面板 → custom，把上面的地址粘进去。"));
+          } else {
+            line(t("  nothing answered. Start LM Studio (1234) or Ollama (11434), then run detect again.",
+              "  没有响应。启动 LM Studio（1234）或 Ollama（11434）后再跑 detect。"), "warn");
+            if (r.https) line(t("  over https Chrome refuses loopback calls — open this page over http to probe.",
+              "  https 下 Chrome 会拒绝 loopback 调用——用 http 打开本页再探测。"), "warn");
+          }
+        }).catch(function (e) { line("  " + String(e), "warn"); });
+      }
+    };
     CMD.whatif = {
       desc: t("the counterfactual engine — change one parameter, re-run everything", "反事实引擎——改一个参数，全部重跑"),
       run: function (a) {
@@ -1697,6 +1721,7 @@
         line("  " + pad("guide", 32) + t("the step-by-step strategy builder", "分步策略构建向导"));
         line("  " + pad("evolve", 32) + t("a genetic search for factors — crossover, mutation", "遗传搜索因子——交叉变异"));
         line("  " + pad("net", 32) + t("train a neural network factor, then run it through the sieve", "训练神经网络因子，再把它过一遍筛子"));
+        line("  " + pad("detect", 32) + t("probe local model ports (LM Studio · Ollama)", "探测本地模型端口（LM Studio · Ollama）"));
         line("  " + pad("whatif", 32) + t("the counterfactual engine — change one parameter", "反事实引擎——改一个参数全部重跑"));
         line("  " + pad("validate", 32) + t("validate your own factors or strategy, our way", "用我们的方法检验你自己的因子或策略"));
         line("  " + pad("agents", 32) + t("the council roster", "议会花名册"));

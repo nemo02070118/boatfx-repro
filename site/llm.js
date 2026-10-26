@@ -502,6 +502,29 @@
   }
 
   /* ------------------------------------------------------------- exports */
+  /* E2 — port auto-detection. The three places a local OpenAI-compatible
+     server usually lives: LM Studio (1234), Ollama (11434), a generic 8080.
+     Each is probed with a short timeout; the first that answers /v1/models
+     wins, and its model list is returned so the caller can fill the form.
+     Over https this is refused by Chrome's private-network policy — the
+     caller is told that instead of a silent empty list. */
+  function probePorts() {
+    var bases = ["http://127.0.0.1:1234/v1", "http://127.0.0.1:11434/v1", "http://127.0.0.1:8080/v1"];
+    return Promise.all(bases.map(function (base) {
+      var ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
+      var to = setTimeout(function () { if (ctrl) ctrl.abort(); }, 1500);
+      return fetch(base + "/models", ctrl ? { signal: ctrl.signal } : {})
+        .then(function (r) { clearTimeout(to); return r.ok ? r.json() : null; })
+        .then(function (j) {
+          return { base: base, ok: !!j, models: j && j.data ? j.data.map(function (m) { return m.id; }) : [] };
+        })
+        .catch(function () { clearTimeout(to); return { base: base, ok: false, models: [] }; });
+    })).then(function (list) {
+      var hit = list.filter(function (x) { return x.ok; });
+      return { found: hit, tried: bases, https: location.protocol === "https:" };
+    });
+  }
+
   window.HJ_LLM = {
     version: "v1.0",
     providers: PROVIDERS,
@@ -513,6 +536,7 @@
     localSupported: localSupported,
     loadLocal: loadLocal,
     chat: chat,
+    probePorts: probePorts,
     resetChat: resetChat,
     context: context,
     pushContext: pushContext,

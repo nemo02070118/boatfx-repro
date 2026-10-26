@@ -2952,9 +2952,11 @@
     d += " L" + W + " " + (H - ((f - lo) / (hi - lo)) * H).toFixed(1);
     return d;
   }
-  function chartLine(series, log, label) {
+  function chartLine(series, log, label, series2) {
     var W = 680, H = 118, PAD = 5;
-    var ext = extentOf(series, log);
+    /* an overlay shares ONE vertical extent across both series, so the two
+       curves are read on the same scale — that is the whole point of C3. */
+    var ext = extentOf(series2 ? series.concat(series2) : series, log);
     var svg = svgEl("svg", { viewBox: "0 0 " + W + " " + H, "class": "agc-svg",
       preserveAspectRatio: "xMidYMid meet", "aria-label": label || "" });
     var g, yy;
@@ -2968,10 +2970,18 @@
       d: d + " L" + W + " " + (H - 2 * PAD) + " L0 " + (H - 2 * PAD) + " Z", "class": "agc-area"
     }));
     grp.appendChild(svgEl("path", { d: d, "class": "agc-line" }));
-    var lastV = series[series.length - 1];
-    var lastF = log ? Math.log(Math.max(lastV, 1e-9)) : lastV;
-    var lastY = (H - 2 * PAD) - ((lastF - ext[0]) / (ext[1] - ext[0])) * (H - 2 * PAD);
-    grp.appendChild(svgEl("circle", { cx: W - 1, cy: lastY.toFixed(1), r: 2.6, "class": "agc-pt" }));
+    function endDot(arr, cls) {
+      var v = arr[arr.length - 1];
+      var f = log ? Math.log(Math.max(v, 1e-9)) : v;
+      var y = (H - 2 * PAD) - ((f - ext[0]) / (ext[1] - ext[0])) * (H - 2 * PAD);
+      return svgEl("circle", { cx: W - 1, cy: y.toFixed(1), r: 2.6, "class": cls });
+    }
+    grp.appendChild(endDot(series, "agc-pt"));
+    if (series2) {
+      var d2 = pathOf(series2, W, H - 2 * PAD, ext[0], ext[1], log);
+      grp.appendChild(svgEl("path", { d: d2, "class": "agc-line agc-line-2" }));
+      grp.appendChild(endDot(series2, "agc-pt agc-pt-2"));
+    }
     svg.appendChild(grp);
     return svg;
   }
@@ -3201,7 +3211,14 @@
       if (b.label) node.appendChild(el("p", "agc-cap", b.label));
       node.appendChild(b.variant === "hist"
         ? chartHist(b.nulls, b.real, b.label)
-        : chartLine(b.series, b.variant === "loss", b.label));
+        : chartLine(b.series, b.variant === "loss", b.label, b.series2));
+      if (b.series2 && b.legend) {
+        var lg = el("p", "agc-legend");
+        lg.appendChild(el("span", "agc-leg1", b.legend[0]));
+        lg.appendChild(el("span", "agc-legsep", " · "));
+        lg.appendChild(el("span", "agc-leg2", b.legend[1]));
+        node.appendChild(lg);
+      }
     } else if (b.k === "council") {
       node = el("div");
       if (window.HJ_COUNCIL) {
@@ -3884,6 +3901,8 @@
      INIT
      ====================================================================== */
   function init() {
+    var sk = $("ag-skeleton");
+    if (sk && sk.parentNode) sk.parentNode.removeChild(sk);
     streamEl = $("ag-stream");
     emptyEl = $("ag-empty");
     liveEl = $("ag-live");

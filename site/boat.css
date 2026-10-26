@@ -5933,6 +5933,51 @@ html { overflow-x: clip; }
 .agc-pt {
   fill: var(--ac, var(--accent));
 }
+/* the second series of an overlay (C3) — one colour per path, shared axis */
+.agc-line-2 {
+  stroke: var(--warn);
+  stroke-dasharray: 5 3;
+}
+.agc-pt-2 {
+  fill: var(--warn);
+}
+.agc-legend {
+  margin: 4px 0 0;
+  font: 500 11px/1.4 var(--mono, ui-monospace, monospace);
+  letter-spacing: .02em;
+  color: var(--dim);
+}
+.agc-leg1 { color: var(--accent); }
+.agc-leg2 { color: var(--warn); }
+.agc-legsep { color: var(--dim); }
+
+/* D2 — skeleton while the deferred agent stack loads ---------------------- */
+.ag-skeleton {
+  display: grid;
+  gap: 10px;
+  padding: 18px 16px 22px;
+}
+.ag-sk-line {
+  display: block;
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--fg, #d9dfe5) 6%, transparent) 0%,
+    color-mix(in srgb, var(--fg, #d9dfe5) 16%, transparent) 50%,
+    color-mix(in srgb, var(--fg, #d9dfe5) 6%, transparent) 100%);
+  background-size: 200% 100%;
+  animation: ag-sk-shimmer 1.4s ease-in-out infinite;
+}
+.ag-sk-line:nth-child(2) { animation-delay: .12s; }
+.ag-sk-line:nth-child(3) { animation-delay: .24s; }
+.ag-sk-line:nth-child(4) { animation-delay: .36s; }
+@keyframes ag-sk-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ag-sk-line { animation: none; opacity: .5; }
+}
 
 /* histogram -------------------------------------------------------------- */
 .agc-axisline {
@@ -6543,3 +6588,33 @@ html { overflow-x: clip; }
 .whyh-strip a { color: var(--accent); text-decoration: none; border-bottom: 1px solid currentColor; }
 .whyh-strip-l { font-weight: 700; letter-spacing: .02em; }
 .whyh-strip-end { margin-left: auto; color: var(--ink-3); }
+
+/* the 休学 card spans the full grid; the inventory sits under it */
+.whyh-card-wide { grid-column: 1 / -1; }
+.whyh-inv {
+  margin: 0 0 1.2rem;
+  padding: .9rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+}
+.whyh-inv-h {
+  margin: 0 0 .6rem;
+  font: 600 .78rem/1.4 var(--mono);
+  letter-spacing: .04em;
+  color: var(--ink-2);
+}
+.whyh-inv-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem;
+  margin: 0;
+}
+.whyh-inv-list code {
+  font: .72rem/1 var(--mono);
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: .28rem .4rem;
+}

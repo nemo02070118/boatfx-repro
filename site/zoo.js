@@ -407,6 +407,12 @@
       label: t("equity · the normal way (screen survivors, holdout)", "净值 · 正常方式（过筛幸存者，留出集）"), series: decimate(pA.oos.equity) });
     if (pB && pB.oos) blocks.push({ k: "chart", variant: "line", log: true,
       label: t("equity · our way (home-venue routed, holdout)", "净值 · 我们的方式（主场路由，留出集）"), series: decimate(pB.oos.equity) });
+    /* C3 — the two paths overlaid on one axis, so the gap is a shape, not a
+       number you have to hold in your head. */
+    if (pA && pA.oos && pB && pB.oos) blocks.push({ k: "chart", variant: "line", log: true,
+      label: t("overlay · normal way vs our way (holdout)", "叠加 · 正常方式 vs 我们的方式（留出集）"),
+      series: decimate(pA.oos.equity), series2: decimate(pB.oos.equity),
+      legend: [t("normal way (screen)", "正常方式（通用筛）"), t("our way (home-routed)", "我们的方式（主场路由）")] });
 
     var ours = pB && pA && pB.oos && pA.oos ? pB.oos.sharpe > pA.oos.sharpe : false;
     blocks.push({ k: "verdict",
