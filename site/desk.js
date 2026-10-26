@@ -425,6 +425,39 @@
     return { curve: curve, total: eq - 1, sharpe: sd > 0 ? mean / sd * Math.sqrt(ppy(kl)) : 0, maxDD: mdd, switches: sw, rule: rule };
   }
 
+  /* volatility targeting: position = min(1, target / realised vol), causal */
+  function volBacktest(kl, sigs, opt) {
+    opt = opt || {};
+    var base = opt.base || "buyhold", target = opt.target || 0.15, trend = opt.trend || 0;
+    var c = kl.map(function (k) { return k.close; }), n = c.length, i, j;
+    var sig = {}; (sigs || []).forEach(function (s) { sig[s.kline_index] = s; });
+    var m50 = null;
+    if (trend === 50) { m50 = []; var s = 0; for (i = 0; i < n; i++) { s += c[i]; if (i >= 50) s -= c[i - 50]; m50.push(i >= 49 ? s / 50 : null); } }
+    var pos = 0, eq = 1, curve = [1], rets = [], peak = 1, mdd = 0, sw = 0, prev = 0;
+    for (i = 1; i < n; i++) {
+      var raw = base === "chanlun" ? (sig[i] ? (/buy/i.test(sig[i].type) ? 1 : 0) : pos) : 1;
+      if (trend === 50 && m50 && m50[i] != null && c[i] < m50[i]) raw = 0;
+      var scale = 1;
+      if (target > 0 && i >= 21) {
+        var rs = [], m = 0, sd = 0;
+        for (j = i - 19; j <= i; j++) rs.push(c[j] / c[j - 1] - 1);
+        for (j = 0; j < rs.length; j++) m += rs[j]; m /= rs.length;
+        for (j = 0; j < rs.length; j++) { var d = rs[j] - m; sd += d * d; }
+        sd = Math.sqrt(sd / (rs.length - 1));
+        scale = Math.min(1, target / Math.max(sd * Math.sqrt(ppy(kl)), 1e-6));
+      }
+      var p = pos * scale;
+      var r = p * (c[i] / c[i - 1] - 1);
+      if (raw !== pos) { r -= 0.0005 * scale; sw++; }
+      pos = raw; rets.push(r); eq *= 1 + r; curve.push(eq);
+      if (eq > peak) peak = eq; mdd = Math.max(mdd, 1 - eq / peak);
+    }
+    var mean = 0; for (i = 0; i < rets.length; i++) mean += rets[i]; mean /= rets.length;
+    var sd2 = 0; for (i = 0; i < rets.length; i++) { var d2 = rets[i] - mean; sd2 += d2 * d2; }
+    sd2 = Math.sqrt(sd2 / (rets.length - 1));
+    return { curve: curve, total: eq - 1, sharpe: sd2 > 0 ? mean / sd2 * Math.sqrt(ppy(kl)) : 0, maxDD: mdd, n: sw, base: base, target: target };
+  }
+
   /* --------------------------------------------------------------- V12 */
   function renderV12(body) {
     var v = D.v12;
@@ -864,7 +897,45 @@
     body.appendChild(card(T("US playbook · simple causal rules on the same bars", "美股剧本 · 同一批 bar 上的简单因果规则"), pw));
     body.appendChild(el("p", "dk-note", T(
       "Every row is lagged one bar (the position decided at yesterday's close earns today's return) and charged 5 bp per switch. No fitting, no look-ahead. If a rule looks too good, the audit line above shows what the look-ahead version would have claimed.",
-      "每一行都滞后一根（昨天收盘定的仓位赚今天的收益），每次切换扣 5bp。无拟合、无偷看。如果某条规则看起来太好，上面的审计行会告诉你“偷看版”会报多少。")));;
+      "每一行都滞后一根（昨天收盘定的仓位赚今天的收益），每次切换扣 5bp。无拟合、无偷看。如果某条规则看起来太好，上面的审计行会告诉你“偷看版”会报多少。")));
+
+    /* risk overlay: vol targeting cuts the drawdown */
+    var rawBH = ruleBacktest(kl, "buyhold");
+    var vt15 = volBacktest(kl, sigs, { base: "buyhold", target: 0.15 });
+    var vt20 = volBacktest(kl, sigs, { base: "buyhold", target: 0.20 });
+    var cv20 = volBacktest(kl, sigs, { base: "chanlun", target: 0.20 });
+    var rw = el("div");
+    var rtab = el("table"); rtab.className = "dk-table";
+    rtab.innerHTML = "<thead><tr><th>risk overlay</th><th>return</th><th>Sharpe</th><th>maxDD</th><th>Calmar</th></tr></thead>";
+    var rbody = el("tbody");
+    [
+      [T("buy & hold · raw", "买入持有 · 原始"), rawBH],
+      [T("buy & hold · vol target 15%", "买入持有 · 波动目标 15%"), vt15],
+      [T("buy & hold · vol target 20%", "买入持有 · 波动目标 20%"), vt20],
+      [T("chanlun long-only · raw", "缠论只做多 · 原始"), sigL],
+      [T("chanlun long-only · vol target 20%", "缠论只做多 · 波动目标 20%"), cv20]
+    ].forEach(function (p) {
+      var r = p[1], tr = el("tr");
+      var cal = r.maxDD > 1e-9 ? (r.total * 100) / (r.maxDD * 100) : 0;
+      [p[0], pct(r.total * 100, 1), num(r.sharpe, 2), pct(r.maxDD * 100, 1), num(cal, 2)].forEach(function (v, i2) {
+        tr.appendChild(el("td", i2 === 1 ? (r.total >= 0 ? "pos" : "neg") : i2 === 3 ? "neg" : i2 === 4 ? (cal > 0 ? "acc" : "neg") : null, String(v)));
+      });
+      rbody.appendChild(tr);
+    });
+    rtab.appendChild(rbody); rw.appendChild(rtab);
+    rw.appendChild(el("p", "dk-h", T("raw buy & hold · grey", "原始买入持有 · 灰") + " · maxDD " + pct(rawBH.maxDD * 100, 1)));
+    rw.appendChild(svgbox(line(rawBH.curve, { h: 100, color: "#8fa6b8" })));
+    rw.appendChild(el("p", "dk-h", T("buy & hold + vol target 15% · teal", "买入持有 + 15% 波动目标 · 青") + " · maxDD " + pct(vt15.maxDD * 100, 1)));
+    rw.appendChild(svgbox(line(vt15.curve, { h: 100, color: "#5ec9a8" })));
+    rw.appendChild(el("p", "dk-h", T("chanlun long-only + vol target 20% · amber", "缠论只做多 + 20% 波动目标 · 琥珀") + " · maxDD " + pct(cv20.maxDD * 100, 1)));
+    rw.appendChild(svgbox(line(cv20.curve, { h: 100, color: "#f5a524" })));
+    rw.appendChild(el("p", "dk-verdict is-ok", T(
+      "vol targeting 15% cuts maxDD from " + pct(rawBH.maxDD * 100, 1) + " to " + pct(vt15.maxDD * 100, 1) + " — return " + pct(rawBH.total * 100, 0) + " → " + pct(vt15.total * 100, 0) + ", Sharpe " + num(rawBH.sharpe, 2) + " → " + num(vt15.sharpe, 2),
+      "15% 波动目标把最大回撤从 " + pct(rawBH.maxDD * 100, 1) + " 降到 " + pct(vt15.maxDD * 100, 1) + " —— 收益 " + pct(rawBH.total * 100, 0) + " → " + pct(vt15.total * 100, 0) + "，Sharpe " + num(rawBH.sharpe, 2) + " → " + num(vt15.sharpe, 2))));
+    body.appendChild(card(T("risk overlay · volatility targeting", "风控叠加 · 波动率目标"), rw));
+    body.appendChild(el("p", "dk-note", T(
+      "Position = min(1, target / realised vol), realised vol = 20-week stdev × √52, causal, 5 bp per switch. Lower drawdown is paid for with lower return — the table shows both sides.",
+      "仓位 = min(1, 目标 / 已实现波动)，已实现波动 = 20 周标准差 × √52，因果、每次切换 5bp。回撤更低是用更低收益换来的——表里两边都给了。")));;
 
     var q = signalQuality(kl, sigs);
     if (q.length) {
