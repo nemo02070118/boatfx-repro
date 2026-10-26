@@ -191,6 +191,29 @@
     return { longs: longs, shorts: shorts };
   }
 
+  /* the app's own rule: B1↔next S1, B2↔next S2, B3↔next S3 (same level) */
+  function levelPairs(sigs) {
+    var s = (sigs || []).slice().sort(function (a, b) { return (a.kline_index || 0) - (b.kline_index || 0); });
+    var longs = [], shorts = [];
+    s.forEach(function (a, i) {
+      var buy = /buy/i.test(a.type), lvl = a.level || 1;
+      for (var k = i + 1; k < s.length; k++) {
+        var b = s[k];
+        if (/buy/i.test(b.type) !== buy && (b.level || 1) === lvl) {
+          var ret = buy ? (b.price / a.price - 1) : (a.price / b.price - 1);
+          (buy ? longs : shorts).push({
+            entry: { sig: a, i: a.kline_index, price: a.price },
+            exit: { sig: b, i: b.kline_index, price: b.price },
+            ret: ret, bars: (b.kline_index || 0) - (a.kline_index || 0),
+            side: buy ? "long" : "short", level: lvl
+          });
+          break;
+        }
+      }
+    });
+    return { longs: longs, shorts: shorts };
+  }
+
   /* a backtest that follows the labeled points themselves: buy → long,
      sell → short (or flat). Every entry is paired with the next signal. */
   function signalTrades(kl, sigs, mode) {
@@ -523,11 +546,13 @@
         var a = p.entry.i, b = p.exit.i;
         if (a < from || a >= to) return;
         var bx = Math.min(b, to - 1);
-        var col = p.ret >= 0 ? "#5ec9a8" : "#e5484d";
+        var col = opt.pairMode === "level"
+          ? (p.level === 1 ? "#FFD700" : p.level === 2 ? "#00CCCC" : "#AA55FF")
+          : (p.ret >= 0 ? "#5ec9a8" : "#e5484d");
         g.appendChild(sv("line", { x1: X(a), y1: Y(p.entry.price), x2: X(bx), y2: Y(p.exit.price), stroke: col, "stroke-width": 1.3, "stroke-dasharray": "3 3", "stroke-opacity": .9 }));
         var mx = (X(a) + X(bx)) / 2, my = (Y(p.entry.price) + Y(p.exit.price)) / 2;
         var t = sv("text", { x: mx, y: my - 4, fill: col, "font-size": 8, "font-family": "monospace", "text-anchor": "middle" });
-        t.textContent = p.side + " " + (p.ret >= 0 ? "+" : "") + num(p.ret * 100, 1) + "%"; g.appendChild(t);
+        t.textContent = (opt.pairMode === "level" ? ("L" + p.level + " ") : "") + p.side + " " + (p.ret >= 0 ? "+" : "") + num(p.ret * 100, 1) + "%"; g.appendChild(t);
       });
     }
     if (opt.signals) (sigs || []).forEach(function (s) {
@@ -595,6 +620,7 @@
     var sigT = signalTrades(kl, sigs, "longshort");
     var sigL = signalTrades(kl, sigs, "longonly");
     var sigI = signalTrades(kl, sigs, "inverse");
+    var lv = levelPairs(sigs);
     var dec = causalDecision(kl, sigs);
     var fL = filteredTrades(kl, sigs, "longonly", "causal");
     var fT = filteredTrades(kl, sigs, "longshort", "causal");
@@ -614,7 +640,7 @@
     var freq = ppy(kl) === 52 ? T("weekly", "周线") : T("daily", "日线");
     body.appendChild(el("p", "dk-prov", "computed_by: " + (a.computed_by || "rust") + " · " + name + " · " + n + " " + freq + " bars · " + sigs.length + " signals · " + sigT.n + " signal trades"));
 
-    var st = { ma: true, strokes: true, zs: true, signals: true, pairs: true, win: 320 };
+    var st = { ma: true, strokes: true, zs: true, signals: true, pairs: true, win: 320, pairMode: "seq" };
     var bar = el("div", "dk-toolbar");
     function toggle(label, key) {
       var b = el("button", "dk-tog" + (st[key] ? " on" : ""), label); b.type = "button";
@@ -627,32 +653,69 @@
       b.addEventListener("click", function () { st.win = w; Array.prototype.forEach.call(bar.querySelectorAll(".dk-tog"), function (x) { if (/^\d+$/.test(x.textContent)) x.classList.remove("on"); }); b.classList.add("on"); redraw(); });
       bar.appendChild(b);
     });
+    var seqB = el("button", "dk-tog on", T("sequence", "顺序")); seqB.type = "button";
+    var lvlB = el("button", "dk-tog", T("same level", "同级")); lvlB.type = "button";
+    function setMode(m) { st.pairMode = m; seqB.classList.toggle("on", m === "seq"); lvlB.classList.toggle("on", m === "level"); redraw(); }
+    seqB.addEventListener("click", function () { setMode("seq"); });
+    lvlB.addEventListener("click", function () { setMode("level"); });
+    bar.appendChild(seqB); bar.appendChild(lvlB);
     body.appendChild(bar);
 
     var chartHost = el("div");
     body.appendChild(card(T("chanlun · candles + 笔 + 中枢 + labeled points + paired trades (hover)", "缠论 · K线 + 笔 + 中枢 + 标签买卖点 + 配对交易（可悬停）"), chartHost));
+    var tradesHost = el("div");
+    body.appendChild(card(T("paired trades · switch sequence / same level above", "配对交易 · 上面可切换 顺序 / 同级"), tradesHost));
     function redraw() {
       chartHost.textContent = "";
-      chartHost.appendChild(interactiveChart(kl, ch, sigs, sigT.trades, { h: 440, from: Math.max(0, n - st.win), ma: st.ma, strokes: st.strokes, zs: st.zs, signals: st.signals, trades: st.pairs, skipped: dec.skipped }));
+      var shown = st.pairMode === "seq" ? sigT.trades : lv.longs.concat(lv.shorts);
+      chartHost.appendChild(interactiveChart(kl, ch, sigs, shown, { h: 440, from: Math.max(0, n - st.win), ma: st.ma, strokes: st.strokes, zs: st.zs, signals: st.signals, trades: st.pairs, skipped: dec.skipped, pairMode: st.pairMode }));
+      paintTrades();
     }
     redraw();
 
-    if (sigT.trades.length) {
+    function paintTrades() {
+      tradesHost.textContent = "";
+      var shown = st.pairMode === "seq" ? sigT.trades : lv.longs.concat(lv.shorts);
+      if (!shown.length) { tradesHost.appendChild(el("p", "dk-note", T("no pairs in this mode", "这个模式下没有配对"))); return; }
       var pt = el("table"); pt.className = "dk-table";
-      pt.innerHTML = "<thead><tr><th>side</th><th>entry</th><th>exit</th><th>in</th><th>out</th><th>return</th><th>bars</th></tr></thead>";
+      pt.innerHTML = "<thead><tr><th>pair</th><th>side</th><th>in</th><th>out</th><th>return</th><th>bars</th></tr></thead>";
       var pb = el("tbody");
-      sigT.trades.forEach(function (p) {
+      shown.forEach(function (p) {
         var tr = el("tr");
-        [p.side, p.entry.sig ? (LAB[p.entry.sig.type] || p.entry.sig.type) : "—", p.exit.sig ? (LAB[p.exit.sig.type] || p.exit.sig.type) : T("open", "持仓中"),
-          num(p.entry.price, 2), num(p.exit.price, 2), (p.ret >= 0 ? "+" : "") + pct(p.ret * 100, 2), p.bars].forEach(function (x, i2) {
-          tr.appendChild(el("td", i2 === 5 ? (p.ret >= 0 ? "pos" : "neg") : null, String(x)));
+        var pair = (LAB[p.entry.sig.type] || p.entry.sig.type) + "↔" + (p.exit.sig ? (LAB[p.exit.sig.type] || p.exit.sig.type) : "…");
+        [pair, p.side, num(p.entry.price, 2), num(p.exit.price, 2), (p.ret >= 0 ? "+" : "") + pct(p.ret * 100, 2), p.bars].forEach(function (x, i2) {
+          tr.appendChild(el("td", i2 === 4 ? (p.ret >= 0 ? "pos" : "neg") : null, String(x)));
         });
         pb.appendChild(tr);
       });
       pt.appendChild(pb);
-      var wins = sigT.trades.filter(function (p) { return p.ret > 0; }).length;
-      body.appendChild(card(T("signal trades · " + wins + "/" + sigT.trades.length + " profitable", "信号交易 · " + wins + "/" + sigT.trades.length + " 盈利"), pt));
+      var wins = shown.filter(function (p) { return p.ret > 0; }).length;
+      tradesHost.appendChild(el("p", "dk-h", T(wins + "/" + shown.length + " profitable · " + (st.pairMode === "seq" ? "sequence pairing" : "same-level pairing"),
+        wins + "/" + shown.length + " 盈利 · " + (st.pairMode === "seq" ? "顺序配对" : "同级配对"))));
+      tradesHost.appendChild(pt);
     }
+
+    function pairStats(list) {
+      var nn = list.length, w = list.filter(function (p) { return p.ret > 0; }).length;
+      var sum = list.reduce(function (a, p) { return a + p.ret; }, 0);
+      return { n: nn, win: nn ? w / nn : 0, avg: nn ? sum / nn : 0, sum: sum };
+    }
+    var seqS = pairStats(sigT.trades), lvS = pairStats(lv.longs.concat(lv.shorts));
+    var cmp2 = el("table"); cmp2.className = "dk-table";
+    cmp2.innerHTML = "<thead><tr><th>pairing</th><th>pairs</th><th>win</th><th>avg return</th><th>sum return</th></tr></thead>";
+    var cb2 = el("tbody");
+    [[T("sequence (entry → next signal)", "顺序（入场→下一个信号）"), seqS],
+     [T("same level (B1↔S1 · B2↔S2 · B3↔S3)", "同级（B1↔S1 · B2↔S2 · B3↔S3）"), lvS]].forEach(function (p) {
+      var r = p[1], tr = el("tr");
+      [p[0], String(r.n), pct(r.win * 100, 1), (r.avg >= 0 ? "+" : "") + pct(r.avg * 100, 2), (r.sum >= 0 ? "+" : "") + pct(r.sum * 100, 2)].forEach(function (v, i2) {
+        tr.appendChild(el("td", i2 === 3 || i2 === 4 ? (String(v).charAt(0) === "+" ? "pos" : "neg") : null, String(v)));
+      });
+      cb2.appendChild(tr);
+    });
+    cmp2.appendChild(cb2);
+    body.appendChild(card(T("pairing comparison · sequence vs same level", "配对对比 · 顺序 vs 同级"), cmp2));
+    var better = lvS.avg > seqS.avg ? T("same-level pairing", "同级配对") : T("sequence pairing", "顺序配对");
+    body.appendChild(el("p", "dk-verdict is-ok", T("higher average return per pair: " + better, "每对平均收益更高：" + better)));
 
     /* the backtest that actually follows the points */
     var sb = el("div"), sk = el("div", "dk-cells");
