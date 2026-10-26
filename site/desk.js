@@ -191,16 +191,22 @@
     var ev = {}; s.forEach(function (x) { ev[x.kline_index] = x; });
     var pos = 0, curve = [1], rets = [], peak = 1, mdd = 0, segs = [], open = null, i;
     for (i = 1; i < kl.length; i++) {
-      if (ev[i]) {
-        if (open) { open.exit = { sig: ev[i], i: i, price: kl[i].close }; segs.push(open); open = null; }
-        var buy = /buy/i.test(ev[i].type);
-        pos = buy ? 1 : (mode === "longshort" ? -1 : 0);
-        if (pos !== 0) open = { entry: { sig: ev[i], i: i, price: kl[i].close }, side: buy ? "long" : "short" };
-      }
+      /* the position held from the previous bar earns this bar's return */
       var r = pos * (kl[i].close / kl[i - 1].close - 1);
       rets.push(r);
       var e = curve[curve.length - 1] * (1 + r); curve.push(e);
       if (e > peak) peak = e; mdd = Math.max(mdd, 1 - e / peak);
+      /* a signal at this bar acts from the NEXT bar; same-side runs do not
+         open a new trade (that was the bug that made long-only look weak) */
+      if (ev[i]) {
+        var buy = /buy/i.test(ev[i].type);
+        var np = mode === "inverse" ? (buy ? -1 : 1) : (buy ? 1 : (mode === "longshort" ? -1 : 0));
+        if (np !== pos) {
+          if (open) { open.exit = { sig: ev[i], i: i, price: kl[i].close }; segs.push(open); open = null; }
+          pos = np;
+          if (pos !== 0) open = { entry: { sig: ev[i], i: i, price: kl[i].close }, side: pos > 0 ? "long" : "short" };
+        }
+      }
     }
     if (open) { open.exit = { sig: null, i: kl.length - 1, price: kl[kl.length - 1].close }; segs.push(open); }
     segs.forEach(function (g) {
@@ -211,6 +217,19 @@
     var sd = 0; for (i = 0; i < rets.length; i++) { var d = rets[i] - mean; sd += d * d; } sd = Math.sqrt(sd / Math.max(1, rets.length - 1));
     var wins = segs.filter(function (g) { return g.ret > 0; }).length;
     return { trades: segs, curve: curve, sharpe: sd > 0 ? mean / sd * Math.sqrt(252) : 0, total: curve[curve.length - 1] - 1, maxDD: mdd, winRate: segs.length ? wins / segs.length : 0, n: segs.length, mode: mode };
+  }
+
+  /* forward return after each signal: which "sell" was actually a long */
+  function signalQuality(kl, sigs) {
+    return (sigs || []).map(function (s) {
+      var i = s.kline_index;
+      var f20 = i + 20 < kl.length ? kl[i + 20].close / s.price - 1 : null;
+      var f60 = i + 60 < kl.length ? kl[i + 60].close / s.price - 1 : null;
+      var buy = /buy/i.test(s.type);
+      var score = f20 == null ? null : (f20 + (f60 == null ? f20 : f60)) / 2;
+      var v = score == null ? "—" : score > 0.02 ? (buy ? T("good long", "有效做多") : T("false sell → long", "假卖 → 该做多")) : score < -0.02 ? (buy ? T("false buy → short", "假买 → 该做空") : T("good short", "有效做空")) : T("flat", "走平");
+      return { s: s, f20: f20, f60: f60, verdict: v, buy: buy };
+    });
   }
 
   /* --------------------------------------------------------------- V12 */
@@ -434,6 +453,7 @@
     if (!n && !a.success) { body.appendChild(el("p", "dk-note", T("no data for " + name, name + " 没有数据"))); return; }
     var sigT = signalTrades(kl, sigs, "longshort");
     var sigL = signalTrades(kl, sigs, "longonly");
+    var sigI = signalTrades(kl, sigs, "inverse");
 
     var k = el("div", "dk-kpis");
     if (n) { var last = kl[n - 1], prev = kl[n - 2], chg = prev ? last.close / prev.close - 1 : 0;
@@ -490,16 +510,38 @@
 
     /* the backtest that actually follows the points */
     var sb = el("div"), sk = el("div", "dk-cells");
-    sk.appendChild(cell(T("long/short Sharpe", "多空 Sharpe"), num(sigT.sharpe, 3), sigT.sharpe > 0 ? "acc" : "neg"));
-    sk.appendChild(cell(T("long/short return", "多空收益"), pct(sigT.total * 100, 2), sigT.total >= 0 ? "pos" : "neg"));
-    sk.appendChild(cell(T("long/short maxDD", "多空回撤"), pct(sigT.maxDD * 100, 2), "neg"));
     sk.appendChild(cell(T("long-only return", "只做多收益"), pct(sigL.total * 100, 2), sigL.total >= 0 ? "pos" : "neg"));
+    sk.appendChild(cell(T("long-only Sharpe", "只做多 Sharpe"), num(sigL.sharpe, 3), sigL.sharpe > 0 ? "acc" : "neg"));
     sk.appendChild(cell(T("long-only maxDD", "只做多回撤"), pct(sigL.maxDD * 100, 2), "neg"));
+    sk.appendChild(cell(T("long/short return", "多空收益"), pct(sigT.total * 100, 2), sigT.total >= 0 ? "pos" : "neg"));
+    sk.appendChild(cell(T("long/short Sharpe", "多空 Sharpe"), num(sigT.sharpe, 3), sigT.sharpe > 0 ? "acc" : "neg"));
+    sk.appendChild(cell(T("long/short maxDD", "多空回撤"), pct(sigT.maxDD * 100, 2), "neg"));
+    sk.appendChild(cell(T("inverse return", "反向收益"), pct(sigI.total * 100, 2), sigI.total >= 0 ? "pos" : "neg"));
     sk.appendChild(cell(T("trades", "交易"), String(sigT.n)));
     sb.appendChild(sk);
-    sb.appendChild(svgbox(line(sigT.curve, { h: 150, color: "#5ec9a8" })));
-    sb.appendChild(svgbox(line(sigL.curve, { h: 100, color: "#8fa6b8" })));
-    body.appendChild(card(T("backtest that follows the points · long/short (teal) vs long-only (grey)", "按买卖点走的回测 · 多空（青） vs 只做多（灰）"), sb));
+    sb.appendChild(svgbox(line(sigL.curve, { h: 150, color: "#5ec9a8" })));
+    sb.appendChild(svgbox(line(sigT.curve, { h: 100, color: "#8fa6b8" })));
+    sb.appendChild(svgbox(line(sigI.curve, { h: 100, color: "#f5a524" })));
+    body.appendChild(card(T("backtest that follows the points · long-only (teal) / long-short (grey) / inverse (amber)", "按买卖点走的回测 · 只做多（青）/ 多空（灰）/ 反向（琥珀）"), sb));
+
+    var q = signalQuality(kl, sigs);
+    if (q.length) {
+      var qt = el("table"); qt.className = "dk-table";
+      qt.innerHTML = "<thead><tr><th>label</th><th>type</th><th>price</th><th>+20</th><th>+60</th><th>verdict</th></tr></thead>";
+      var qb = el("tbody");
+      q.forEach(function (x) {
+        var tr = el("tr");
+        [LAB[x.s.type] || x.s.type, x.s.type, num(x.s.price, 2),
+          x.f20 == null ? "—" : (x.f20 >= 0 ? "+" : "") + pct(x.f20 * 100, 1),
+          x.f60 == null ? "—" : (x.f60 >= 0 ? "+" : "") + pct(x.f60 * 100, 1), x.verdict].forEach(function (v, i2) {
+          var cls = (i2 === 3 || i2 === 4) ? (String(v).charAt(0) === "+" ? "pos" : "neg") : i2 === 5 ? (/good|long|做多|有效/.test(String(v)) ? "acc" : "") : null;
+          tr.appendChild(el("td", cls, String(v)));
+        });
+        qb.appendChild(tr);
+      });
+      qt.appendChild(qb);
+      body.appendChild(card(T("forward return after each signal · which sell was actually a long", "每个信号之后的前瞻收益 · 哪个卖点其实该做多"), qt));
+    }
 
     if (pack.bt && pack.bt.success) {
       var b = pack.bt, bk = el("div", "dk-cells");
