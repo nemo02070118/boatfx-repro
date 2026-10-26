@@ -240,6 +240,287 @@
       "V12 组合回测是真实引擎的缓存输出（engine v12_final），在用户机器上算完、以 JSON 随页提供。它是声明票池上的历史回测，不是实时信号，也不是投资建议。")));
   }
 
+  /* ============================ rich symbol panel ============================ */
+  var LAB = { FirstBuy: "B1", SecondBuy: "B2", ThirdBuy: "B3", FirstSell: "S1", SecondSell: "S2", ThirdSell: "S3" };
+
+  function chanlunChart(kl, ch, sigs, opt) {
+    opt = opt || {};
+    var W = 680, H = opt.h || 400, L = 8, R = 8, TP = 12, B = 20;
+    var from = Math.max(0, kl.length - (opt.win || 240)), to = kl.length, n = to - from, i;
+    var lo = Infinity, hi = -Infinity;
+    for (i = from; i < to; i++) { if (kl[i].low < lo) lo = kl[i].low; if (kl[i].high > hi) hi = kl[i].high; }
+    if (hi - lo < 1e-9) hi = lo + 1;
+    var padY = (hi - lo) * 0.06; lo -= padY; hi += padY;
+    var byTs = {}; kl.forEach(function (k, j) { byTs[k.timestamp] = j; });
+    function X(j) { return L + ((j - from + 0.5) / n) * (W - L - R); }
+    function Y(v) { return H - B - ((v - lo) / (hi - lo)) * (H - B - TP); }
+    var g = sv("svg", { viewBox: "0 0 " + W + " " + H, preserveAspectRatio: "none" });
+
+    /* grid + price axis */
+    for (i = 0; i <= 4; i++) {
+      var gy = TP + (H - B - TP) * i / 4;
+      g.appendChild(sv("line", { x1: L, y1: gy, x2: W - R, y2: gy, stroke: "#1d3040", "stroke-width": 1, "stroke-dasharray": "2 4" }));
+      var pv = hi - (hi - lo) * i / 4;
+      var tx = sv("text", { x: L + 2, y: gy - 3, fill: "#5f7a8e", "font-size": 9, "font-family": "monospace" }); tx.textContent = num(pv, 1); g.appendChild(tx);
+    }
+
+    /* zhongshu boxes */
+    (ch.zhongshus || []).forEach(function (z) {
+      var a = byTs[z.start_time], b = byTs[z.end_time];
+      if (a == null || b == null || b < from || a >= to) return;
+      a = Math.max(a, from); b = Math.min(b, to - 1);
+      var x1 = X(a), x2 = X(b), y1 = Y(z.high), y2 = Y(z.low);
+      g.appendChild(sv("rect", { x: x1, y: y1, width: Math.max(2, x2 - x1), height: Math.max(2, y2 - y1), fill: "rgba(94,201,168,.10)", stroke: "rgba(94,201,168,.55)", "stroke-width": 1 }));
+      var zt = sv("text", { x: x1 + 3, y: y1 - 3, fill: "#5ec9a8", "font-size": 9, "font-family": "monospace" }); zt.textContent = "ZS " + num(z.center, 1); g.appendChild(zt);
+    });
+
+    /* candles */
+    var bw = (W - L - R) / n;
+    for (i = from; i < to; i++) {
+      var x = X(i), up = kl[i].close >= kl[i].open;
+      g.appendChild(sv("line", { x1: x, y1: Y(kl[i].high), x2: x, y2: Y(kl[i].low), stroke: up ? "#e5484d" : "#2f9e6b", "stroke-width": 1 }));
+      var top = Y(Math.max(kl[i].open, kl[i].close)), bot = Y(Math.min(kl[i].open, kl[i].close));
+      g.appendChild(sv("rect", { x: x - bw * .3, y: top, width: Math.max(1, bw * .6), height: Math.max(1, bot - top), fill: up ? "#e5484d" : "#2f9e6b" }));
+    }
+
+    /* MA20 / MA50 */
+    function sma(arr, w) { var o = [], s = 0; for (var j = 0; j < arr.length; j++) { s += arr[j]; if (j >= w) s -= arr[j - w]; o.push(j >= w - 1 ? s / w : null); } return o; }
+    var closes = kl.map(function (k) { return k.close; });
+    [[sma(closes, 20), "#f5a524"], [sma(closes, 50), "#8fa6b8"]].forEach(function (p) {
+      var d = "", st = false;
+      for (var j = from; j < to; j++) { var v = p[0][j]; if (v == null) continue; d += (st ? " L" : "M") + X(j).toFixed(1) + " " + Y(v).toFixed(1); st = true; }
+      if (d) g.appendChild(sv("path", { d: d, fill: "none", stroke: p[1], "stroke-width": 1, "stroke-opacity": .8 }));
+    });
+
+    /* strokes — the real 笔 */
+    (ch.strokes || []).forEach(function (s) {
+      var a = byTs[s.start_time], b = byTs[s.end_time];
+      if (a == null || b == null || b < from || a >= to) return;
+      var up = /up/i.test(s.direction);
+      g.appendChild(sv("line", { x1: X(a), y1: Y(s.start_price), x2: X(b), y2: Y(s.end_price), stroke: up ? "#2dd4bf" : "#f5a524", "stroke-width": 1.6, "stroke-linecap": "round" }));
+      g.appendChild(sv("circle", { cx: X(a), cy: Y(s.start_price), r: 2, fill: up ? "#2dd4bf" : "#f5a524" }));
+      g.appendChild(sv("circle", { cx: X(b), cy: Y(s.end_price), r: 2, fill: up ? "#2dd4bf" : "#f5a524" }));
+    });
+
+    /* labeled buy/sell points at their exact kline index */
+    (sigs || []).forEach(function (s) {
+      var j = s.kline_index != null ? s.kline_index : s.index;
+      if (j == null || j < from || j >= to) return;
+      var buy = /buy/i.test(s.type), lbl = LAB[s.type] || (buy ? "B" : "S");
+      var px = X(j), py = Y(s.price);
+      var off = buy ? 26 : -26;
+      var ly = py + off;
+      g.appendChild(sv("line", { x1: px, y1: py, x2: px, y2: ly, stroke: buy ? "#e5484d" : "#2f9e6b", "stroke-width": 1, "stroke-opacity": .6, "stroke-dasharray": "2 2" }));
+      g.appendChild(sv("circle", { cx: px, cy: py, r: 3.2, fill: buy ? "#e5484d" : "#2f9e6b", stroke: "#0a1018", "stroke-width": 1 }));
+      var pill = sv("rect", { x: px - 11, y: ly - (buy ? 0 : 12), width: 22, height: 12, rx: 3, fill: buy ? "rgba(229,72,77,.16)" : "rgba(47,158,107,.16)", stroke: buy ? "#e5484d" : "#2f9e6b", "stroke-width": 1 });
+      g.appendChild(pill);
+      var tx = sv("text", { x: px, y: ly + (buy ? 9 : -3), fill: buy ? "#e5484d" : "#2f9e6b", "font-size": 9, "font-family": "monospace", "text-anchor": "middle" });
+      tx.textContent = lbl; g.appendChild(tx);
+    });
+
+    /* date axis */
+    [0, Math.floor(n / 2), n - 1].forEach(function (k2) {
+      var j = from + k2, d = new Date(kl[j].timestamp);
+      var tx2 = sv("text", { x: X(j), y: H - 6, fill: "#5f7a8e", "font-size": 9, "font-family": "monospace", "text-anchor": k2 === 0 ? "start" : k2 === n - 1 ? "end" : "middle" });
+      tx2.textContent = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0"); g.appendChild(tx2);
+    });
+    var lg = sv("text", { x: W - R, y: TP + 9, fill: "#5f7a8e", "font-size": 9, "font-family": "monospace", "text-anchor": "end" });
+    lg.textContent = T("笔 teal↑ amber↓ · 中枢 box · B/S = buy/sell", "笔 青↑ 琥珀↓ · 中枢 方框 · B/S = 买卖点");
+    g.appendChild(lg);
+    return g;
+  }
+
+  function isingField(m) {
+    var N = m.length, W = 300, H = 300, c = W / N;
+    var g = sv("svg", { viewBox: "0 0 " + W + " " + H, preserveAspectRatio: "xMidYMid meet" });
+    for (var r = 0; r < N; r++) for (var q = 0; q < N; q++) {
+      var v = m[r][q];
+      var fill = v > 0 ? "rgba(229,72,77," + (0.25 + 0.6 * Math.min(1, v)) + ")" : v < 0 ? "rgba(47,158,107," + (0.25 + 0.6 * Math.min(1, -v)) + ")" : "rgba(95,122,142,.14)";
+      g.appendChild(sv("rect", { x: q * c, y: r * c, width: c + .4, height: c + .4, fill: fill }));
+    }
+    return g;
+  }
+
+  function barcodeChart(list) {
+    var W = 680, H = 150, PAD = 8;
+    /* scale to the 95th percentile so one outlier does not squash the rest */
+    var ds = list.map(function (b) { return b.death; }).sort(function (a, b) { return a - b; });
+    var cap = ds[Math.floor(ds.length * 0.95)] || ds[ds.length - 1] || 1;
+    if (!(cap > 0)) cap = 1;
+    var g = sv("svg", { viewBox: "0 0 " + W + " " + H, preserveAspectRatio: "none" });
+    var rows = Math.min(list.length, 80);
+    for (var i = 0; i < rows; i++) {
+      var b = list[i], y = PAD + (H - 2 * PAD) * i / Math.max(1, rows - 1);
+      var x1 = PAD + (Math.min(b.birth, cap) / cap) * (W - 2 * PAD), x2 = PAD + (Math.min(b.death, cap) / cap) * (W - 2 * PAD);
+      g.appendChild(sv("line", { x1: x1, y1: y, x2: Math.max(x1 + 1, x2), y2: y, stroke: b.dimension === 1 ? "#f5a524" : "#2dd4bf", "stroke-width": 2, "stroke-opacity": .75 }));
+    }
+    return g;
+  }
+
+  function lpplsChart(kl, lp) {
+    var ws = lp.window_size || 120, n = kl.length, from = Math.max(0, n - ws);
+    var p = lp.params || {};
+    var actual = [], fitted = [], i;
+    for (i = from; i < n; i++) {
+      actual.push(Math.log(kl[i].close));
+      var t = i - from, dt = p.tc - t;
+      if (dt > 0) {
+        var f = Math.pow(dt, p.m || 0.5), lf = Math.log(dt);
+        fitted.push(p.a + p.b * f + p.c1 * f * Math.cos((p.omega || 8) * lf) + p.c2 * f * Math.sin((p.omega || 8) * lf));
+      } else fitted.push(null);
+    }
+    var W = 680, H = 160, PAD = 8;
+    var all = actual.concat(fitted.filter(function (v) { return v != null; }));
+    var lo = Math.min.apply(null, all), hi = Math.max.apply(null, all);
+    if (hi - lo < 1e-9) hi = lo + 1;
+    var g = sv("svg", { viewBox: "0 0 " + W + " " + H, preserveAspectRatio: "none" });
+    function Y(v) { return H - PAD - ((v - lo) / (hi - lo)) * (H - 2 * PAD); }
+    function path(arr, col) { var d = "", st = false; for (var j = 0; j < arr.length; j++) { if (arr[j] == null) continue; var x = PAD + (j / (arr.length - 1)) * (W - 2 * PAD); d += (st ? " L" : "M") + x.toFixed(1) + " " + Y(arr[j]).toFixed(1); st = true; } return d; }
+    g.appendChild(sv("path", { d: path(actual, 0), fill: "none", stroke: "#8fa6b8", "stroke-width": 1.3 }));
+    g.appendChild(sv("path", { d: path(fitted, 0), fill: "none", stroke: "#f5a524", "stroke-width": 1.6, "stroke-dasharray": "4 3" }));
+    return g;
+  }
+
+  function miniLine(vals, opt) {
+    opt = opt || {}; var W = 680, H = opt.h || 90, PAD = 6, i;
+    var c = (vals || []).filter(function (v) { return v != null && isFinite(v); });
+    if (!c.length) return sv("svg", { viewBox: "0 0 " + W + " " + H });
+    var lo = Math.min.apply(null, c), hi = Math.max.apply(null, c);
+    if (hi - lo < 1e-9) hi = lo + 1;
+    var g = sv("svg", { viewBox: "0 0 " + W + " " + H, preserveAspectRatio: "none" });
+    var d = "", st = false;
+    for (i = 0; i < vals.length; i++) { var v = vals[i]; if (v == null || !isFinite(v)) continue; var x = i / (vals.length - 1) * W, y = H - PAD - ((v - lo) / (hi - lo)) * (H - 2 * PAD); d += (st ? " L" : "M") + x.toFixed(1) + " " + y.toFixed(1); st = true; }
+    g.appendChild(sv("path", { d: d, fill: "none", stroke: opt.color || "#5ec9a8", "stroke-width": 1.3 }));
+    return g;
+  }
+
+  function renderSymbolRich(body, pack, name, allowShort) {
+    var a = pack.analysis, kl = (pack.klines && pack.klines.klines) || [], n = kl.length;
+    if (!a && !kl.length) { body.appendChild(el("p", "dk-note", T("no data for " + name, name + " 没有数据"))); return; }
+    var ch = a && a.chanlun || {}, is = a && a.ising || {}, tda = a && a.tda || {}, lp = a && a.lppls || {}, rm = a && a.rmt || {};
+    var sigs = (ch.signals && ch.signals.length ? ch.signals : ((pack.signals && pack.signals.signals) || []));
+
+    /* KPI strip */
+    var k = el("div", "dk-kpis");
+    if (kl.length) { var last = kl[n - 1], prev = kl[n - 2], chg = prev ? last.close / prev.close - 1 : 0;
+      k.appendChild(kpi(T("last", "最新"), "$" + num(last.close, 2), chg >= 0 ? "pos" : "neg"));
+      k.appendChild(kpi(T("change", "涨跌"), (chg >= 0 ? "+" : "") + pct(chg * 100, 2), chg >= 0 ? "pos" : "neg")); }
+    k.appendChild(kpi(T("chanlun", "缠论"), ch.current_position || "—", "acc"));
+    k.appendChild(kpi(T("market state", "市场态"), is.market_state || "—"));
+    k.appendChild(kpi("T / Tc", num(is.temperature, 2) + " / " + num(is.critical_temperature, 2)));
+    k.appendChild(kpi("LPPLS p", num(lp.bubble_probability, 3)));
+    k.appendChild(kpi("Hurst", num(a && a.mfdfa ? (a.mfdfa.hurst_index != null ? a.mfdfa.hurst_index : (a.mfdfa.result && a.mfdfa.result.hurst_index)) : null, 3)));
+    body.appendChild(k);
+    body.appendChild(el("p", "dk-prov", "computed_by: " + ((a && a.computed_by) || "rust") + " · " + name + " · " + n + " bars · signals: " + sigs.length));
+
+    /* main chanlun chart */
+    if (kl.length) body.appendChild(card(T("chanlun · candles + 笔 + 中枢 + labeled 买卖点", "缠论 · K线 + 笔 + 中枢 + 带标签买卖点"), svgbox(chanlunChart(kl, ch, sigs, { h: 420, win: 320 }))));
+
+    /* signal table */
+    if (sigs.length) {
+      var t = el("table"); t.className = "dk-table";
+      t.innerHTML = "<thead><tr><th>#</th><th>label</th><th>type</th><th>level</th><th>price</th><th>conf</th><th>index</th></tr></thead>";
+      var tb = el("tbody");
+      sigs.forEach(function (s, i2) {
+        var buy = /buy/i.test(s.type), tr = el("tr");
+        [i2 + 1, LAB[s.type] || (buy ? "B" : "S"), s.type, s.level != null ? s.level : "—", num(s.price, 2), num(s.confidence, 2), s.kline_index != null ? s.kline_index : "—"].forEach(function (x) { tr.appendChild(el("td", null, String(x))); });
+        tb.appendChild(tr);
+      });
+      t.appendChild(tb);
+      body.appendChild(card(T("signals · the real chanlun labels", "信号 · 真实缠论标签"), t));
+    }
+
+    /* sub panels */
+    if (a && a.indicators) {
+      var I = a.indicators, RSI = I.RSI || {}, MACD = I.MACD || {};
+      var g2 = el("div", "dk-grid2");
+      if (RSI.RSI6) g2.appendChild(card("RSI", svgbox(miniLine(RSI.RSI6.slice(-240), { h: 90, color: "#f5a524" }))));
+      if (MACD.DIF) {
+        var wrap = el("div");
+        wrap.appendChild(svgbox(miniLine(MACD.DIF.slice(-240), { h: 90, color: "#2dd4bf" })));
+        wrap.appendChild(svgbox(miniLine(MACD.MACD.slice(-240), { h: 60, color: "#e5484d" })));
+        g2.appendChild(card("MACD · DIF / hist", wrap));
+      }
+      body.appendChild(g2);
+    }
+
+    /* physics: ising + TDA + LPPLS */
+    var g3 = el("div", "dk-grid2");
+    if (is.spin_matrix && is.spin_matrix.length) {
+      var iw = el("div");
+      iw.appendChild(svgbox(isingField(is.spin_matrix)));
+      var kv = el("div", "dk-cells");
+      [["market_state", T("state", "状态")], ["temperature", "T"], ["critical_temperature", "Tc"], ["wait_ratio", T("wait", "观望")], ["buy_ratio", T("buy", "买")], ["sell_ratio", T("sell", "卖")], ["magnetization", "M"], ["susceptibility", "χ"], ["phase_risk", T("risk", "风险")]].forEach(function (p) {
+        if (is[p[0]] != null) kv.appendChild(cell(p[1], String(is[p[0]]).slice(0, 12)));
+      });
+      iw.appendChild(kv);
+      g3.appendChild(card(T("Ising force-field · 64×64 spins", "伊辛力场 · 64×64 自旋"), iw));
+    }
+    if (tda.barcodes && tda.barcodes.length) {
+      var tw = el("div"); tw.appendChild(svgbox(barcodeChart(tda.barcodes)));
+      var kv2 = el("div", "dk-cells");
+      if (tda.betti_numbers) ["beta_0", "beta_1", "beta_2", "euler_characteristic"].forEach(function (k2) { if (tda.betti_numbers[k2] != null) kv2.appendChild(cell(k2, String(tda.betti_numbers[k2]))); });
+      if (tda.max_persistence != null) kv2.appendChild(cell(T("max persistence", "最大持续"), num(tda.max_persistence, 3)));
+      tw.appendChild(kv2);
+      g3.appendChild(card(T("TDA · persistence barcodes", "拓扑 · 持久条码"), tw));
+    }
+    body.appendChild(g3);
+
+    var g4 = el("div", "dk-grid2");
+    if (lp.params) {
+      var lw = el("div"); lw.appendChild(svgbox(lpplsChart(kl, lp)));
+      var kv3 = el("div", "dk-cells");
+      [["bubble_probability", T("bubble p", "泡沫概率")], ["critical_time_days", T("critical days", "临界天数")], ["fit_quality", T("fit", "拟合")], ["rmse", "RMSE"], ["window_size", T("window", "窗口")]].forEach(function (p) { if (lp[p[0]] != null) kv3.appendChild(cell(p[1], num(lp[p[0]], 3))); });
+      lw.appendChild(kv3);
+      g4.appendChild(card(T("LPPLS · fitted vs actual", "LPPLS · 拟合 vs 实际"), lw));
+    }
+    if (a && a.entropy) {
+      var e = a.entropy, kv4 = el("div", "dk-cells");
+      [["transfer_entropy_xy", "TE x→y"], ["transfer_entropy_yx", "TE y→x"], ["net_flow", T("net flow", "净流")], ["p_value", "p"], ["is_significant", T("significant", "显著")], ["causality_type", T("type", "类型")]].forEach(function (p) { if (e[p[0]] != null) kv4.appendChild(cell(p[1], String(e[p[0]]).slice(0, 14))); });
+      g4.appendChild(card(T("transfer entropy (rust)", "转移熵（Rust）"), kv4));
+    }
+    if (a && a.mfdfa) {
+      var mf = a.mfdfa.result || a.mfdfa, kv6 = el("div", "dk-cells");
+      [["hurst_index", "Hurst"], ["efficiency", "efficiency"], ["multifractal_strength", "MF"], ["r_squared", "R²"]].forEach(function (p) { if (mf[p[0]] != null) kv6.appendChild(cell(p[1], num(mf[p[0]], 3))); });
+      var mw = el("div"); mw.appendChild(kv6);
+      if (mf.hurst_spectrum && mf.hurst_spectrum.length) mw.appendChild(svgbox(miniLine(mf.hurst_spectrum, { h: 90, color: "#8fa6b8" })));
+      g4.appendChild(card(T("MF-DFA (rust)", "多重分形（Rust）"), mw));
+    }
+    body.appendChild(g4);
+
+    /* 14 indicator families */
+    if (a && a.indicators) {
+      var defs = [["RSI", ["RSI6", "RSI12", "RSI24"]], ["KDJ", ["K", "D", "J"]], ["MACD", ["DIF", "DEA", "MACD"]], ["BOLL", ["upper", "middle", "lower"]], ["CCI", ["CCI"]], ["WR", ["WR"]], ["DMI", ["PDI", "MDI", "ADX", "ADXR"]], ["ATR", ["ATR", "ATR_PERCENT"]], ["OBV", ["OBV"]]];
+      var ig = el("div", "dk-grid3");
+      defs.forEach(function (d) {
+        var obj = a.indicators[d[0]]; if (!obj) return;
+        var cc = el("div", "dk-card"); cc.appendChild(el("h4", "dk-h", d[0]));
+        var kvv = el("div", "dk-cells");
+        d[1].forEach(function (k2) { var v2 = obj[k2]; if (v2 && v2.length) kvv.appendChild(cell(k2, num(v2[v2.length - 1], k2 === "OBV" ? 0 : 2))); });
+        cc.appendChild(kvv); ig.appendChild(cc);
+      });
+      body.appendChild(card(T("indicators · 14 families from /api/analysis", "指标 · /api/analysis 的 14 类"), ig));
+    }
+
+    /* short mode */
+    if (allowShort && kl.length && sigs.length) {
+      var eq = longShort(kl, sigs.map(function (s) { return { timestamp: s.timestamp, type: s.type }; }));
+      var g5 = el("div", "dk-grid2");
+      g5.appendChild(card(T("long/short equity from rust signals", "按 Rust 信号的多空权益"), svgbox(line(eq.curve, { h: 160, color: "#5ec9a8" }))));
+      var kv5 = el("div", "dk-cells");
+      kv5.appendChild(cell("Sharpe", num(eq.sharpe, 3), "acc"));
+      kv5.appendChild(cell(T("total return", "总收益"), pct(eq.total, 2), eq.total >= 0 ? "pos" : "neg"));
+      kv5.appendChild(cell(T("max drawdown", "最大回撤"), pct(eq.maxDD, 2), "neg"));
+      kv5.appendChild(cell(T("trades", "交易"), String(eq.trades)));
+      g5.appendChild(card(T("short mode · US can short", "做空模式 · 美股可做空"), kv5));
+      body.appendChild(g5);
+    }
+
+    body.appendChild(el("p", "dk-note", T(
+      "Candles, 笔, 中枢, 分型 and the labeled B1/B2/B3 · S1/S2/S3 points are the real Rust chanlun output at their exact kline index. The Ising 64×64 lattice, TDA barcodes, LPPLS fit, entropy and 14 indicator families are the same /api/analysis payload. Not investment advice.",
+      "K线、笔、中枢、分型与带标签的 B1/B2/B3 · S1/S2/S3 买卖点，都是真实 Rust 缠论输出，落在精确的 kline 索引上。伊辛 64×64 晶格、TDA 条码、LPPLS 拟合、熵与 14 类指标同属 /api/analysis 载荷。非投资建议。")));
+  }
+
   /* ------------------------------------------------------------- symbol */
   function renderSymbol(body, pack, name, allowShort) {
     var a = pack.analysis, klRaw = pack.klines && pack.klines.klines, sg = pack.signals && pack.signals.signals;
@@ -423,8 +704,8 @@
       Array.prototype.forEach.call(bar.children, function (b) { b.classList.toggle("on", b.getAttribute("data-tab") === id); });
       body.textContent = "";
       if (id === "v12") renderV12(body);
-      else if (id === "tsla") renderSymbol(body, D.tsla, "TSLA", true);
-      else renderSymbol(body, D.moutai, "600519.SH", false);
+      else if (id === "tsla") renderSymbolRich(body, D.tsla, "TSLA", true);
+      else renderSymbolRich(body, D.moutai, "600519.SH", false);
     }
     TABS.forEach(function (p) {
       var b = el("button", "dk-tab", p[1]); b.type = "button"; b.setAttribute("data-tab", p[0]);
