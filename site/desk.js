@@ -23,6 +23,14 @@
   function T(en, zh) { return lang() === "zh" ? zh : en; }
   function num(x, d) { d = d == null ? 2 : d; if (x == null || !isFinite(x)) return "—"; var p = Math.pow(10, d); return (Math.round(x * p) / p).toFixed(d); }
   function pct(x, d) { return num(x, d == null ? 2 : d) + "%"; }
+  function compact(x) {
+    if (x == null || !isFinite(x)) return "—";
+    var a = Math.abs(x);
+    if (a >= 1e9) return num(x / 1e9, 2) + "B";
+    if (a >= 1e6) return num(x / 1e6, 2) + "M";
+    if (a >= 1e3) return num(x / 1e3, 1) + "K";
+    return String(Math.round(x * 100) / 100);
+  }
   function el(t, c, x) { var n = document.createElement(t); if (c) n.className = c; if (x != null) n.textContent = x; return n; }
   var NS = "http://www.w3.org/2000/svg";
   function sv(tag, at) { var n = document.createElementNS(NS, tag); for (var k in at) if (at.hasOwnProperty(k)) n.setAttribute(k, at[k]); return n; }
@@ -92,28 +100,44 @@
   function miniLine(vals, opt) { opt = opt || {}; return line(vals, { h: opt.h || 90, color: opt.color }); }
 
   function isingField(m) {
-    var N = m.length, W = 300, H = 300, c = W / N;
+    var S = 2, N = Math.floor(m.length / S), W = 300, H = 318, c = W / N;
     var g = sv("svg", { viewBox: "0 0 " + W + " " + H, preserveAspectRatio: "xMidYMid meet" });
     for (var r = 0; r < N; r++) for (var q = 0; q < N; q++) {
-      var v = m[r][q];
-      var fill = v > 0 ? "rgba(229,72,77," + (0.25 + 0.6 * Math.min(1, v)) + ")" : v < 0 ? "rgba(47,158,107," + (0.25 + 0.6 * Math.min(1, -v)) + ")" : "rgba(95,122,142,.14)";
-      g.appendChild(sv("rect", { x: q * c, y: r * c, width: c + .4, height: c + .4, fill: fill }));
+      var sum = 0, cnt = 0;
+      for (var dr = 0; dr < S; dr++) for (var dq = 0; dq < S; dq++) { var vv = m[r * S + dr][q * S + dq]; if (vv != null) { sum += vv; cnt++; } }
+      var v = cnt ? sum / cnt : 0;
+      var fill = v > 0 ? "rgba(229,72,77," + (0.2 + 0.65 * Math.min(1, v)) + ")" : v < 0 ? "rgba(47,158,107," + (0.2 + 0.65 * Math.min(1, -v)) + ")" : "rgba(95,122,142,.14)";
+      g.appendChild(sv("rect", { x: q * c, y: r * c, width: c + .3, height: c + .3, fill: fill }));
     }
+    [["rgba(229,72,77,.8)", "up"], ["rgba(47,158,107,.8)", "down"], ["rgba(95,122,142,.35)", "flat"]].forEach(function (p, i) {
+      g.appendChild(sv("rect", { x: i * 62, y: 304, width: 8, height: 8, fill: p[0] }));
+      var t = sv("text", { x: i * 62 + 12, y: 312, fill: "#5f7a8e", "font-size": 9, "font-family": "monospace" });
+      t.textContent = p[1]; g.appendChild(t);
+    });
     return g;
   }
   function barcodeChart(list) {
-    var W = 680, H = 150, PAD = 8;
-    var ds = list.map(function (b) { return b.death; }).sort(function (a, b) { return a - b; });
-    var cap = ds[Math.floor(ds.length * 0.95)] || ds[ds.length - 1] || 1; if (!(cap > 0)) cap = 1;
+    var W = 680, H = 150, PAD = 10;
+    var vals = list.map(function (b) { return b.persistence || 0; }).filter(function (v) { return v > 0; });
+    if (!vals.length) return sv("svg", { viewBox: "0 0 " + W + " " + H });
+    var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+    if (hi - lo < 1e-9) hi = lo + 1;
+    var BINS = 24, counts = new Array(BINS).fill(0);
+    vals.forEach(function (v) { var b = Math.floor((v - lo) / (hi - lo) * BINS); if (b >= BINS) b = BINS - 1; if (b < 0) b = 0; counts[b]++; });
+    var mx = 1; counts.forEach(function (c) { if (c > mx) mx = c; });
     var g = sv("svg", { viewBox: "0 0 " + W + " " + H, preserveAspectRatio: "none" });
-    var rows = Math.min(list.length, 80);
-    for (var i = 0; i < rows; i++) {
-      var b = list[i], y = PAD + (H - 2 * PAD) * i / Math.max(1, rows - 1);
-      var x1 = PAD + (Math.min(b.birth, cap) / cap) * (W - 2 * PAD), x2 = PAD + (Math.min(b.death, cap) / cap) * (W - 2 * PAD);
-      g.appendChild(sv("line", { x1: x1, y1: y, x2: Math.max(x1 + 1, x2), y2: y, stroke: b.dimension === 1 ? "#f5a524" : "#2dd4bf", "stroke-width": 2, "stroke-opacity": .75 }));
-    }
+    var bw = W / BINS;
+    counts.forEach(function (c, i) {
+      var h = (c / mx) * (H - 2 * PAD);
+      g.appendChild(sv("rect", { x: i * bw + 1, y: H - PAD - h, width: bw - 2, height: h, fill: "#2dd4bf", "fill-opacity": ".7", rx: 2 }));
+    });
+    var t1 = sv("text", { x: PAD, y: 10, fill: "#5f7a8e", "font-size": 9, "font-family": "monospace" });
+    t1.textContent = num(lo, 2); g.appendChild(t1);
+    var t2 = sv("text", { x: W - PAD, y: 10, fill: "#5f7a8e", "font-size": 9, "font-family": "monospace", "text-anchor": "end" });
+    t2.textContent = "persistence → " + num(hi, 2) + " · " + vals.length + " features"; g.appendChild(t2);
     return g;
   }
+
   function lpplsChart(kl, lp) {
     var ws = lp.window_size || 120, n = kl.length, from = Math.max(0, n - ws), p = lp.params || {};
     var actual = [], fitted = [], i;
@@ -132,14 +156,23 @@
     g.appendChild(sv("path", { d: path(fitted), fill: "none", stroke: "#f5a524", "stroke-width": 1.6, "stroke-dasharray": "4 3" }));
     return g;
   }
-  function heat(cells, rows) {
-    var W = 680, H = 40 + rows * 26, cw = W / 12, ch = (H - 10) / rows;
-    var mx = 1; cells.forEach(function (x) { if (Math.abs(x.v) > mx) mx = Math.abs(x.v); });
+  function heat(cells, rows, years, maxAbs) {
+    var L = 38, T = 16, W = 680, H = T + 12 + rows * 26, cw = (W - L) / 12, ch = (H - T - 12) / rows;
+    var mx = maxAbs || 1;
+    if (!maxAbs) cells.forEach(function (x) { if (Math.abs(x.v) > mx) mx = Math.abs(x.v); });
     var g = sv("svg", { viewBox: "0 0 " + W + " " + H, preserveAspectRatio: "none" });
+    for (var m = 0; m < 12; m++) {
+      var mt = sv("text", { x: L + m * cw + cw / 2, y: 10, fill: "#5f7a8e", "font-size": 9, "font-family": "monospace", "text-anchor": "middle" });
+      mt.textContent = String(m + 1); g.appendChild(mt);
+    }
+    (years || []).forEach(function (y, r) {
+      var yt = sv("text", { x: L - 5, y: T + 6 + r * ch + ch / 2, fill: "#5f7a8e", "font-size": 9, "font-family": "monospace", "text-anchor": "end" });
+      yt.textContent = y; g.appendChild(yt);
+    });
     cells.forEach(function (x) {
       var a = Math.min(1, Math.abs(x.v) / mx);
       var fill = x.v >= 0 ? "rgba(229,72,77," + (0.12 + 0.7 * a) + ")" : "rgba(47,158,107," + (0.12 + 0.7 * a) + ")";
-      g.appendChild(sv("rect", { x: x.c * cw + 1, y: x.r * ch + 1, width: cw - 2, height: ch - 2, fill: fill, rx: 2 }));
+      g.appendChild(sv("rect", { x: L + x.c * cw + 1, y: T + x.r * ch + 1, width: cw - 2, height: ch - 2, fill: fill, rx: 2 }));
     });
     return g;
   }
@@ -413,12 +446,13 @@
     body.appendChild(card(T("equity curve · V12", "权益曲线 · V12"), svgbox(line(v.equity_curve, { h: 210, color: "#5ec9a8" }))));
     body.appendChild(card(T("underwater · drawdown", "回撤曲线 · underwater"), svgbox(area(v.drawdown_curve, { h: 140 }))));
 
-    var months = Object.keys(v.monthly_returns || {});
+    var startM = (v.backtest_start_date || "").slice(0, 7), endM = (v.backtest_end_date || "").slice(0, 7);
+    var months = Object.keys(v.monthly_returns || {}).filter(function (m) { return (!startM || m >= startM) && (!endM || m <= endM); });
     if (months.length) {
       var years = {}; months.forEach(function (m) { years[m.slice(0, 4)] = true; });
       var ys = Object.keys(years).sort(), cells = [];
       months.forEach(function (m) { cells.push({ r: ys.indexOf(m.slice(0, 4)), c: parseInt(m.slice(5, 7), 10) - 1, v: Number(v.monthly_returns[m]) || 0 }); });
-      body.appendChild(card(T("monthly returns · red up / green down", "月度收益 · 红涨绿跌"), svgbox(heat(cells, ys.length))));
+      body.appendChild(card(T("monthly returns · red up / green down · ±10% scale", "月度收益 · 红涨绿跌 · ±10% 色阶"), svgbox(heat(cells, ys.length, ys, 10))));
     }
     if (v.rolling_sharpe && v.rolling_sharpe.length) body.appendChild(card(T("rolling Sharpe", "滚动 Sharpe"), svgbox(line(v.rolling_sharpe, { h: 130, color: "#8fa6b8" }))));
 
@@ -821,7 +855,7 @@
       "TSLA 的回撤是真实的：买入持有 72.2%、MA20>MA50 61.6%、缠论只做多 28.6%。收益越高回撤越大——这条胶带上没有免费的午餐。")));
     var la = ruleBacktest(kl, "ma50", { lag: false, cost: 0 });
     var honest = ruleBacktest(kl, "ma50");
-    pw.appendChild(el("p", "dk-note", T(
+    pw.appendChild(el("p", "dk-audit", T(
       "look-ahead audit: the same MA50 rule with the position set on the current close shows " + pct(la.total * 100, 1) + "; lagged one bar it is " + pct(honest.total * 100, 1) + ". The table uses the lagged, cost-charged version — the earlier number was not real.",
       "偷看审计：同一条 MA50 规则，若用当根收盘定当根仓位，显示 " + pct(la.total * 100, 1) + "；滞后一根后是 " + pct(honest.total * 100, 1) + "。表格用的是滞后+计成本的版本——之前那个数不是真的。")));
     pw.appendChild(el("p", "dk-verdict " + (bestRule[1].total > 0 ? "is-ok" : "is-warn"), T(
@@ -922,17 +956,18 @@
     if (is.spin_matrix && is.spin_matrix.length) {
       var iw = el("div"); iw.appendChild(svgbox(isingField(is.spin_matrix)));
       var ik = el("div", "dk-cells");
-      [["market_state", T("state", "状态")], ["temperature", "T"], ["critical_temperature", "Tc"], ["wait_ratio", T("wait", "观望")], ["buy_ratio", T("buy", "买")], ["sell_ratio", T("sell", "卖")], ["magnetization", "M"], ["susceptibility", "χ"], ["phase_risk", T("risk", "风险")]].forEach(function (p) { if (is[p[0]] != null) ik.appendChild(cell(p[1], String(is[p[0]]).slice(0, 12))); });
+      var isFmt = { market_state: function (v) { return String(v); }, temperature: function (v) { return num(v, 2); }, critical_temperature: function (v) { return num(v, 3); }, wait_ratio: function (v) { return pct(v * 100, 1); }, buy_ratio: function (v) { return pct(v * 100, 1); }, sell_ratio: function (v) { return pct(v * 100, 1); }, magnetization: function (v) { return num(v, 3); }, susceptibility: function (v) { return num(v, 3); }, phase_risk: function (v) { return String(v); } };
+      [["market_state", T("state", "状态")], ["temperature", "T"], ["critical_temperature", "Tc"], ["wait_ratio", T("wait", "观望")], ["buy_ratio", T("buy", "买")], ["sell_ratio", T("sell", "卖")], ["magnetization", "M"], ["susceptibility", "χ"], ["phase_risk", T("risk", "风险")]].forEach(function (p) { if (is[p[0]] != null) ik.appendChild(cell(p[1], isFmt[p[0]](is[p[0]]))); });
       iw.appendChild(ik);
-      g3.appendChild(card(T("Ising force-field · 64×64 spins", "伊辛力场 · 64×64 自旋"), iw));
+      g3.appendChild(card(T("Ising force-field · 64×64 spins (2×2 pooled)", "伊辛力场 · 64×64 自旋（2×2 合并）"), iw));
     }
     if (tda.barcodes && tda.barcodes.length) {
       var tw = el("div"); tw.appendChild(svgbox(barcodeChart(tda.barcodes)));
       var tk = el("div", "dk-cells");
-      if (tda.betti_numbers) ["beta_0", "beta_1", "beta_2", "euler_characteristic"].forEach(function (k2) { if (tda.betti_numbers[k2] != null) tk.appendChild(cell(k2, String(tda.betti_numbers[k2]))); });
+      if (tda.betti_numbers) ["beta_0", "beta_1", "beta_2", "euler_characteristic"].forEach(function (k2) { if (tda.betti_numbers[k2] != null) tk.appendChild(cell(k2, compact(tda.betti_numbers[k2]))); });
       if (tda.max_persistence != null) tk.appendChild(cell(T("max persistence", "最大持续"), num(tda.max_persistence, 3)));
       tw.appendChild(tk);
-      g3.appendChild(card(T("TDA · persistence barcodes", "拓扑 · 持久条码"), tw));
+      g3.appendChild(card(T("TDA · persistence histogram", "拓扑 · 持久度分布"), tw));
     }
     body.appendChild(g3);
 
