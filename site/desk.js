@@ -323,7 +323,10 @@
   }
 
   /* simple causal rules on the same bars — the US trend playbook */
-  function ruleBacktest(kl, rule) {
+  function ruleBacktest(kl, rule, opt) {
+    opt = opt || {};
+    var lag = opt.lag !== false;
+    var cost = opt.cost == null ? 0.0005 : opt.cost;
     var c = kl.map(function (k) { return k.close; });
     var h = kl.map(function (k) { return k.high; });
     var l = kl.map(function (k) { return k.low; });
@@ -344,10 +347,14 @@
     else if (rule === "buyhold") { for (i = 0; i < n; i++) pos[i] = 1; }
     var eq = 1, curve = [1], rets = [], peak = 1, mdd = 0, sw = 0, prev = 0;
     for (i = 1; i < n; i++) {
-      var r = pos[i] * (c[i] / c[i - 1] - 1);
+      /* the position decided at the PREVIOUS close earns this bar's return;
+         opt.lag === false reproduces the old look-ahead for the audit only */
+      var p = lag ? pos[i - 1] : pos[i];
+      var r = p * (c[i] / c[i - 1] - 1);
+      if (p !== prev) { r -= cost; sw++; }
+      prev = p;
       rets.push(r); eq *= 1 + r; curve.push(eq);
       if (eq > peak) peak = eq; mdd = Math.max(mdd, 1 - eq / peak);
-      if (pos[i] !== prev) { sw++; prev = pos[i]; }
     }
     var mean = 0; for (i = 0; i < rets.length; i++) mean += rets[i]; mean /= (rets.length || 1);
     var sd = 0; for (i = 0; i < rets.length; i++) { var d = rets[i] - mean; sd += d * d; } sd = Math.sqrt(sd / Math.max(1, rets.length - 1));
@@ -727,13 +734,18 @@
     rt.appendChild(rb); pw.appendChild(rt);
     pw.appendChild(svgbox(line(ruleBacktest(kl, "ma50").curve, { h: 150, color: "#5ec9a8" })));
     pw.appendChild(svgbox(line(ruleBacktest(kl, "donchian").curve, { h: 100, color: "#f5a524" })));
-    pw.appendChild(el("p", "dk-verdict is-ok", T(
+    var la = ruleBacktest(kl, "ma50", { lag: false, cost: 0 });
+    var honest = ruleBacktest(kl, "ma50");
+    pw.appendChild(el("p", "dk-note", T(
+      "look-ahead audit: the same MA50 rule with the position set on the current close shows " + pct(la.total * 100, 1) + "; lagged one bar it is " + pct(honest.total * 100, 1) + ". The table uses the lagged, cost-charged version — the earlier number was not real.",
+      "偷看审计：同一条 MA50 规则，若用当根收盘定当根仓位，显示 " + pct(la.total * 100, 1) + "；滞后一根后是 " + pct(honest.total * 100, 1) + "。表格用的是滞后+计成本的版本——之前那个数不是真的。")));
+    pw.appendChild(el("p", "dk-verdict " + (bestRule[1].total > 0 ? "is-ok" : "is-warn"), T(
       "best rule on this tape: " + bestRule[0] + " " + pct(bestRule[1].total * 100, 2) + " · Sharpe " + num(bestRule[1].sharpe, 3),
       "这条胶带上最强的规则：" + bestRule[0] + " " + pct(bestRule[1].total * 100, 2) + " · Sharpe " + num(bestRule[1].sharpe, 3))));
     body.appendChild(card(T("US playbook · simple causal rules on the same bars", "美股剧本 · 同一批 bar 上的简单因果规则"), pw));
     body.appendChild(el("p", "dk-note", T(
-      "MA50 long/short is the US trend characteristic: long above the 50-day, short below it. It is not the chanlun points and not investment advice; the same bars, one rule, no costs, no fitting.",
-      "MA50 多空是美股的趋势特性：站上 50 日线做多、跌破做空。它不是缠论点，也不是投资建议；同一批 bar、一条规则、无成本、无拟合。")));;
+      "Every row is lagged one bar (the position decided at yesterday's close earns today's return) and charged 5 bp per switch. No fitting, no look-ahead. If a rule looks too good, the audit line above shows what the look-ahead version would have claimed.",
+      "每一行都滞后一根（昨天收盘定的仓位赚今天的收益），每次切换扣 5bp。无拟合、无偷看。如果某条规则看起来太好，上面的审计行会告诉你“偷看版”会报多少。")));;
 
     var q = signalQuality(kl, sigs);
     if (q.length) {
